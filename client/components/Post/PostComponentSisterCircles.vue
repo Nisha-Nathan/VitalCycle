@@ -19,7 +19,8 @@ const deletePost = async () => {
 </script>
 
 <template>
-  <p class="author">{{ props.post.author }}</p>
+  <h2>{{ props.post.title }}</h2>
+  <p class="author">by {{ props.post.author ? props.post.username : "anonymous" }}</p>
   <p>{{ props.post.content }}</p>
   <div class="base">
     <menu v-if="props.post.author == currentUsername">
@@ -30,6 +31,11 @@ const deletePost = async () => {
       <p v-if="props.post.dateCreated !== props.post.dateUpdated">Edited on: {{ formatDate(props.post.dateUpdated) }}</p>
       <p v-else>Created on: {{ formatDate(props.post.dateCreated) }}</p>
     </article>
+    <ul>
+      <li v-for="circle in props.post.circles" :key="circle">
+        {{ circle }}
+      </li>
+    </ul>
   </div>
 </template>
 

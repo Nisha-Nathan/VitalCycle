@@ -18,6 +18,7 @@ export interface MyCareBoardPostDoc extends BaseDoc {
   username: string;
   title: string;
   content: string;
+  postedOnUsername: string
 }
 
 export interface CircleDoc extends BaseDoc {
@@ -83,12 +84,13 @@ export default class PostingConcept {
   }
 
   // Create MyCareBoard Post
-  async createMyCareBoardPost(author: ObjectId, username: string, title: string, content: string) {
+  async createMyCareBoardPost(author: ObjectId, username: string, title: string, content: string, postedOnUsername: string) {
     const post = {
       author,
       username,
       title,
       content,
+      postedOnUsername,
     };
     const _id = await this.myCareBoardPosts.createOne(post);
     return { msg: "MyCareBoard post created!", post: await this.myCareBoardPosts.readOne({ _id }) };
@@ -107,6 +109,11 @@ export default class PostingConcept {
   // Fetch SisterCircle Posts by Author
   async getSisterCirclePostsByAuthor(author: ObjectId) {
     return await this.sisterCirclePosts.readMany({ author });
+  }
+
+  // Fetch MyCareboard Posts by Board Posted To
+  async getMyCareBoardPostsByDestinationUsername(postedOnUsername: string) {
+    return await this.myCareBoardPosts.readMany({ postedOnUsername });
   }
 
   // Fetch MyCareBoard Posts by Author

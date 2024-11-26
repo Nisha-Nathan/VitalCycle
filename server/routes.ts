@@ -70,7 +70,6 @@ class Routes {
   }
 
   @Router.get("/sistercircle/posts")
-  @Router.validate(z.object({ author: z.string().optional() }))
   async getSisterCirclePosts(author?: string) {
     let posts;
     if (author) {
@@ -83,21 +82,7 @@ class Routes {
   }
 
   @Router.post("/sistercircle/posts")
-  @Router.validate(
-    z.object({
-      title: z.string(),
-      content: z.string(),
-      anonymous: z.boolean(),
-      circles: z.array(z.string()),
-    })
-  )
-  async createSisterCirclePost(
-    session: SessionDoc,
-    title: string,
-    content: string,
-    anonymous: boolean,
-    circles: string[]
-  ) {
+  async createSisterCirclePost(session: SessionDoc, title: string, content: string, anonymous: boolean, circles: string[]) {
     const userID = Sessioning.getUser(session);
     const user = await Authing.getUserById(userID);
     const created = await Posting.createSisterCirclePost(
@@ -120,24 +105,16 @@ class Routes {
   }
 
   @Router.get("/mycareboard/posts")
-  @Router.validate(z.object({ author: z.string() }))
   async getMyCareBoardPosts(author: string) {
-    const id = (await Authing.getUserByUsername(author))._id;
-    const posts = await Posting.getMyCareBoardPostsByAuthor(id);
+    const posts = await Posting.getMyCareBoardPostsByDestinationUsername(author);
     return Responses.posts(posts);
   }
 
   @Router.post("/mycareboard/posts")
-  @Router.validate(
-    z.object({
-      title: z.string(),
-      content: z.string(),
-    })
-  )
-  async createMyCareBoardPost(session: SessionDoc, title: string, content: string) {
+  async createMyCareBoardPost(session: SessionDoc, title: string, content: string, postedOnUsername: string) {
     const userID = Sessioning.getUser(session);
     const user = await Authing.getUserById(userID);
-    const created = await Posting.createMyCareBoardPost(userID, user.username, title, content);
+    const created = await Posting.createMyCareBoardPost(userID, user.username, title, content, postedOnUsername);
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
 

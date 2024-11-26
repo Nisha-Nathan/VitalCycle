@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import PostListComponent from "@/components/Post/PostListComponent.vue";
+import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
+import SisterCirclesPostListComponent from "@/components/Post/PostListComponentSisterCircles.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 
@@ -13,7 +14,8 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
       <h1 v-if="isLoggedIn">Welcome {{ currentUsername }}!</h1>
       <h1 v-else>Please login!</h1>
     </section>
-    <PostListComponent />
+    <SisterCirclesPostListComponent />
+    <CareBoardPostListComponent />
   </main>
 </template>
 
