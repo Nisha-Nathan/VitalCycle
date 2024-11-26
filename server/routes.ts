@@ -70,40 +70,88 @@ class Routes {
     return { msg: "Logged out!" };
   }
 
-  @Router.get("/posts")
+  @Router.get("/sistercircle/posts")
   @Router.validate(z.object({ author: z.string().optional() }))
-  async getPosts(author?: string) {
+  async getSisterCirclePosts(author?: string) {
     let posts;
     if (author) {
       const id = (await Authing.getUserByUsername(author))._id;
-      posts = await Posting.getByAuthor(id);
+      posts = await Posting.getSisterCirclePostsByAuthor(id);
     } else {
-      posts = await Posting.getPosts();
+      posts = await Posting.getAllSisterCirclePosts();
     }
     return Responses.posts(posts);
   }
 
-  @Router.post("/posts")
-  async createPost(session: SessionDoc, content: string, options?: PostOptions) {
+  @Router.post("/sistercircle/posts")
+  @Router.validate(
+    z.object({
+      title: z.string(),
+      content: z.string(),
+      anonymous: z.boolean(),
+      circles: z.array(z.string()),
+    })
+  )
+  async createSisterCirclePost(
+    session: SessionDoc,
+    title: string,
+    content: string,
+    anonymous: boolean,
+    circles: string[]
+  ) {
     const user = Sessioning.getUser(session);
-    const created = await Posting.create(user, content, options);
+    const created = await Posting.createSisterCirclePost(
+      anonymous ? null : user,
+      anonymous ? null : user.username,
+      title,
+      content,
+      anonymous,
+      circles
+    );
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
 
-  @Router.patch("/posts/:id")
-  async updatePost(session: SessionDoc, id: string, content?: string, options?: PostOptions) {
+  @Router.delete("/sistercircle/posts/:id")
+  async deleteSisterCirclePost(session: SessionDoc, id: string) {
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
-    await Posting.assertAuthorIsUser(oid, user);
-    return await Posting.update(oid, content, options);
+    await Posting.assertAuthorIsUser(oid, user, "SisterCircle");
+    return Posting.deleteSisterCirclePost(oid);
   }
 
-  @Router.delete("/posts/:id")
-  async deletePost(session: SessionDoc, id: string) {
+  @Router.get("/mycareboard/posts")
+  @Router.validate(z.object({ author: z.string() }))
+  async getMyCareBoardPosts(author: string) {
+    const id = (await Authing.getUserByUsername(author))._id;
+    const posts = await Posting.getMyCareBoardPostsByAuthor(id);
+    return Responses.posts(posts);
+  }
+
+  @Router.post("/mycareboard/posts")
+  @Router.validate(
+    z.object({
+      title: z.string(),
+      content: z.string(),
+    })
+  )
+  async createMyCareBoardPost(session: SessionDoc, title: string, content: string) {
+    const user = Sessioning.getUser(session);
+    const created = await Posting.createMyCareBoardPost(user, user.username, title, content);
+    return { msg: created.msg, post: await Responses.post(created.post) };
+  }
+
+  @Router.delete("/mycareboard/posts/:id")
+  async deleteMyCareBoardPost(session: SessionDoc, id: string) {
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
-    await Posting.assertAuthorIsUser(oid, user);
-    return Posting.delete(oid);
+    await Posting.assertAuthorIsUser(oid, user, "MyCareBoard");
+    return Posting.deleteMyCareBoardPost(oid);
+  }
+
+  @Router.get("/circles")
+  async getCircles() {
+    const circles = await Posting.getAllCircles();
+    return Responses.circles(circles);
   }
 
   @Router.get("/friends")
