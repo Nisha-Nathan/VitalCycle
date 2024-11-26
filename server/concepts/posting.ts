@@ -3,71 +3,143 @@ import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
 import { NotAllowedError, NotFoundError } from "./errors";
 
-export interface PostOptions {
-  backgroundColor?: string;
+
+export interface SisterCirclePostDoc extends BaseDoc {
+  author: ObjectId;
+  username: string | null; // Null for anonymous
+  title: string;
+  content: string;
+  anonymous: boolean;
+  circles: string[];
 }
 
-export interface PostDoc extends BaseDoc {
+export interface MyCareBoardPostDoc extends BaseDoc {
   author: ObjectId;
+  username: string;
+  title: string;
   content: string;
-  options?: PostOptions;
+}
+
+export interface CircleDoc extends BaseDoc {
+  name: string;
 }
 
 /**
  * concept: Posting [Author]
  */
 export default class PostingConcept {
-  public readonly posts: DocCollection<PostDoc>;
+  public readonly sisterCirclePosts: DocCollection<SisterCirclePostDoc>;
+  public readonly myCareBoardPosts: DocCollection<MyCareBoardPostDoc>;
+  public readonly circles: DocCollection<CircleDoc>;
 
-  /**
-   * Make an instance of Posting.
-   */
-  constructor(collectionName: string) {
-    this.posts = new DocCollection<PostDoc>(collectionName);
+  constructor(sisterCircleCollection: string, careBoardCollection: string, circlesCollection: string) {
+    this.sisterCirclePosts = new DocCollection<SisterCirclePostDoc>(sisterCircleCollection);
+    this.myCareBoardPosts = new DocCollection<MyCareBoardPostDoc>(careBoardCollection);
+    this.circles = new DocCollection<CircleDoc>(circlesCollection);
+
+    // Initialize default circles
+    this.initializeDefaultCircles();
   }
 
-  async create(author: ObjectId, content: string, options?: PostOptions) {
-    const _id = await this.posts.createOne({ author, content, options });
-    return { msg: "Post successfully created!", post: await this.posts.readOne({ _id }) };
-  }
-
-  async getPosts() {
-    // Returns all posts! You might want to page for better client performance
-    return await this.posts.readMany({}, { sort: { _id: -1 } });
-  }
-
-  async getByAuthor(author: ObjectId) {
-    return await this.posts.readMany({ author });
-  }
-
-  async update(_id: ObjectId, content?: string, options?: PostOptions) {
-    // Note that if content or options is undefined, those fields will *not* be updated
-    // since undefined values for partialUpdateOne are ignored.
-    await this.posts.partialUpdateOne({ _id }, { content, options });
-    return { msg: "Post successfully updated!" };
-  }
-
-  async delete(_id: ObjectId) {
-    await this.posts.deleteOne({ _id });
-    return { msg: "Post deleted successfully!" };
-  }
-
-  async assertAuthorIsUser(_id: ObjectId, user: ObjectId) {
-    const post = await this.posts.readOne({ _id });
-    if (!post) {
-      throw new NotFoundError(`Post ${_id} does not exist!`);
+  private async initializeDefaultCircles() {
+    const existingCircles = await this.circles.readMany({});
+    if (existingCircles.length === 0) {
+      await this.circles.createOne({ name: "Fertility" });
+      await this.circles.createOne({ name: "Menopause" });
     }
-    if (post.author.toString() !== user.toString()) {
+  }
+  
+  private async ensureCircles(circles: string[]): Promise<string[]> {
+      // Fetch existing circles from the database
+      const existingCircles = await this.circles.readMany({ name: { $in: circles } });
+    
+      // Create a Set of existing circle names for quick lookup
+      const existingNamesSet = new Set(existingCircles.map(c => c.name));
+
+      // Iterate over the input circles and add missing ones to the database
+      for (const circle of circles) {
+          if (!existingNamesSet.has(circle)) {
+              await this.circles.createOne({ name: circle });
+              existingNamesSet.add(circle); // Update the Set to include the newly added circle
+          }
+      }
+
+      return circles;
+  }
+
+
+  // Create SisterCircle Post
+  async createSisterCirclePost(author: ObjectId | null, username: string | null, title: string, content: string, anonymous: boolean, circles: string[]) {
+    const validatedCircles = await this.ensureCircles(circles);
+    const post = {
+      author: author,
+      username: anonymous ? null : username,
+      title,
+      content,
+      anonymous,
+      circles: validatedCircles,
+    };
+    const _id = await this.sisterCirclePosts.createOne(post);
+    return { msg: "SisterCircle post created!", post: await this.sisterCirclePosts.readOne({ _id }) };
+  }
+
+  // Create MyCareBoard Post
+  async createMyCareBoardPost(author: ObjectId, username: string, title: string, content: string) {
+    const post = {
+      author,
+      username,
+      title,
+      content,
+    };
+    const _id = await this.myCareBoardPosts.createOne(post);
+    return { msg: "MyCareBoard post created!", post: await this.myCareBoardPosts.readOne({ _id }) };
+  }
+
+  // Fetch all circles
+  async getAllCircles() {
+    return await this.circles.readMany({}, { sort: { name: 1 } }); // Sort alphabetically
+  }
+
+  // Fetch SisterCircle Posts by Author
+  async getSisterCirclePostsByAuthor(author: ObjectId) {
+    return await this.sisterCirclePosts.readMany({ author });
+  }
+
+  // Fetch MyCareBoard Posts by Author
+  async getMyCareBoardPostsByAuthor(author: ObjectId) {
+    return await this.myCareBoardPosts.readMany({ author });
+  }
+
+  // Delete SisterCircle Post
+  async deleteSisterCirclePost(_id: ObjectId) {
+    await this.sisterCirclePosts.deleteOne({ _id });
+    return { msg: "SisterCircle post deleted!" };
+  }
+
+  // Delete MyCareBoard Post
+  async deleteMyCareBoardPost(_id: ObjectId) {
+    await this.myCareBoardPosts.deleteOne({ _id });
+    return { msg: "MyCareBoard post deleted!" };
+  }
+
+  // Assert that the user is the author of a post (common for both SisterCircle and MyCareBoard)
+  async assertAuthorIsUser(_id: ObjectId, user: ObjectId, collectionType: "SisterCircle" | "MyCareBoard") {
+    const collection = collectionType === "SisterCircle" ? this.sisterCirclePosts : this.myCareBoardPosts;
+
+    const post = await collection.readOne({ _id });
+    if (!post) {
+      throw new NotFoundError(`${collectionType} post ${_id} does not exist!`);
+    }
+
+    if (!post.author || post.author.toString() !== user.toString()) {
       throw new PostAuthorNotMatchError(user, _id);
     }
   }
 }
 
 export class PostAuthorNotMatchError extends NotAllowedError {
-  constructor(
-    public readonly author: ObjectId,
-    public readonly _id: ObjectId,
-  ) {
+  constructor(public readonly author: ObjectId, public readonly _id: ObjectId) {
     super("{0} is not the author of post {1}!", author, _id);
   }
 }
+
