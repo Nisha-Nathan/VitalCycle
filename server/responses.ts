@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { Authing } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friending";
 import { CircleDoc, MyCareBoardPostDoc, PostAuthorNotMatchError, SisterCirclePostDoc } from "./concepts/posting";
@@ -15,16 +16,33 @@ export default class Responses {
     if (!post) {
       return post;
     }
+    if(!post.author) {
+      return { ...post, author: null };
+    }
     const author = await Authing.getUserById(post.author);
-    return { ...post, author: author.username };
   }
 
   /**
    * Same as {@link post} but for an array of PostDoc for improved performance.
    */
   static async posts(posts: MyCareBoardPostDoc[] | SisterCirclePostDoc[]) {
-    const authors = await Authing.idsToUsernames(posts.map((post) => post.author));
-    return posts.map((post, i) => ({ ...post, author: authors[i] }));
+    const postAuthorIDs = posts.map((post) => post.author) // some might be null (if anonymous)
+    let usernamesToGet: ObjectId[] = postAuthorIDs.filter((id): id is ObjectId => id !== null);
+    let authors = await Authing.idsToUsernames(usernamesToGet);
+    authors = authors.reverse();
+
+    let result: {post: MyCareBoardPostDoc | SisterCirclePostDoc , authorUsername: string | null}[] = [];
+    for(const post of posts) {
+      if(!post.author)
+        result.push({ post: post , authorUsername: null });
+      else {
+        const nextAuthor = authors.pop();
+        if(nextAuthor)
+          result.push({ post: post , authorUsername: nextAuthor });
+      }
+    }
+
+    return result;
   }
 
   /**

@@ -5,7 +5,7 @@ import { NotAllowedError, NotFoundError } from "./errors";
 
 
 export interface SisterCirclePostDoc extends BaseDoc {
-  author: ObjectId;
+  author: ObjectId | null;
   username: string | null; // Null for anonymous
   title: string;
   content: string;
@@ -68,7 +68,7 @@ export default class PostingConcept {
   }
 
   // Create SisterCircle Post
-  async createSisterCirclePost(author: ObjectId, username: string | null, title: string, content: string, anonymous: boolean, circles: string[]) {
+  async createSisterCirclePost(author: ObjectId | null, username: string | null, title: string, content: string, anonymous: boolean, circles: string[]) {
     const validatedCircles = await this.ensureCircles(circles);
     const post = {
       author: author,

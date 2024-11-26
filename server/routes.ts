@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 import { Router, getExpressRouter } from "./framework/router";
 
 import { Authing, Friending, Posting, Sessioning } from "./app";
-import { PostOptions } from "./concepts/posting";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
 
@@ -99,9 +98,10 @@ class Routes {
     anonymous: boolean,
     circles: string[]
   ) {
-    const user = Sessioning.getUser(session);
+    const userID = Sessioning.getUser(session);
+    const user = await Authing.getUserById(userID);
     const created = await Posting.createSisterCirclePost(
-      anonymous ? null : user,
+      anonymous ? null : userID,
       anonymous ? null : user.username,
       title,
       content,
@@ -135,8 +135,9 @@ class Routes {
     })
   )
   async createMyCareBoardPost(session: SessionDoc, title: string, content: string) {
-    const user = Sessioning.getUser(session);
-    const created = await Posting.createMyCareBoardPost(user, user.username, title, content);
+    const userID = Sessioning.getUser(session);
+    const user = await Authing.getUserById(userID);
+    const created = await Posting.createMyCareBoardPost(userID, user.username, title, content);
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
 
