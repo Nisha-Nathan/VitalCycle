@@ -67,9 +67,8 @@ export default class PostingConcept {
       return circles;
   }
 
-
   // Create SisterCircle Post
-  async createSisterCirclePost(author: ObjectId | null, username: string | null, title: string, content: string, anonymous: boolean, circles: string[]) {
+  async createSisterCirclePost(author: ObjectId, username: string | null, title: string, content: string, anonymous: boolean, circles: string[]) {
     const validatedCircles = await this.ensureCircles(circles);
     const post = {
       author: author,
@@ -98,6 +97,11 @@ export default class PostingConcept {
   // Fetch all circles
   async getAllCircles() {
     return await this.circles.readMany({}, { sort: { name: 1 } }); // Sort alphabetically
+  }
+
+  // Get all SisterCircle posts sorted by dateUpdated (descending)
+  async getAllSisterCirclePosts() {
+    return await this.sisterCirclePosts.readMany({}, { sort: { dateUpdated: -1 } });
   }
 
   // Fetch SisterCircle Posts by Author
