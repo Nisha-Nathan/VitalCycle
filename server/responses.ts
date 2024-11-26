@@ -1,6 +1,6 @@
 import { Authing } from "./app";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friending";
-import { PostAuthorNotMatchError, PostDoc } from "./concepts/posting";
+import { CircleDoc, MyCareBoardPostDoc, PostAuthorNotMatchError, SisterCirclePostDoc } from "./concepts/posting";
 import { Router } from "./framework/router";
 
 /**
@@ -11,7 +11,7 @@ export default class Responses {
   /**
    * Convert PostDoc into more readable format for the frontend by converting the author id into a username.
    */
-  static async post(post: PostDoc | null) {
+  static async post(post: MyCareBoardPostDoc | SisterCirclePostDoc | null) {
     if (!post) {
       return post;
     }
@@ -22,7 +22,7 @@ export default class Responses {
   /**
    * Same as {@link post} but for an array of PostDoc for improved performance.
    */
-  static async posts(posts: PostDoc[]) {
+  static async posts(posts: MyCareBoardPostDoc[] | SisterCirclePostDoc[]) {
     const authors = await Authing.idsToUsernames(posts.map((post) => post.author));
     return posts.map((post, i) => ({ ...post, author: authors[i] }));
   }
@@ -36,6 +36,10 @@ export default class Responses {
     const to = requests.map((request) => request.to);
     const usernames = await Authing.idsToUsernames(from.concat(to));
     return requests.map((request, i) => ({ ...request, from: usernames[i], to: usernames[i + requests.length] }));
+  }
+
+  static async circles(circles: CircleDoc[]) {
+    return circles.map((circle) => ({ id: circle._id.toString(), name: circle.name }));
   }
 }
 
