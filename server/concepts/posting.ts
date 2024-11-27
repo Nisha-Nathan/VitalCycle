@@ -111,6 +111,31 @@ export default class PostingConcept {
     return await this.sisterCirclePosts.readMany({ author });
   }
 
+  private titleContains(title: string, search: string): boolean {
+    return title.toLowerCase().includes(search.toLowerCase());
+  }
+
+  // Fetch SisterCircle Posts by title
+  async getSisterCirclePostsByTitle(title: string) {
+    if (!title) {
+      throw new Error("Title search string cannot be empty");
+    }
+
+    try {
+      // Fetch all posts
+      const posts = await this.sisterCirclePosts.readMany({});
+
+      // Filter posts where the title contains the search string (case-insensitive)
+      const filteredPosts = posts.filter(post => this.titleContains(post.title, title));
+
+      // Return the filtered posts
+      return filteredPosts;
+    } catch (error) {
+      console.error("Error fetching posts by title:", error);
+      throw new Error("Failed to fetch posts by title");
+    }
+  }
+
   // Fetch MyCareboard Posts by Board Posted To
   async getMyCareBoardPostsByDestinationUsername(postedOnUsername: string) {
     return await this.myCareBoardPosts.readMany({ postedOnUsername });

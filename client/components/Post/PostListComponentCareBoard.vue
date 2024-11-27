@@ -45,7 +45,7 @@ onBeforeMount(async () => {
   <div class="row">
     <h2 v-if="!searchAuthor">My Care Board Posts:</h2>
     <h2 v-else>Posts on {{ searchAuthor }}'s Care Board:</h2>
-    <SearchPostForm @getPostsByAuthor="getPosts" />
+    <SearchPostForm :headerText="'Go to Careboard of User:'" @getPostsByAuthor="getPosts" />
   </div>
   <section class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">
