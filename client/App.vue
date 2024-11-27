@@ -22,74 +22,30 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <header>
-    <nav>
-      <div class="title">
-        <img src="@/assets/images/logo.svg" />
-        <RouterLink :to="{ name: 'Home' }">
-          <h1>Social Media App</h1>
-        </RouterLink>
-      </div>
-      <ul>
-        <li>
-          <RouterLink :to="{ name: 'Home' }" :class="{ underline: currentRouteName == 'Home' }"> Home </RouterLink>
-        </li>
-        <li v-if="isLoggedIn">
-          <RouterLink :to="{ name: 'Settings' }" :class="{ underline: currentRouteName == 'Settings' }"> Settings </RouterLink>
-        </li>
-        <li v-else>
-          <RouterLink :to="{ name: 'Login' }" :class="{ underline: currentRouteName == 'Login' }"> Login </RouterLink>
-        </li>
-      </ul>
-    </nav>
-    <article v-if="toast !== null" class="toast" :class="toast.style">
-      <p>{{ toast.message }}</p>
-    </article>
-  </header>
+  <nav class="navbar">
+    <RouterLink to="/" class="nav-item">Home</RouterLink>
+    <RouterLink to="/today" class="nav-item">Today</RouterLink>
+    <RouterLink to="/cycle-stats" class="nav-item">Cycle Stats</RouterLink>
+    <RouterLink to="/settings" class="nav-item">Settings</RouterLink>
+  </nav>
   <RouterView />
 </template>
 
 <style scoped>
-@import "./assets/toast.css";
-
-nav {
-  padding: 1em 2em;
-  background-color: lightgray;
+.navbar {
   display: flex;
-  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
 }
 
-h1 {
-  font-size: 2em;
-  margin: 0;
-}
-
-.title {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-
-img {
-  height: 2em;
-}
-
-a {
-  font-size: large;
-  color: black;
+.nav-item {
   text-decoration: none;
+  color: #333;
+  padding: 0.5rem 1rem;
 }
 
-ul {
-  list-style-type: none;
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  gap: 1em;
-}
-
-.underline {
-  text-decoration: underline;
+.nav-item.router-link-active {
+  font-weight: bold;
 }
 </style>
