@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Posting, Sessioning } from "./app";
+import { Authing, Friending, Logging, Posting, Sessioning } from "./app";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
 
@@ -85,14 +85,7 @@ class Routes {
   async createSisterCirclePost(session: SessionDoc, title: string, content: string, anonymous: boolean, circles: string[]) {
     const userID = Sessioning.getUser(session);
     const user = await Authing.getUserById(userID);
-    const created = await Posting.createSisterCirclePost(
-      anonymous ? null : userID,
-      anonymous ? null : user.username,
-      title,
-      content,
-      anonymous,
-      circles
-    );
+    const created = await Posting.createSisterCirclePost(anonymous ? null : userID, anonymous ? null : user.username, title, content, anonymous, circles);
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
 
@@ -177,6 +170,13 @@ class Routes {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
     return await Friending.rejectRequest(fromOid, user);
+  }
+
+  @Router.get("/cycles/stats")
+  async getCycleStats(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const stats = await Logging.getInstance().calculateCycleStats(user);
+    return { msg: "Successfully retrieved cycle statistics!", stats };
   }
 }
 
