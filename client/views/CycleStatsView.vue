@@ -1,175 +1,97 @@
 <template>
-    <main class="cycle-stats">
-      <h2>Your Cycle Statistics</h2>
+  <main class="cycle-stats">
+    <h2 class="section-title">Cycle Trends</h2>
 
-      <div v-if="loading">Loading cycle statistics...</div>
-      <div v-else-if="error" class="error">{{ error }}</div>
-      <div v-else-if="!stats">No cycle data available yet. Start logging to see your trends!</div>
-      <div v-else>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <h3>Cycle Length</h3>
-            <p>{{ stats.averageCycleLength ? `${stats.averageCycleLength} days` : "Not enough data" }}</p>
-          </div>
+    <!-- Tab Section -->
+    <div class="tabs">
+      <button class="tab active">Cycle History</button>
+      <button class="tab">Activity Trends</button>
+      <button class="tab">Weight Trends</button>
+    </div>
 
-          <div class="stat-card">
-            <h3>Period Length</h3>
-            <p>{{ stats.averagePeriodLength ? `${stats.averagePeriodLength} days` : "Not enough data" }}</p>
-          </div>
+    <!-- Statistics Section -->
+    <div class="stats-overview">
+      <div class="stat-item">Average Cycle Length: 28 days</div>
+      <div class="stat-item">Average Period Length: 4 days</div>
+      <div class="stat-item">Last Menstrual Period Start: 17th Nov</div>
+    </div>
+  </main>
+</template>
 
-          <div class="stat-card">
-            <h3>Regularity Score</h3>
-            <p>{{ stats.regularityScore }}%</p>
-          </div>
-        </div>
+<script setup lang="ts">
+// Any additional logic can be implemented here.
+</script>
 
-        <div class="dates-section">
-          <h3>Important Dates</h3>
-          <p>Last Period: {{ stats.lastPeriodStart ? formatDate(new Date(stats.lastPeriodStart)) : "No data" }}</p>
-          <p>Predicted Next Period: {{ stats.predictedNextPeriod ? formatDate(new Date(stats.predictedNextPeriod)) : "Not enough data" }}</p>
-        </div>
+<style scoped>
+/* General Styling */
+.cycle-stats {
+  background-color: #ffe3e3;
+  color: #000;
+  padding: 1.5rem;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
 
-        <div class="trends-section">
-          <div class="common-symptoms">
-            <h3>Most Common Symptoms</h3>
-            <ul>
-              <li v-for="(item, index) in stats.commonSymptoms.slice(0, 5)" :key="index">
-                {{ item.symptom }}: {{ item.frequency }} times
-              </li>
-            </ul>
-          </div>
+/* Section Title */
+.section-title {
+  font-size: 1.8rem;
+  color: #fff;
+  background-color: #000;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  text-align: center;
+}
 
-          <div class="common-moods">
-            <h3>Most Common Moods</h3>
-            <ul>
-              <li v-for="(item, index) in stats.commonMoods.slice(0, 5)" :key="index">
-                {{ item.mood }}: {{ item.frequency }} times
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </main>
-  </template>
+/* Tabs Section */
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin: 1.5rem 0;
+}
 
-  <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+.tab {
+  background-color: #ffc1c1;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: #000;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-  interface CycleStats {
-    averageCycleLength: number | null;
-    averagePeriodLength: number | null;
-    commonSymptoms: { symptom: string; frequency: number }[];
-    commonMoods: { mood: string; frequency: number }[];
-    regularityScore: number;
-    lastPeriodStart: string | null;
-    predictedNextPeriod: string | null;
-  }
+.tab:hover {
+  background-color: #ffb3b3;
+}
 
-  const stats = ref<CycleStats | null>(null);
-  const loading = ref(true);
-  const error = ref("");
+.tab.active {
+  background-color: #ffb3b3;
+  border-color: #ff7575;
+  font-weight: bold;
+}
 
-  const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+/* Statistics Section */
+.stats-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #ffe3e3;
+  border-radius: 12px;
+}
 
-  const fetchStats = async () => {
-    try {
-      const response = await fetch("/api/cycles/stats");
-      const data = await response.json();
-      if (data.error) {
-        error.value = data.error;
-      } else {
-        stats.value = data.stats;
-      }
-    } catch (e) {
-      error.value = "Failed to fetch cycle statistics";
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  onMounted(() => {
-    fetchStats();
-  });
-  </script>
-
-  <style scoped>
-  .cycle-stats {
-    padding: 20px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-  }
-
-  .stat-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    text-align: center;
-  }
-
-  .stat-card h3 {
-    margin: 0 0 10px 0;
-    color: #333;
-  }
-
-  .stat-card p {
-    font-size: 24px;
-    font-weight: bold;
-    color: #6b4cd5;
-    margin: 0;
-  }
-
-  .dates-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 20px 0;
-  }
-
-  .trends-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-  }
-
-  .common-symptoms, .common-moods {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-  }
-
-  li:last-child {
-    border-bottom: none;
-  }
-
-  .error {
-    color: red;
-    text-align: center;
-    padding: 20px;
-  }
-  </style>
+.stat-item {
+  background-color: #ffc1c1;
+  color: #000;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>
