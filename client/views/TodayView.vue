@@ -1,60 +1,10 @@
 <template>
-    <div class="today-view">
-      <div class="header">
-        <div class="date-info">
-          <h1>Sunday, 17 November</h1>
-          <p>Period Day</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn checklist">Daily Checklist</button>
-          <button class="btn export">Export</button>
-        </div>
-      </div>
+  <LoggerComponent/>
 
-      <div class="content">
-        <textarea class="journal" placeholder="How did your day go..."></textarea>
-
-        <div class="mood-section">
-          <h2>Mood</h2>
-          <div class="options">
-            <button>Angry</button>
-            <button>Happy</button>
-            <button>Calm</button>
-            <button>Sad</button>
-            <button>Confused</button>
-          </div>
-        </div>
-
-        <div class="flow-section">
-          <h2>Flow Intensity</h2>
-          <div class="options">
-            <button>Light</button>
-            <button>Medium</button>
-            <button>Heavy</button>
-          </div>
-        </div>
-
-        <div class="symptoms-section">
-          <h2>Symptoms</h2>
-          <div class="options">
-            <button>Abdominal Cramps</button>
-            <button>Headache</button>
-            <button>Acne</button>
-            <button>Fatigue</button>
-            <button>Constipation</button>
-            <button>Diarrhea</button>
-            <button>Nausea</button>
-            <button>Bloating</button>
-            <button>Chills</button>
-            <button>Mood swings</button>
-            <button>Dry skin</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </template>
 
   <script setup lang="ts">
+  import LoggerComponent from '@/components/Logging/LoggerComponent.vue';
   // Logic or imports can be added here
   </script>
 

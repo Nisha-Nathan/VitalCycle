@@ -5,8 +5,10 @@ import { Router, getExpressRouter } from "./framework/router";
 import { Authing, Friending, Logging, Posting, Sessioning } from "./app";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
+import { Mood, Symptom, FlowIntensity } from "./concepts/logging";
 
 import { z } from "zod";
+import session from "express-session";
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -189,6 +191,50 @@ class Routes {
     const stats = await Logging.getInstance().calculateCycleStats(user);
     return { msg: "Successfully retrieved cycle statistics!", stats };
   }
+
+  @Router.post("/logs")
+  async createLog(session: SessionDoc, dateOfLog: Date, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
+    const user = Sessioning.getUser(session);
+    console.log("dateOfLog", dateOfLog);
+    console.log("symptoms", symptoms);
+    console.log("mood", mood);
+    console.log("flow", flow);
+    console.log("notes", notes);
+    return await Logging.getInstance().create(user, dateOfLog, symptoms, mood, flow, notes);
+  }
+
+  @Router.put("/logs/:id")
+  async updateLog(session: SessionDoc, id: string, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(id);
+    console.log("updaye symptoms", symptoms);
+    console.log("update mood", mood);
+    console.log("update flow", flow);
+    console.log("update notes", notes);
+    await Logging.getInstance().assertAuthorIsUser(oid, user);
+    return await Logging.getInstance().update(oid,symptoms, mood, flow, notes);
+  }
+
+  @Router.get("/log")
+  async getLog(session: SessionDoc, date:Date) {
+    console.log("callled fetch")
+    const user = Sessioning.getUser(session);
+    return await Logging.getInstance().getLogByDate(user, date);
+  }
+
+  @Router.get("/logs")
+  async getLogs() {
+    // const user = Sessioning.getUser(session);
+    return await Logging.getInstance().getLogs();
+  }
+
+  @Router.delete("/logs")
+  async deleteLogs() {
+    // const user = Sessioning.getUser(session);
+    return await Logging.getInstance().deleteAllLogs();
+  }
+
+
 }
 
 /** The web app. */

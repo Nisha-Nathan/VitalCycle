@@ -5,6 +5,10 @@
   --base-bg: #f1f3f5;
 }
 
+body{
+  background-color:#EA7575;
+}
+
 button.btn-small {
   font-size: 80%;
 }
