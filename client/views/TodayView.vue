@@ -1,157 +1,232 @@
 <template>
     <div class="today-view">
+      <!-- Header Section -->
       <div class="header">
-        <div class="date-info">
-          <h1>Sunday, 17 November</h1>
-          <p>Period Day</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn checklist">Daily Checklist</button>
-          <button class="btn export">Export</button>
+        <h2>Sunday, 17 November</h2>
+        <p class="subheader">Period Day</p>
+      </div>
+
+      <!-- Export Section -->
+      <div class="export-section">
+        <button
+          @click.prevent="() => (showExportForm = true)"
+          class="export-button"
+          :disabled="!todaysLog"
+        >
+          Export
+        </button>
+      </div>
+
+      <!-- Journal Section -->
+      <div class="journal-section">
+        <h3>How did your day go?</h3>
+        <textarea
+          v-model="journalEntry"
+          class="journal-input"
+          placeholder="Add your notes here..."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <!-- Mood Section -->
+      <div class="mood-section">
+        <h3>Mood</h3>
+        <div class="button-group">
+          <button
+            v-for="mood in moods"
+            :key="mood"
+            @click.prevent="selectMood(mood)"
+            :class="['button', { selected: selectedMood === mood }]"
+          >
+            {{ mood }}
+          </button>
         </div>
       </div>
 
-      <div class="content">
-        <textarea class="journal" placeholder="How did your day go..."></textarea>
-
-        <div class="mood-section">
-          <h2>Mood</h2>
-          <div class="options">
-            <button>Angry</button>
-            <button>Happy</button>
-            <button>Calm</button>
-            <button>Sad</button>
-            <button>Confused</button>
-          </div>
+      <!-- Flow Intensity Section -->
+      <div class="flow-section">
+        <h3>Flow Intensity</h3>
+        <div class="button-group">
+          <button
+            v-for="level in flowLevels"
+            :key="level"
+            @click.prevent="selectFlow(level)"
+            :class="['button', { selected: selectedFlow === level }]"
+          >
+            {{ level }}
+          </button>
         </div>
+      </div>
 
-        <div class="flow-section">
-          <h2>Flow Intensity</h2>
-          <div class="options">
-            <button>Light</button>
-            <button>Medium</button>
-            <button>Heavy</button>
-          </div>
+      <!-- Symptoms Section -->
+      <div class="symptoms-section">
+        <h3>Symptoms</h3>
+        <div class="button-group">
+          <button
+            v-for="symptom in symptoms"
+            :key="symptom"
+            @click.prevent="toggleSymptom(symptom)"
+            :class="['button', { selected: selectedSymptoms.includes(symptom) }]"
+          >
+            {{ symptom }}
+          </button>
         </div>
+      </div>
 
-        <div class="symptoms-section">
-          <h2>Symptoms</h2>
-          <div class="options">
-            <button>Abdominal Cramps</button>
-            <button>Headache</button>
-            <button>Acne</button>
-            <button>Fatigue</button>
-            <button>Constipation</button>
-            <button>Diarrhea</button>
-            <button>Nausea</button>
-            <button>Bloating</button>
-            <button>Chills</button>
-            <button>Mood swings</button>
-            <button>Dry skin</button>
-          </div>
+      <!-- Log Button -->
+      <button
+        @click.prevent="logSymptoms"
+        class="log-button"
+        :disabled="!selectedFlow && selectedSymptoms.length === 0 && !journalEntry.trim()"
+      >
+        Log Today's Symptoms
+      </button>
+
+      <!-- Today's Log -->
+      <div v-if="todaysLog" class="todays-log">
+        <h3>Today's Log:</h3>
+        <p>Mood: {{ todaysLog.mood || 'Not specified' }}</p>
+        <p>Flow Intensity: {{ todaysLog.flow || 'Not specified' }}</p>
+        <p>Symptoms: {{ todaysLog.symptoms.join(', ') || 'None' }}</p>
+        <div v-if="todaysLog.journal" class="journal-display">
+          <h4>Journal Entry:</h4>
+          <p>{{ todaysLog.journal }}</p>
         </div>
       </div>
     </div>
   </template>
 
-  <script setup lang="ts">
-  // Logic or imports can be added here
+  <script setup>
+  import { ref } from 'vue';
+
+  const flowLevels = ['Light', 'Medium', 'Heavy'];
+  const moods = ['Angry', 'Happy', 'Calm', 'Sad', 'Confused'];
+  const symptoms = ['Abdominal Cramps', 'Headache', 'Fatigue', 'Bloating', 'Mood Swings'];
+
+  const selectedFlow = ref('');
+  const selectedMood = ref('');
+  const selectedSymptoms = ref([]);
+  const journalEntry = ref('');
+  const todaysLog = ref(null);
+  const showExportForm = ref(false);
+
+  const selectFlow = (level) => {
+    selectedFlow.value = level;
+  };
+
+  const selectMood = (mood) => {
+    selectedMood.value = mood;
+  };
+
+  const toggleSymptom = (symptom) => {
+    const index = selectedSymptoms.value.indexOf(symptom);
+    if (index === -1) {
+      selectedSymptoms.value.push(symptom);
+    } else {
+      selectedSymptoms.value.splice(index, 1);
+    }
+  };
+
+  const logSymptoms = () => {
+    todaysLog.value = {
+      flow: selectedFlow.value,
+      mood: selectedMood.value,
+      symptoms: [...selectedSymptoms.value],
+      journal: journalEntry.value,
+    };
+  };
   </script>
 
   <style scoped>
-  /* General Styles */
   .today-view {
-    font-family: 'Arial', sans-serif;
-    color: #fff;
-    background-color: #ffc1c1;
-    border-radius: 10px;
-    padding: 1rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fde2e4;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
-  /* Header */
   .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .header h2 {
+    font-size: 1.5em;
+    color: #c8553d;
+  }
+
+  .subheader {
+    font-size: 1em;
+    color: #e29578;
+  }
+
+  .export-section {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
+    justify-content: flex-end;
+    margin-bottom: 20px;
   }
 
-  .date-info h1 {
-    font-size: 1.5rem;
-    margin: 0;
-    color: #fff;
+  .export-button {
+    background-color: #6d6875;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
   }
 
-  .date-info p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #ffe3e3;
-  }
-
-  .header-actions .btn {
-    background-color: #f09b9b;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    color: #fff;
-    cursor: pointer;
-  }
-
-  .header-actions .btn.checklist {
-    margin-right: 0.5rem;
-  }
-
-  /* Content */
-  .content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .journal {
-    width: 100%;
-    height: 100px;
-    border-radius: 10px;
-    border: 1px solid #ffb6b6;
-    padding: 0.5rem;
-    background-color: #fff;
-    color: #333;
-    resize: none;
-  }
-
-  /* Sections */
+  .journal-section,
   .mood-section,
   .flow-section,
   .symptoms-section {
-    background-color: #ffb3b3;
-    border-radius: 10px;
-    padding: 0.75rem;
+    margin-bottom: 20px;
   }
 
-  h2 {
-    font-size: 1.2rem;
-    margin: 0 0 0.5rem;
+  .journal-input {
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 1em;
   }
 
-  /* Options */
-  .options {
+  .button-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 10px;
   }
 
-  .options button {
-    background-color: #ffe0e0;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+  .button {
+    padding: 8px 12px;
+    border: 1px solid #c8553d;
+    border-radius: 4px;
     cursor: pointer;
-    color: #333;
+    background-color: white;
+    color: #c8553d;
   }
 
-  .options button:hover {
-    background-color: #ffc0c0;
+  .button.selected {
+    background-color: #c8553d;
+    color: white;
+  }
+
+  .log-button {
+    width: 100%;
+    background-color: #6d6875;
+    color: white;
+    padding: 10px;
+    font-size: 1.2em;
+    border-radius: 4px;
+  }
+
+  .todays-log {
+    padding: 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 4px;
+  }
+
+  .journal-display {
+    margin-top: 10px;
   }
   </style>
