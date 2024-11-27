@@ -81,6 +81,17 @@ class Routes {
     return Responses.posts(posts);
   }
 
+  @Router.get("/sistercircle/posts/byTitle")
+  async getSisterCirclePostsByTitle(title?: string) {
+    let posts;
+    if (title) {
+      posts = await Posting.getSisterCirclePostsByTitle(title);
+    } else {
+      posts = await Posting.getAllSisterCirclePosts();
+    }
+    return Responses.posts(posts);
+  }
+
   @Router.post("/sistercircle/posts")
   async createSisterCirclePost(session: SessionDoc, title: string, content: string, anonymous: boolean, circles: string[]) {
     const userID = Sessioning.getUser(session);

@@ -13,6 +13,7 @@ const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
 let searchAuthor = ref("");
+let searchTitle = ref("");
 
 async function getPosts(author?: string) {
   let query: Record<string, string> = author !== undefined ? { author } : {};
@@ -24,7 +25,22 @@ async function getPosts(author?: string) {
     return;
   }
   searchAuthor.value = author ? author : "";
+  searchTitle.value = "";
   posts.value = postResults;
+}
+
+async function getPostsByTitle(title?: string) {
+  let query: Record<string, string> = title !== undefined ? { title: title } : {};
+  let postResults;
+  try {
+    postResults = await fetchy("api/sistercircle/posts/byTitle", "GET", { query });
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+  posts.value = postResults;
+  searchTitle.value = title ? title : "";
+  searchAuthor.value = "";
 }
 
 function updateEditing(id: string) {
@@ -43,9 +59,11 @@ onBeforeMount(async () => {
     <CreatePostForm @refreshPosts="getPosts" />
   </section>
   <div class="row">
-    <h2 v-if="!searchAuthor">Sister Circle Posts:</h2>
-    <h2 v-else>Posts by {{ searchAuthor }}:</h2>
-    <SearchPostForm @getPostsByAuthor="getPosts" />
+    <h2 v-if="!searchAuthor && !searchTitle">Sister Circle Posts:</h2>
+    <h2 v-else-if="searchAuthor">Posts by {{ searchAuthor }}:</h2>
+    <h2 v-else>Search results for '{{ searchTitle }}':</h2>
+    <SearchPostForm :headerText="'Search by Author:'" @getPostsByAuthor="getPosts" />
+    <SearchPostForm :headerText="'Search by Title:'" @getPostsByAuthor="getPostsByTitle" />
   </div>
   <section class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">
