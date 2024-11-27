@@ -166,4 +166,12 @@ export default class LoggingConcept {
       .map(([item, freq]) => ({ item, frequency: freq }))
       .sort((a, b) => b.frequency - a.frequency);
   }
+
+  async getLogsForExport(author: ObjectId) {
+    const logs = await this.logs.readMany(
+      { author },
+      { sort: { dateOfLog: -1 } }  // Most recent first
+    );
+    return logs;
+  }
 }
