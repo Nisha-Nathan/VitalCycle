@@ -8,12 +8,34 @@
 
       <!-- Export Section -->
       <div class="export-section">
+        <div v-if="showUsernameInput" class="username-input-container">
+          <input
+            v-model="targetUsername"
+            class="pure-input"
+            placeholder="Enter username to share with"
+            @keyup.enter="submitExport"
+          >
+          <button
+            @click.prevent="submitExport"
+            class="pure-button pure-button-primary"
+            :disabled="!targetUsername.trim()"
+          >
+            Share
+          </button>
+          <button
+            @click.prevent="cancelExport"
+            class="pure-button"
+          >
+            Cancel
+          </button>
+        </div>
         <button
-          @click.prevent="() => (showExportForm = true)"
-          class="export-button"
+          v-else
+          @click.prevent="startExport"
+          class="pure-button pure-button-primary"
           :disabled="!todaysLog"
         >
-          Export
+          Export to Care Board
         </button>
       </div>
 
@@ -96,8 +118,9 @@
     </div>
   </template>
 
-  <script setup>
+  <script setup lang="ts">
   import { ref } from 'vue';
+  import { fetchy } from '@/utils/fetchy';
 
   const flowLevels = ['Light', 'Medium', 'Heavy'];
   const moods = ['Angry', 'Happy', 'Calm', 'Sad', 'Confused'];
@@ -108,7 +131,8 @@
   const selectedSymptoms = ref([]);
   const journalEntry = ref('');
   const todaysLog = ref(null);
-  const showExportForm = ref(false);
+  const showUsernameInput = ref(false);
+  const targetUsername = ref('');
 
   const selectFlow = (level) => {
     selectedFlow.value = level;
@@ -134,6 +158,53 @@
       symptoms: [...selectedSymptoms.value],
       journal: journalEntry.value,
     };
+  };
+
+  const formatLoggedData = () => {
+    if (!todaysLog.value) return '';
+
+    const date = new Date().toLocaleDateString();
+    let formattedData = `Menstrual Log for ${date}\n\n`;
+
+    formattedData += `Flow Level: ${todaysLog.value.flow}\n\n`;
+    formattedData += `Symptoms: ${todaysLog.value.symptoms.length ? todaysLog.value.symptoms.join(', ') : 'None reported'}\n\n`;
+
+    if (todaysLog.value.journal) {
+      formattedData += `Journal Entry:\n${todaysLog.value.journal}`;
+    }
+
+    return formattedData;
+  };
+
+  const startExport = () => {
+    showUsernameInput.value = true;
+  };
+
+  const cancelExport = () => {
+    showUsernameInput.value = false;
+    targetUsername.value = '';
+  };
+
+  const submitExport = async () => {
+    try {
+      const content = formatLoggedData();
+
+      await fetchy("/api/mycareboard/posts", "POST", {
+        body: {
+          title: "Today's Menstrual Log",
+          content,
+          postedOnUsername: targetUsername.value.trim()
+        }
+      });
+
+      // Reset and show success
+      showUsernameInput.value = false;
+      targetUsername.value = '';
+      alert('Successfully shared to Care Board!');
+    } catch (error) {
+      alert(`Failed to share. Please check the username and try again.`);
+      console.error('Export error:', error);
+    }
   };
   </script>
 
@@ -166,13 +237,6 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 20px;
-  }
-
-  .export-button {
-    background-color: #6d6875;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
   }
 
   .journal-section,
@@ -228,5 +292,23 @@
 
   .journal-display {
     margin-top: 10px;
+  }
+
+  .username-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .username-input-container input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 200px;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
   </style>
