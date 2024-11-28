@@ -27,7 +27,6 @@ const showDatePicker = ref(false);
 const isCurrentDate = computed(() => dateOfLog.value === getCurrentDate());
 
 const submitLog = async () => {
-    console.log('submitting log');
     try {
         const response = await fetchy("/api/logs", "POST", {
             body: {
@@ -46,7 +45,6 @@ const submitLog = async () => {
 };
 
 const updateLog = async () => {
-    console.log('updating log', logId.value);
     try {
 
         await fetchy(`/api/logs/${logId.value}`, "PUT", {
@@ -106,7 +104,6 @@ const handleFormSubmit = () => {
 };  
 
 onMounted(() => {
-    console.log(dateOfLog.value);
     fetchLogByDate(dateOfLog.value);
 });
 

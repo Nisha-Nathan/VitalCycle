@@ -1,107 +1,57 @@
-<template>
-  <LoggerComponent/>
-
-  </template>
-
-  <script setup lang="ts">
+<script setup lang="ts">
+  import { useUserStore } from "@/stores/user";
+  import { storeToRefs } from "pinia";
   import LoggerComponent from '@/components/Logging/LoggerComponent.vue';
+  
+  const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   // Logic or imports can be added here
   </script>
 
+<template>
+
+  <main class="today-view">
+    <section class="header">
+      <h1 class="welcome-message">
+        <span v-if="isLoggedIn">Welcome, {{ currentUsername }}!</span>
+        <span v-else>Please login to access your account!</span>
+      </h1>
+    </section>
+  <LoggerComponent/>
+  </main>
+
+  </template>
+
+  
+
   <style scoped>
   /* General Styles */
+  /* General Layout */
+  /* General Layout */
+
   .today-view {
-    font-family: 'Arial', sans-serif;
-    color: #fff;
-    background-color: #ffc1c1;
-    border-radius: 10px;
-    padding: 1rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffe3e3;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
   }
 
-  /* Header */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
+  /* Welcome Section */
+.header {
+  background-color: #ffb3b3;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-  .date-info h1 {
-    font-size: 1.5rem;
-    margin: 0;
-    color: #fff;
-  }
+.welcome-message {
+  font-size: 1.8rem;
+  color: #000;
+  font-weight: bold;
+}
 
-  .date-info p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #ffe3e3;
-  }
-
-  .header-actions .btn {
-    background-color: #f09b9b;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    color: #fff;
-    cursor: pointer;
-  }
-
-  .header-actions .btn.checklist {
-    margin-right: 0.5rem;
-  }
-
-  /* Content */
-  .content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .journal {
-    width: 100%;
-    height: 100px;
-    border-radius: 10px;
-    border: 1px solid #ffb6b6;
-    padding: 0.5rem;
-    background-color: #fff;
-    color: #333;
-    resize: none;
-  }
-
-  /* Sections */
-  .mood-section,
-  .flow-section,
-  .symptoms-section {
-    background-color: #ffb3b3;
-    border-radius: 10px;
-    padding: 0.75rem;
-  }
-
-  h2 {
-    font-size: 1.2rem;
-    margin: 0 0 0.5rem;
-  }
-
-  /* Options */
-  .options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .options button {
-    background-color: #ffe0e0;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: #333;
-  }
-
-  .options button:hover {
-    background-color: #ffc0c0;
-  }
+  
   </style>

@@ -31,7 +31,6 @@ const getAllCircles = async () => {
   try {
     allCircles.value = await fetchy("/api/circles", "GET", { });
   } catch (error) {
-    console.log(error)
     return;
   }
 };

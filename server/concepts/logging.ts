@@ -83,7 +83,6 @@ export default class LoggingConcept {
    * Create a new logged entry (by author, for date DateOfLog)
    */
   async create(author: ObjectId, dateOfLog: Date, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
-    console.log("log create concept", dateOfLog);
     const _id = await this.logs.createOne({ author, dateOfLog, symptoms, mood, flow, notes });
     return { msg: "Log successfully created!", log: await this.logs.readOne({ _id }) };
   }
@@ -115,12 +114,8 @@ export default class LoggingConcept {
   }
 
   async getLogByDate(author: ObjectId, date: Date) {
-    console.log("log get concept", date);
     const log = await this.logs.readOne({ author, dateOfLog: date });
-
-    console.log("log get concept", log);
     if (log === null) {
-      console.log("log not found");
       return { msg: "Log not found" };
     }
     return { msg: "Successfully retrieved logs!", log };

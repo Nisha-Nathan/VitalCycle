@@ -23,7 +23,10 @@ export interface MyCareBoardPostDoc extends BaseDoc {
 
 export interface CircleDoc extends BaseDoc {
   name: string;
+  description?: string;
 }
+
+const predefinedCircles = ["Fertility", "Menopause"];
 
 /**
  * concept: Posting [Author]
@@ -44,9 +47,11 @@ export default class PostingConcept {
 
   private async initializeDefaultCircles() {
     const existingCircles = await this.circles.readMany({});
-    if (existingCircles.length === 0) {
-      await this.circles.createOne({ name: "Fertility" });
-      await this.circles.createOne({ name: "Menopause" });
+   
+    for (const circle of predefinedCircles) {
+      if (!existingCircles.some(c => c.name === circle)) {
+        await this.circles.createOne({ name: circle });
+      }
     }
   }
   
@@ -104,6 +109,15 @@ export default class PostingConcept {
   // Get all SisterCircle posts sorted by dateUpdated (descending)
   async getAllSisterCirclePosts() {
     return await this.sisterCirclePosts.readMany({}, { sort: { dateUpdated: -1 } });
+  }
+
+  async getSisterCirclePostsByCircle(circleName: string) {
+    const circle = await this.circles.readOne({ name: circleName });
+    if (!circle) {
+        throw new Error(`Circle with name ${circleName} not found`);
+    }
+    const posts = await this.sisterCirclePosts.readMany({ circles: { $in: [circle.name] } });
+    return posts;
   }
 
   // Fetch SisterCircle Posts by Author
