@@ -4,22 +4,43 @@
 
     <!-- Tab Section -->
     <div class="tabs">
-      <button class="tab active">Cycle History</button>
-      <button class="tab">Activity Trends</button>
-      <button class="tab">Weight Trends</button>
+      <button
+        v-for="tab in tabs"
+        :key="tab"
+        :class="['tab', { active: currentTab === tab }]"
+        @click="currentTab = tab"
+      >
+        {{ tab }}
+      </button>
     </div>
 
-    <!-- Statistics Section -->
-    <div class="stats-overview">
+    <!-- Cycle History Tab -->
+    <div v-if="currentTab === 'Cycle History'" class="stats-overview">
       <div class="stat-item">Average Cycle Length: 28 days</div>
       <div class="stat-item">Average Period Length: 4 days</div>
       <div class="stat-item">Last Menstrual Period Start: 17th Nov</div>
+    </div>
+
+    <!-- Activity Trends Tab -->
+    <div v-if="currentTab === 'Activity Trends'" class="stats-overview">
+      <div class="stat-item">Recent Activities</div>
+      <div class="stat-item">Activity Duration Trends</div>
+      <div class="stat-item">Most Common Activities</div>
+    </div>
+
+    <!-- Weight Trends Tab -->
+    <div v-if="currentTab === 'Weight Trends'" class="stats-overview">
+      <div class="stat-item">Weight Tracking Coming Soon!</div>
+      <div class="stat-item">Track your weight changes over time</div>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-// Any additional logic can be implemented here.
+import { ref } from 'vue';
+
+const tabs = ['Cycle History', 'Activity Trends', 'Weight Trends'];
+const currentTab = ref('Cycle History');
 </script>
 
 <style scoped>
