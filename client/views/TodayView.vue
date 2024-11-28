@@ -1,11 +1,11 @@
 <script setup lang="ts">
-  import { useUserStore } from "@/stores/user";
-  import { storeToRefs } from "pinia";
-  import LoggerComponent from '@/components/Logging/LoggerComponent.vue';
-  
-  const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
-  // Logic or imports can be added here
-  </script>
+import { useUserStore } from "@/stores/user";
+import { storeToRefs } from "pinia";
+import LoggerComponent from '@/components/Logging/LoggerComponent.vue';
+
+const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+// Logic or imports can be added here
+</script>
 
 <template>
 
@@ -16,26 +16,28 @@
         <span v-else>Please login to access your account!</span>
       </h1>
     </section>
-  <LoggerComponent/>
+    <div v-if="isLoggedIn">
+      <LoggerComponent />
+    </div>
   </main>
 
-  </template>
+</template>
 
-  
 
-  <style scoped>
-  /* General Styles */
 
-  .today-view {
-    background-color: #ffe3e3;
+<style scoped>
+/* General Styles */
+
+.today-view {
+  background-color: #ffe3e3;
   padding: 2rem;
   border-radius: 12px;
   max-width: 1200px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
-  }
+}
 
-  /* Welcome Section */
+/* Welcome Section */
 .header {
   background-color: #ffb3b3;
   padding: 1.5rem;
@@ -50,6 +52,4 @@
   color: #000;
   font-weight: bold;
 }
-
-  
-  </style>
+</style>
