@@ -33,6 +33,13 @@ export interface CycleStats {
   predictedNextPeriod: Date | null;
 }
 
+export interface WeightLog {
+  _id: ObjectId;
+  userId: ObjectId;
+  weight: number;
+  date: Date;
+}
+
 export default class LoggingConcept {
   private static instance: LoggingConcept;
   public readonly logs: DocCollection<LoggingDoc>;
@@ -174,4 +181,39 @@ export default class LoggingConcept {
     );
     return logs;
   }
+
+  // async logWeight(userId: ObjectId, weight: number) {
+  //   const weightValidation = this.validateWeight(weight);
+  //   if (weightValidation.error) {
+  //     throw new Error(weightValidation.error);
+  //   }
+
+  //   const log = await this.logs.createOne({
+  //     userId,
+  //     weight,
+  //     date: new Date(),
+  //   });
+  //   return { msg: "Weight logged successfully!", log };
+  // }
+
+  // async getWeightHistory(userId: ObjectId) {
+  //   const weights = await this.logs
+  //     .find({ userId, weight: { $exists: true } })
+  //     .sort({ date: -1 })
+  //     .toArray();
+  //   return weights;
+  // }
+
+  // private validateWeight(weight: number) {
+  //   if (typeof weight !== "number") {
+  //     return { error: "Weight must be a number" };
+  //   }
+  //   if (weight <= 0) {
+  //     return { error: "Weight must be greater than 0" };
+  //   }
+  //   if (weight > 500) {
+  //     return { error: "Weight seems unrealistic" };
+  //   }
+  //   return { error: null };
+  // }
 }

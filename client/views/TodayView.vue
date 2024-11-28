@@ -8,7 +8,23 @@
 
       <!-- Export Section -->
       <div class="export-section">
-        <div v-if="showUsernameInput" class="username-input-container">
+        <button
+          v-if="!showExportOptions"
+          @click.prevent="startExport('careboard')"
+          class="pure-button pure-button-primary"
+        >
+          Export to Care Board
+        </button>
+        <button
+          v-if="!showExportOptions"
+          @click.prevent="startExport('sistercircle')"
+          class="pure-button pure-button-primary"
+        >
+          Share to Sister Circle
+        </button>
+
+        <!-- Care Board Username Input -->
+        <div v-if="showExportOptions && exportType === 'careboard'" class="username-input-container">
           <input
             v-model="targetUsername"
             class="pure-input"
@@ -18,7 +34,6 @@
           <button
             @click.prevent="submitExport"
             class="pure-button pure-button-primary"
-            :disabled="!targetUsername.trim()"
           >
             Share
           </button>
@@ -29,14 +44,36 @@
             Cancel
           </button>
         </div>
-        <button
-          v-else
-          @click.prevent="startExport"
-          class="pure-button pure-button-primary"
-          :disabled="!todaysLog"
-        >
-          Export to Care Board
-        </button>
+
+        <!-- Sister Circle Options -->
+        <div v-if="showExportOptions && exportType === 'sistercircle'" class="circle-input-container">
+          <select
+            v-model="selectedCircle"
+            class="pure-input"
+            required
+          >
+            <option value="" disabled selected>Select a circle</option>
+            <option v-for="circle in allCircles" :key="circle.id" :value="circle.name">
+              {{ circle.name }}
+            </option>
+          </select>
+          <label class="anonymous-label">
+            <input type="checkbox" v-model="isAnonymous" class="anonymous-checkbox">
+            Post Anonymously
+          </label>
+          <button
+            @click.prevent="submitExport"
+            class="pure-button pure-button-primary"
+          >
+            Share
+          </button>
+          <button
+            @click.prevent="cancelExport"
+            class="pure-button"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
 
       <!-- Journal Section -->
@@ -119,8 +156,15 @@
   </template>
 
   <script setup lang="ts">
-  import { ref } from 'vue';
   import { fetchy } from '@/utils/fetchy';
+import { ref } from 'vue';
+
+  interface DailyLog {
+    flow: string;
+    mood: string;
+    symptoms: string[];
+    journal: string;
+  }
 
   const flowLevels = ['Light', 'Medium', 'Heavy'];
   const moods = ['Angry', 'Happy', 'Calm', 'Sad', 'Confused'];
@@ -130,9 +174,15 @@
   const selectedMood = ref('');
   const selectedSymptoms = ref([]);
   const journalEntry = ref('');
-  const todaysLog = ref(null);
+  const todaysLog = ref<DailyLog | null>(null);
   const showUsernameInput = ref(false);
   const targetUsername = ref('');
+
+  const showExportOptions = ref(false);
+  const exportType = ref<'careboard' | 'sistercircle'>('careboard');
+  const selectedCircle = ref('');
+  const isAnonymous = ref(true);
+  const allCircles = ref<Circle[]>([]);
 
   const selectFlow = (level) => {
     selectedFlow.value = level;
@@ -176,33 +226,75 @@
     return formattedData;
   };
 
-  const startExport = () => {
-    showUsernameInput.value = true;
+  const startExport = (type: 'careboard' | 'sistercircle') => {
+    exportType.value = type;
+    showExportOptions.value = true;
+    if (type === 'sistercircle') {
+      getAllCircles();
+    }
+  };
+
+  const getAllCircles = async () => {
+    try {
+      allCircles.value = await fetchy("/api/circles", "GET", {});
+    } catch (error) {
+      console.error(error);
+      alert('Failed to load circles. Please try again.');
+    }
   };
 
   const cancelExport = () => {
-    showUsernameInput.value = false;
+    showExportOptions.value = false;
     targetUsername.value = '';
+    selectedCircle.value = '';
+  };
+
+  const validateUsername = async (username: string) => {
+    try {
+      const response = await fetchy(`/api/users/${username}`, "GET", {});
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   const submitExport = async () => {
     try {
       const content = formatLoggedData();
 
-      await fetchy("/api/mycareboard/posts", "POST", {
-        body: {
-          title: "Today's Menstrual Log",
-          content,
-          postedOnUsername: targetUsername.value.trim()
+      if (exportType.value === 'careboard') {
+        // Validate username first
+        const isValidUser = await validateUsername(targetUsername.value.trim());
+        if (!isValidUser) {
+          alert('User does not exist. Please check the username.');
+          return;
         }
-      });
+
+        await fetchy("/api/mycareboard/posts", "POST", {
+          body: {
+            title: "Today's Menstrual Log",
+            content,
+            postedOnUsername: targetUsername.value.trim()
+          }
+        });
+      } else {
+        await fetchy("/api/sistercircle/posts", "POST", {
+          body: {
+            title: "Today's Menstrual Log",
+            content,
+            anonymous: isAnonymous.value,
+            circles: [selectedCircle.value]
+          }
+        });
+      }
 
       // Reset and show success
-      showUsernameInput.value = false;
+      showExportOptions.value = false;
       targetUsername.value = '';
-      alert('Successfully shared to Care Board!');
+      selectedCircle.value = '';
+      alert('Successfully shared!');
     } catch (error) {
-      alert(`Failed to share. Please check the username and try again.`);
+      alert(`Failed to share. Please try again.`);
       console.error('Export error:', error);
     }
   };
@@ -235,6 +327,7 @@
 
   .export-section {
     display: flex;
+    gap: 10px;
     justify-content: flex-end;
     margin-bottom: 20px;
   }
@@ -294,21 +387,36 @@
     margin-top: 10px;
   }
 
-  .username-input-container {
+  .username-input-container,
+  .circle-input-container {
     display: flex;
     gap: 10px;
     align-items: center;
   }
 
-  .username-input-container input {
+  .anonymous-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+
+  .anonymous-checkbox {
+    transform: scale(1.2);
+    margin: 0 5px;
+  }
+
+  select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 200px;
+  }
+
+  input[type="text"] {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     width: 200px;
-  }
-
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
   }
   </style>
