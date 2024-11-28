@@ -5,8 +5,10 @@ import { Router, getExpressRouter } from "./framework/router";
 import { Authing, Friending, Logging, Posting, Sessioning } from "./app";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
+import { Mood, Symptom, FlowIntensity } from "./concepts/logging";
 
 import { z } from "zod";
+import session from "express-session";
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -70,15 +72,23 @@ class Routes {
   }
 
   @Router.get("/sistercircle/posts")
-  async getSisterCirclePosts(author?: string) {
+  async getSisterCirclePosts(author?: string, circle?: string) {
     let posts;
+
     if (author) {
       const id = (await Authing.getUserByUsername(author))._id;
       posts = await Posting.getSisterCirclePostsByAuthor(id);
     } else {
       posts = await Posting.getAllSisterCirclePosts();
     }
-    return Responses.posts(posts);
+
+    if (circle && circle !== "All Circles") {
+      const circlePosts = await Posting.getSisterCirclePostsByCircle(circle);
+      const circlePostIds = new Set(circlePosts.map((post) => post._id.toString()));
+      posts = posts.filter((post) => circlePostIds.has(post._id.toString()));
+    }
+    const postsReturned = await Responses.posts(posts);
+    return postsReturned;
   }
 
   @Router.get("/sistercircle/posts/byTitle")
@@ -131,9 +141,25 @@ class Routes {
   }
 
   @Router.get("/circles")
-  async getCircles() {
+  async getCircles(username?: string) {
+    if (username) {
+      const id = (await Authing.getUserByUsername(username))._id;
+      return { circles: await Authing.getUserCircles(id) };
+    }
     const circles = await Posting.getAllCircles();
-    return Responses.circles(circles);
+    return { circles: await Responses.circles(circles) };
+  }
+
+  @Router.get("/circles/:username")
+  async getUserCircles(username: string) {
+    const id = (await Authing.getUserByUsername(username))._id;
+    return { circles: await Authing.getUserCircles(id) };
+  }
+
+  @Router.post("/circles")
+  async addCircles(session: SessionDoc, circles: string[]) {
+    const user = Sessioning.getUser(session);
+    return await Authing.addUserToCircle(user, circles);
   }
 
   @Router.get("/friends")
@@ -189,6 +215,44 @@ class Routes {
     const stats = await Logging.getInstance().calculateCycleStats(user);
     return { msg: "Successfully retrieved cycle statistics!", stats };
   }
+
+  @Router.post("/logs")
+  async createLog(session: SessionDoc, dateOfLog: Date, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
+    const user = Sessioning.getUser(session);
+    return await Logging.getInstance().create(user, dateOfLog, symptoms, mood, flow, notes);
+  }
+
+  @Router.put("/logs/:id")
+  async updateLog(session: SessionDoc, id: string, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(id);
+    await Logging.getInstance().assertAuthorIsUser(oid, user);
+    return await Logging.getInstance().update(oid, symptoms, mood, flow, notes);
+  }
+
+  @Router.get("/log")
+  async getLog(session: SessionDoc, date: Date) {
+    const user = Sessioning.getUser(session);
+    return await Logging.getInstance().getLogByDate(user, date);
+  }
+
+  @Router.get("/circles")
+  @Router.validate(z.object({ user: z.string().optional() }))
+  async getPosts(user: string) {
+    const id = (await Authing.getUserByUsername(user))._id;
+    return await Authing.getUserCircles(id);
+  }
+
+   // debugging routes
+  // @Router.get("/logs")
+  // async getLogs() {
+  //   return await Logging.getInstance().getLogs();
+  // }
+
+  // @Router.delete("/logs")
+  // async deleteLogs() {
+  //   return await Logging.getInstance().deleteAllLogs();
+  // }
 }
 
 /** The web app. */

@@ -23,9 +23,10 @@ onBeforeMount(async () => {
 
 <template>
   <nav class="navbar">
-    <RouterLink to="/" class="nav-item">Home</RouterLink>
-    <RouterLink to="/today" class="nav-item">Today</RouterLink>
-    <RouterLink to="/cycle-stats" class="nav-item">Cycle Stats</RouterLink>
+    <RouterLink to="/" class="nav-item">Today</RouterLink>
+    <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn">Sister Circles</RouterLink>
+    <RouterLink to="/cycle-stats" class="nav-item" v-if="isLoggedIn">Cycle Stats</RouterLink>
+    <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn">Care Board</RouterLink>
     <RouterLink to="/settings" class="nav-item">Settings</RouterLink>
   </nav>
   <RouterView />

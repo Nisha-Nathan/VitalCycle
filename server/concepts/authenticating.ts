@@ -5,6 +5,7 @@ import { BadValuesError, NotAllowedError, NotFoundError } from "./errors";
 export interface UserDoc extends BaseDoc {
   username: string;
   password: string;
+  circles: string[];
 }
 
 /**
@@ -103,6 +104,34 @@ export default class AuthenticatingConcept {
     if (maybeUser === null) {
       throw new NotFoundError(`User not found!`);
     }
+  }
+
+  async getUserCircles(_id: ObjectId) {
+    const user = await this.users.readOne({ _id });
+    if (user === null) {
+      throw new NotFoundError(`User not found!`);
+    }
+    return user.circles;
+  }
+
+  async addUserToCircle(_id: ObjectId, circles: string[]) {
+    const user = await this.users.readOne({ _id });
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const existingCircles = user.circles ?? [];
+    const newCirclesSet = new Set([...existingCircles, ...circles]);
+    const newCircles = Array.from(newCirclesSet);
+
+    await this.users.partialUpdateOne({ _id }, { circles: newCircles });
+    return { msg: "User added to circle!", user: await this.users.readOne({ _id }) };
+  }
+
+  async removeUserFromCircle(_id: ObjectId, circle: string) {
+    const circles = (await this.users.readOne({ _id }))?.circles ?? [];
+    const newCircles = circles.filter((c) => c !== circle);
+    await this.users.partialUpdateOne({ _id }, { circles: newCircles });
   }
 
   private async assertGoodCredentials(username: string, password: string) {

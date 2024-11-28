@@ -20,7 +20,6 @@ async function getPosts(author?: string) {
   try {
     postResults = await fetchy("/api/mycareboard/posts", "GET", { query });
   } catch (error) {
-    console.log(error);
     return;
   }
   searchAuthor.value = author ? author : "";

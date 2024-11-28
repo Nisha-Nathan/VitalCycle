@@ -8,17 +8,28 @@ import NotFoundView from "../views/NotFoundView.vue";
 import SettingView from "../views/SettingView.vue";
 import CycleStatsView from "../views/CycleStatsView.vue";
 import TodayView from "../views/TodayView.vue";
+import CareBoardView from "../views/CareBoardView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: "/",
-      name: "Home",
+      name: "Today",
+      component: TodayView,
+    },
+    {
+      path: "/sister-circle",
+      name: "Sister Circle",
       component: HomeView,
     },
     {
-      path: "/setting",
+      path: "/care-board",
+      name: "Care Board",
+      component: CareBoardView,
+    },
+    {
+      path: "/settings",
       name: "Settings",
       component: SettingView,
       meta: { requiresAuth: true },
@@ -45,11 +56,11 @@ const router = createRouter({
       name: "CycleStats",
       component: CycleStatsView,
     },
-    {
-      path: '/today',
-      name: 'today',
-      component: TodayView
-    },
+    // {
+    //   path: '/today',
+    //   name: 'today',
+    //   component: TodayView
+    // },
   ],
 });
 

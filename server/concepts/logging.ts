@@ -2,17 +2,45 @@ import { ObjectId } from "mongodb";
 
 import DocCollection, { BaseDoc } from "../framework/doc";
 
+// export enum Symptom {
+// Headache, Fatigue, Cramps, Acne, Constipation, Nausea, Bloating, Chills, Diarrhea, MoodSwings, DrySkin
+// }
+
+// export enum Mood {
+//     Angry, Happy, Calm, Confused, Sad
+// }
+
 export enum Symptom {
-Headache, Fatigue, Cramps, Acne, Constipation, Nausea, Bloating, Chills, Diarrhea, MoodSwings, DrySkin
+  AbdominalCramps = "Abdominal Cramps",
+  Headache = "Headache",
+  Acne = "Acne",
+  Fatigue = "Fatigue",
+  Constipation = "Constipation",
+  Diarrhea = "Diarrhea",
+  Nausea = "Nausea",
+  Bloating = "Bloating",
+  Chills = "Chills",
+  MoodSwings = "Mood swings",
+  DrySkin = "Dry skin",
 }
 
 export enum Mood {
-    Angry, Happy, Calm, Confused, Sad
+  Angry = "Angry",
+  Happy = "Happy",
+  Calm = "Calm",
+  Sad = "Sad",
+  Confused = "Confused",
 }
 
 export enum FlowIntensity {
-    Light, Medium, Heavy
+  Light = "Light",
+  Medium = "Medium",
+  Heavy = "Heavy",
 }
+
+// export enum FlowIntensity {
+//     Light, Medium, Heavy
+// }
 
 export interface LoggingDoc extends BaseDoc {
   author: ObjectId;
@@ -74,12 +102,43 @@ export default class LoggingConcept {
     return { msg: "Log deleted successfully!" };
   }
 
+  async update(_id: ObjectId, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
+    const log = await this.logs.readOne({ _id });
+    if (!log) {
+      throw new Error("Log not found");
+    }
+    const id = await this.logs.partialUpdateOne({ _id }, { symptoms, mood, flow, notes });
+    return { msg: "Log updated successfully!", log: await this.logs.readOne({ _id: id }) };
+  }
+
+  async assertAuthorIsUser(_id: ObjectId, user: ObjectId) {
+    const log = await this.logs.readOne({ _id });
+    if (!log) {
+      throw new Error("Log not found");
+    } else if (log.author.toString() !== user.toString()) {
+      throw new Error("User is not the author of this log");
+    }
+  }
+
+  async getLogByDate(author: ObjectId, date: Date) {
+    const log = await this.logs.readOne({ author, dateOfLog: date });
+    if (log === null) {
+      return { msg: "Log not found" };
+    }
+    return { msg: "Successfully retrieved logs!", log };
+  }
+
+  async getLogs() {
+    return await this.logs.readMany({});
+  }
+
+  async deleteAllLogs() {
+    return await this.logs.deleteMany({});
+  }
+
   async calculateCycleStats(author: ObjectId): Promise<CycleStats> {
     // Get all logs for user, sorted by date
-    const logs = await this.logs.readMany(
-      { author },
-      { sort: { dateOfLog: 1 } }
-    );
+    const logs = await this.logs.readMany({ author }, { sort: { dateOfLog: 1 } });
 
     // Find period start dates (days with flow logged)
     const periodStarts: Date[] = [];
@@ -94,7 +153,7 @@ export default class LoggingConcept {
 
     for (const log of logs) {
       // Track symptom frequencies
-      log.symptoms.forEach(symptom => {
+      log.symptoms.forEach((symptom) => {
         symptomFrequency.set(symptom, (symptomFrequency.get(symptom) || 0) + 1);
       });
 
@@ -112,9 +171,7 @@ export default class LoggingConcept {
         lastPeriodEnd = log.dateOfLog;
       } else if (currentPeriodStart !== null && lastPeriodEnd !== null) {
         // Period ended
-        const periodLength = Math.ceil(
-          (lastPeriodEnd.getTime() - currentPeriodStart.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const periodLength = Math.ceil((lastPeriodEnd.getTime() - currentPeriodStart.getTime()) / (1000 * 60 * 60 * 24));
         periodLengths.push(periodLength);
         currentPeriodStart = null;
       }
@@ -122,40 +179,30 @@ export default class LoggingConcept {
 
     // Calculate cycle lengths
     for (let i = 1; i < periodStarts.length; i++) {
-      const cycleLength = Math.ceil(
-        (periodStarts[i].getTime() - periodStarts[i - 1].getTime()) / (1000 * 60 * 60 * 24)
-      );
+      const cycleLength = Math.ceil((periodStarts[i].getTime() - periodStarts[i - 1].getTime()) / (1000 * 60 * 60 * 24));
       cycleLengths.push(cycleLength);
     }
 
     // Calculate averages
-    const avgCycleLength = cycleLengths.length > 0
-      ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
-      : null;
+    const avgCycleLength = cycleLengths.length > 0 ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length) : null;
 
-    const avgPeriodLength = periodLengths.length > 0
-      ? Math.round(periodLengths.reduce((a, b) => a + b, 0) / periodLengths.length)
-      : null;
+    const avgPeriodLength = periodLengths.length > 0 ? Math.round(periodLengths.reduce((a, b) => a + b, 0) / periodLengths.length) : null;
 
     // Calculate regularity score (based on cycle length consistency)
-    const regularityScore = cycleLengths.length > 1
-      ? this.calculateRegularityScore(cycleLengths)
-      : 0;
+    const regularityScore = cycleLengths.length > 1 ? this.calculateRegularityScore(cycleLengths) : 0;
 
     // Predict next period
     const lastPeriodStart = periodStarts[periodStarts.length - 1] || null;
-    const predictedNextPeriod = lastPeriodStart && avgCycleLength
-      ? new Date(lastPeriodStart.getTime() + avgCycleLength * 24 * 60 * 60 * 1000)
-      : null;
+    const predictedNextPeriod = lastPeriodStart && avgCycleLength ? new Date(lastPeriodStart.getTime() + avgCycleLength * 24 * 60 * 60 * 1000) : null;
 
     return {
       averageCycleLength: avgCycleLength,
       averagePeriodLength: avgPeriodLength,
-      commonSymptoms: this.sortByFrequency(symptomFrequency).map(({item, frequency}) => ({symptom: item, frequency})),
-      commonMoods: this.sortByFrequency(moodFrequency).map(({item, frequency}) => ({mood: item, frequency})),
+      commonSymptoms: this.sortByFrequency(symptomFrequency).map(({ item, frequency }) => ({ symptom: item, frequency })),
+      commonMoods: this.sortByFrequency(moodFrequency).map(({ item, frequency }) => ({ mood: item, frequency })),
       regularityScore,
       lastPeriodStart,
-      predictedNextPeriod
+      predictedNextPeriod,
     };
   }
 
@@ -164,7 +211,7 @@ export default class LoggingConcept {
     const variance = cycleLengths.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / cycleLengths.length;
     const stdDev = Math.sqrt(variance);
     // Higher score for lower standard deviation (more regular cycles)
-    const score = Math.max(0, 100 - (stdDev * 5));
+    const score = Math.max(0, 100 - stdDev * 5);
     return Math.round(score);
   }
 
