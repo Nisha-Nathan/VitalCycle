@@ -243,17 +243,16 @@ class Routes {
     return await Authing.getUserCircles(id);
   }
 
-  @Router.get("/logs")
-  async getLogs() {
-    // const user = Sessioning.getUser(session);
-    return await Logging.getInstance().getLogs();
-  }
+   // debugging routes
+  // @Router.get("/logs")
+  // async getLogs() {
+  //   return await Logging.getInstance().getLogs();
+  // }
 
-  @Router.delete("/logs")
-  async deleteLogs() {
-    // const user = Sessioning.getUser(session);
-    return await Logging.getInstance().deleteAllLogs();
-  }
+  // @Router.delete("/logs")
+  // async deleteLogs() {
+  //   return await Logging.getInstance().deleteAllLogs();
+  // }
 }
 
 /** The web app. */

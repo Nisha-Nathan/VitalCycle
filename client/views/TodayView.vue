@@ -25,8 +25,6 @@
 
   <style scoped>
   /* General Styles */
-  /* General Layout */
-  /* General Layout */
 
   .today-view {
     background-color: #ffe3e3;

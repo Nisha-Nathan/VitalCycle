@@ -101,7 +101,7 @@ const handleFormSubmit = () => {
     } else {
         submitLog();
     }
-};  
+};
 
 onMounted(() => {
     fetchLogByDate(dateOfLog.value);
@@ -127,10 +127,11 @@ onMounted(() => {
                         <input type="date" v-model="dateOfLog" @change="handleDateChange" />
                     </div>
                 </div>
-                <div class="header-actions">
+                <!-- <div class="header-actions">
                     <button class="btn checklist">Daily Checklist</button>
                     <button class="btn export">Export</button>
-                </div>
+                </div> -->
+
             </div>
 
             <div class="content">
