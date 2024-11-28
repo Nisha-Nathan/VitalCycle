@@ -3,7 +3,6 @@ import SisterCirclesPostListComponent from "@/components/Post/PostListComponentS
 import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
-// import HeaderComponent from "@/components/Post/HeaderComponent.vue";
 // import { onMounted, ref } from "vue";
 // let circles = ref<Array<Record<string, string>>>([]);
 
