@@ -10,7 +10,7 @@ const { currentUsername } = storeToRefs(useUserStore());
 const emit = defineEmits(["refreshReactCounts"]);
 
 let allReacts = ref([]);
-let myCurrentReacts = ref({});
+let myCurrentReacts = ref<Record<string, boolean>>({ thumb: false, heart: false, sad: false });
 
 const reactToPost = async (emoji: string) => {
   console.log("reacting to post with emoji: ", emoji);

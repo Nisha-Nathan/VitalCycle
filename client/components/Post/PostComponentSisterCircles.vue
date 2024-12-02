@@ -25,7 +25,7 @@ const deletePost = async () => {
 const reactCountsRef = ref(null);
 
 const handleRefreshReactCounts = () => {
-  reactCountsRef.value?.getPostReacts();
+  reactCountsRef.value?.getPostReacts?.();
 };
 </script>
 
