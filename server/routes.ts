@@ -147,7 +147,8 @@ class Routes {
       return { circles: await Authing.getUserCircles(id) };
     }
     const circles = await Posting.getAllCircles();
-    return { circles: await Responses.circles(circles) };
+    const result = await Responses.circles(circles);
+    return { circles: result };
   }
 
   @Router.get("/circles/:username")
@@ -247,13 +248,11 @@ class Routes {
   async getReactsOnPost(postID: string) {
     const oid = new ObjectId(postID);
     const result = await Reacting.getReactCountsOnPost(oid);
-    console.log("in routes got reacts on post: ", result);
     return result;
   }
 
   @Router.post("/reacts")
   async toggleReaction(session: SessionDoc, postID: string, emoji: string) {
-    console.log("toggle reaction called");
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(postID);
     let emojiChoice: ReactEmoji;

@@ -13,7 +13,6 @@ let allReacts = ref([]);
 let myCurrentReacts = ref<Record<string, boolean>>({ thumb: false, heart: false, sad: false });
 
 const reactToPost = async (emoji: string) => {
-  console.log("reacting to post with emoji: ", emoji);
   try {
     myCurrentReacts.value = { ...myCurrentReacts.value, [emoji]: !myCurrentReacts.value[emoji] }; // change front-end first to avoid delay
     await fetchy("/api/reacts", "POST", {
@@ -35,7 +34,6 @@ async function getMyReacts() {
   } catch (error) {
     return;
   }
-  console.log("got my reacts: ", requestResults);
   myCurrentReacts.value = requestResults;
 }
 

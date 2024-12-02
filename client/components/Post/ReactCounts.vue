@@ -19,7 +19,6 @@ async function getPostReacts() {
     console.log(error);
     return;
   }
-  console.log("got reacts: ", requestResults);
   allReacts.value.thumb = requestResults.thumb;
   allReacts.value.heart = requestResults.heart;
   allReacts.value.sad = requestResults.sad;

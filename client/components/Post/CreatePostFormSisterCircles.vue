@@ -14,11 +14,10 @@ const isAnonymous = ref(true);
 const allCircles = ref<Circle[]>([]);
 const emit = defineEmits(["refreshPosts"]);
 
-
-const createPost = async (title: string, content: string, anonymous: boolean, circles: string[]) => {
+const createPost = async (title: string, content: string, anonymous: boolean, circle: string) => {
   try {
     await fetchy("/api/sistercircle/posts", "POST", {
-      body: { title, content, anonymous, circles },
+      body: { title, content, anonymous, circles: [circle] },
     });
   } catch (_) {
     return;
@@ -27,16 +26,25 @@ const createPost = async (title: string, content: string, anonymous: boolean, ci
   emptyForm();
 };
 
+const getSelectedCircleName = (circleId: string) => {
+  const selected = allCircles.value.find((circle) => circle.id === circleId);
+  return selected ? selected.name : "";
+};
+
 const getAllCircles = async () => {
   try {
-    allCircles.value = await fetchy("/api/circles", "GET", { });
+    const response = await fetchy("/api/circles", "GET", {});
+    allCircles.value = response.circles;
   } catch (error) {
+    console.log(error);
     return;
   }
 };
 
 const emptyForm = () => {
   content.value = "";
+  title.value = "";
+  selectedCircle.value = "";
 };
 
 onBeforeMount(async () => {
@@ -45,7 +53,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <form @submit.prevent="createPost(title, content, isAnonymous, [selectedCircle])">
+  <form @submit.prevent="createPost(title, content, isAnonymous, getSelectedCircleName(selectedCircle))">
     <label for="title">Post Title:</label>
     <textarea id="title" v-model="title" placeholder="Title of Post Here!" required> </textarea>
     <label for="content">Post Contents:</label>
@@ -55,13 +63,13 @@ onBeforeMount(async () => {
       <input type="checkbox" class="anonymous-checkbox" v-model="isAnonymous" />
     </div>
     <div>
-    <label for="circle">Select Circle:</label>
-    <select id="circle" v-model="selectedCircle" required>
-      <option v-for="circle in allCircles">
-        {{ circle.name  }}
-      </option>
-    </select>
-  </div>
+      <label for="circle">Select Circle:</label>
+      <select id="circle" v-model="selectedCircle" required>
+        <option v-for="circle in allCircles" :key="circle.id" :value="circle.id">
+          {{ circle.name }}
+        </option>
+      </select>
+    </div>
     <button type="submit" class="pure-button-primary pure-button">Create Post</button>
   </form>
 </template>
@@ -89,5 +97,4 @@ textarea {
   transform: scale(1.5);
   margin: 10px;
 }
-
 </style>

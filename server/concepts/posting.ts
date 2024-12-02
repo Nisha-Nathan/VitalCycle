@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
 import { NotAllowedError, NotFoundError } from "./errors";
 
-
 export interface SisterCirclePostDoc extends BaseDoc {
   author: ObjectId | null;
   username: string | null; // Null for anonymous
@@ -18,7 +17,7 @@ export interface MyCareBoardPostDoc extends BaseDoc {
   username: string;
   title: string;
   content: string;
-  postedOnUsername: string
+  postedOnUsername: string;
 }
 
 export interface CircleDoc extends BaseDoc {
@@ -47,42 +46,42 @@ export default class PostingConcept {
 
   private async initializeDefaultCircles() {
     const existingCircles = await this.circles.readMany({});
-   
+
     for (const circle of predefinedCircles) {
-      if (!existingCircles.some(c => c.name === circle)) {
+      if (!existingCircles.some((c) => c.name === circle)) {
         await this.circles.createOne({ name: circle });
       }
     }
   }
-  
+
   private async ensureCircles(circles: string[]): Promise<string[]> {
-      // Fetch existing circles from the database
-      const existingCircles = await this.circles.readMany({ name: { $in: circles } });
-    
-      // Create a Set of existing circle names for quick lookup
-      const existingNamesSet = new Set(existingCircles.map(c => c.name));
+    // Fetch existing circles from the database
+    const existingCircles = await this.circles.readMany({ name: { $in: circles } });
 
-      // Iterate over the input circles and add missing ones to the database
-      for (const circle of circles) {
-          if (!existingNamesSet.has(circle)) {
-              await this.circles.createOne({ name: circle });
-              existingNamesSet.add(circle); // Update the Set to include the newly added circle
-          }
+    // Create a Set of existing circle names for quick lookup
+    const existingNamesSet = new Set(existingCircles.map((c) => c.name));
+
+    // Iterate over the input circles and add missing ones to the database
+    for (const circle of circles) {
+      if (!existingNamesSet.has(circle)) {
+        await this.circles.createOne({ name: circle });
+        existingNamesSet.add(circle); // Update the Set to include the newly added circle
       }
+    }
 
-      return circles;
+    return circles;
   }
 
   // Create SisterCircle Post
   async createSisterCirclePost(author: ObjectId | null, username: string | null, title: string, content: string, anonymous: boolean, circles: string[]) {
-    const validatedCircles = await this.ensureCircles(circles);
+    //const validatedCircles = await this.ensureCircles(circles);
     const post = {
       author: author,
       username: anonymous ? null : username,
       title,
       content,
       anonymous,
-      circles: validatedCircles,
+      circles: circles,
     };
     const _id = await this.sisterCirclePosts.createOne(post);
     return { msg: "SisterCircle post created!", post: await this.sisterCirclePosts.readOne({ _id }) };
@@ -114,7 +113,7 @@ export default class PostingConcept {
   async getSisterCirclePostsByCircle(circleName: string) {
     const circle = await this.circles.readOne({ name: circleName });
     if (!circle) {
-        throw new Error(`Circle with name ${circleName} not found`);
+      throw new Error(`Circle with name ${circleName} not found`);
     }
     const posts = await this.sisterCirclePosts.readMany({ circles: { $in: [circle.name] } });
     return posts;
@@ -140,7 +139,7 @@ export default class PostingConcept {
       const posts = await this.sisterCirclePosts.readMany({});
 
       // Filter posts where the title contains the search string (case-insensitive)
-      const filteredPosts = posts.filter(post => this.titleContains(post.title, title));
+      const filteredPosts = posts.filter((post) => this.titleContains(post.title, title));
 
       // Return the filtered posts
       return filteredPosts;
@@ -188,8 +187,10 @@ export default class PostingConcept {
 }
 
 export class PostAuthorNotMatchError extends NotAllowedError {
-  constructor(public readonly author: ObjectId, public readonly _id: ObjectId) {
+  constructor(
+    public readonly author: ObjectId,
+    public readonly _id: ObjectId,
+  ) {
     super("{0} is not the author of post {1}!", author, _id);
   }
 }
-
