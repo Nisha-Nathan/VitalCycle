@@ -22,7 +22,7 @@ const deletePost = async () => {
   emit("refreshPosts");
 };
 
-const reactCountsRef = ref(null);
+const reactCountsRef = ref<InstanceType<typeof ReactCounts> | null>(null);
 
 const handleRefreshReactCounts = () => {
   reactCountsRef.value?.getPostReacts?.();
