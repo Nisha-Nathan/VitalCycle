@@ -2,13 +2,13 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Logging, Posting, Sessioning } from "./app";
+import { Authing, Friending, Logging, Posting, Reacting, Sessioning } from "./app";
+import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
+import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
-import { Mood, Symptom, FlowIntensity } from "./concepts/logging";
 
 import { z } from "zod";
-import session from "express-session";
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -243,7 +243,50 @@ class Routes {
     return await Authing.getUserCircles(id);
   }
 
-   // debugging routes
+  @Router.get("/reacts")
+  async getReactsOnPost(postID: string) {
+    const oid = new ObjectId(postID);
+    const result = await Reacting.getReactCountsOnPost(oid);
+    console.log("in routes got reacts on post: ", result);
+    return result;
+  }
+
+  @Router.post("/reacts")
+  async toggleReaction(session: SessionDoc, postID: string, emoji: string) {
+    console.log("toggle reaction called");
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(postID);
+    let emojiChoice: ReactEmoji;
+    switch (emoji) {
+      case "thumb":
+        emojiChoice = ReactEmoji.Thumb;
+        break;
+      case "heart":
+        emojiChoice = ReactEmoji.Heart;
+        break;
+      default:
+        emojiChoice = ReactEmoji.Sad;
+        break;
+    }
+    const alreadyReacted = await Reacting.checkIfReactionExists(user, oid, emojiChoice);
+    if (alreadyReacted) {
+      return await Reacting.removeUserReactionOnPost(user, oid, emojiChoice);
+    } else {
+      return await Reacting.reactToPost(user, oid, emojiChoice);
+    }
+  }
+
+  @Router.get("/reacts/bySessionUser")
+  async getReactionsByUserOnPost(session: SessionDoc, postID: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(postID);
+    const thumb = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Thumb);
+    const heart = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Heart);
+    const sad = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Sad);
+    return { thumb: thumb, heart: heart, sad: sad };
+  }
+
+  // debugging routes
   // @Router.get("/logs")
   // async getLogs() {
   //   return await Logging.getInstance().getLogs();
