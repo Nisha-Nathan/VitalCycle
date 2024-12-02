@@ -1,24 +1,37 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
+import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+
+let createPostFormShowing = ref(false);
+
+const toggleCreatePostForm = () => {
+  console.log("hi ", createPostFormShowing.value);
+  createPostFormShowing.value = !createPostFormShowing.value;
+};
 </script>
 
 <template>
   <main class="homepage">
     <!-- Header Section -->
-    <section class="header">
+    <section v-if="!isLoggedIn" class="header">
       <h1 class="welcome-message">
-        <span v-if="isLoggedIn">Welcome, {{ currentUsername }}!</span>
-        <span v-else>Please login to access your account!</span>
+        <span>Please login to access your account!</span>
       </h1>
     </section>
 
     <!-- Care Board Section -->
     <section class="care-board">
-      <h2 class="section-title">Care Board</h2>
+      <h2 class="section-title">My Care Board</h2>
+      <div class="top-buttons">
+        <button :class="{ 'top-button-selected': createPostFormShowing, 'top-button': !createPostFormShowing }" @click="toggleCreatePostForm">+ Create Post</button>
+        <button class="top-button">+ Invite User</button>
+      </div>
+      <CreatePostFormCareBoard v-if="createPostFormShowing" />
       <CareBoardPostListComponent />
     </section>
   </main>
@@ -26,13 +39,16 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 <style scoped>
 /* General Layout */
+@import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
+
 .homepage {
   background-color: #ffe3e3;
-  padding: 2rem;
   border-radius: 12px;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
+  font-family: "Quando", serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 /* Welcome Section */
@@ -56,20 +72,48 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   font-size: 1.6rem;
   color: #fff;
   background-color: #000;
-  padding: 0.8rem;
+  padding: 2rem;
   border-radius: 8px;
-  text-align: center;
   margin-bottom: 1rem;
 }
 
 /* Sister Circles & Care Board Sections */
 .sister-circles,
 .care-board {
-  background-color: #ffc1c1;
-  padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-buttons {
+  border: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.top-button {
+  color: black;
+  border: 1 px solid black;
+  background-color: #ffe3e3;
+  padding: 10px;
+  border-radius: 1em;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.top-button-selected {
+  color: black;
+  border: 1 px solid black;
+  background-color: lightgray;
+  padding: 10px;
+  border-radius: 1em;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.top-button:hover {
+  background-color: white;
 }
 
 .sister-circles :deep(h2),
@@ -83,6 +127,5 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>

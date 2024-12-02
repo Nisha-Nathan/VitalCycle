@@ -19,17 +19,55 @@ const deletePost = async () => {
 </script>
 
 <template>
-  <h2>{{ props.post.title }}</h2>
-  <p>{{ props.post.content }}</p>
-  <div class="base">
-    <article class="timestamp">
-      <p v-if="props.post.dateCreated !== props.post.dateUpdated">Edited on: {{ formatDate(props.post.dateUpdated) }}</p>
-      <p v-else>Created on: {{ formatDate(props.post.dateCreated) }}</p>
-    </article>
+  <div class="all-post">
+    <div class="post-header">
+      <p class="post-title">{{ props.post.title }}</p>
+      <article class="timestamp">
+        <p>{{ formatDate(props.post.dateUpdated) }}</p>
+      </article>
+    </div>
+    <p class="post-content">{{ props.post.content }}</p>
+    <div class="base">
+      <button class="see-replies">See Replies</button>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.all-post {
+  background-color: #ea7575;
+  border-radius: 1em;
+  border: 1px solid black;
+}
+
+.post-content {
+  background-color: rgba(255, 251, 254, 0.7);
+  margin: 1em;
+  margin-top: 0;
+  padding: 0.5em;
+  padding-top: 1.5em;
+  border: 1px solid black;
+}
+
+.post-title {
+  color: white;
+}
+
+.post-header {
+  background-color: black;
+  padding: 1.5rem;
+  padding-bottom: 0;
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+}
+.see-replies {
+  background-color: #ea7575;
+  color: white;
+  border: 1px solid white;
+  border-radius: 0.5em;
+  margin: 10px;
+  width: fit-content;
+}
 p {
   margin: 0em;
 }
@@ -51,14 +89,15 @@ menu {
 .timestamp {
   display: flex;
   justify-content: flex-end;
-  font-size: 0.9em;
+  font-size: 0.7em;
   font-style: italic;
+  color: gray;
 }
 
 .base {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .base article:only-child {
