@@ -36,7 +36,6 @@ export default class ReactingConcept {
 
   // Get All Reacts on a Specific Post
   async getReactCountsOnPost(postID: ObjectId) {
-    let result = {};
     const thumbs = await this.reacts.readMany({ postID: postID, emoji: ReactEmoji.Thumb });
     const hearts = await this.reacts.readMany({ postID: postID, emoji: ReactEmoji.Heart });
     const sads = await this.reacts.readMany({ postID: postID, emoji: ReactEmoji.Sad });
@@ -57,6 +56,6 @@ export default class ReactingConcept {
   // Remove a reaction
   async removeUserReactionOnPost(author: ObjectId, postID: ObjectId, emoji: ReactEmoji) {
     await this.reacts.deleteOne({ author, postID, emoji });
-    return { msg: "SisterCircle post deleted!" };
+    return { msg: "Reaction deleted!" };
   }
 }

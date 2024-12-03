@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Logging, Posting, Reacting, Sessioning } from "./app";
+import { Authing, Friending, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -285,16 +285,39 @@ class Routes {
     return { thumb: thumb, heart: heart, sad: sad };
   }
 
-  // debugging routes
-  // @Router.get("/logs")
-  // async getLogs() {
-  //   return await Logging.getInstance().getLogs();
-  // }
+  // Returns a list of reply objects
+  @Router.get("/replies")
+  async getRepliesOnPost(postID: string) {
+    const oid = new ObjectId(postID);
+    const replies = await Replying.getRepliesOnPost(oid);
+    return { replies };
+  }
 
-  // @Router.delete("/logs")
-  // async deleteLogs() {
-  //   return await Logging.getInstance().deleteAllLogs();
-  // }
+  // Route to add a new reply to a post
+  @Router.post("/replies")
+  async addReplyToPost(session: SessionDoc, postID: string, content: string) {
+    const user = Sessioning.getUser(session); // Get the current user from session
+    const oid = new ObjectId(postID);
+
+    // Add a new reply
+    return await Replying.replyToPost(user, oid, content);
+  }
+
+  // Get all replies by specific user on specific post
+  @Router.get("/replies/bySessionUser")
+  async getRepliesByUserOnPost(session: SessionDoc, postID: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(postID);
+
+    // Get user's reply to post
+    const userReplies = await Replying.getUserRepliesOnPost(user, oid);
+
+    if (userReplies.length > 0) {
+      return { replies: userReplies };
+    } else {
+      return { msg: "You haven't replied to this post yet!" };
+    }
+  }
 }
 
 /** The web app. */
