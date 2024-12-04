@@ -124,6 +124,7 @@ const goToUserCareboard = (username: string) => {
         </ul>
         <p v-else>You haven't invited anyone to your careboard yet.</p>
       </div>
+      <!--
       <div class="invites-part">
         <p class="section-title">Visit a friend's careboard</p>
         <ul v-if="invitedTo.length > 0">
@@ -133,6 +134,7 @@ const goToUserCareboard = (username: string) => {
         </ul>
         <p v-else>You haven't been invited to any careboards yet.</p>
       </div>
+      -->
     </div>
   </main>
 </template>

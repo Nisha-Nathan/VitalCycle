@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Checklist, Sessioning } from "./app";
+import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -128,6 +128,7 @@ class Routes {
   async createMyCareBoardPost(session: SessionDoc, title: string, content: string, postedOnUsername: string) {
     const userID = Sessioning.getUser(session);
     const user = await Authing.getUserById(userID);
+    if (postedOnUsername !== user.username) throw new Error("You cannot create a post on a careboard that isn't your own.");
     const created = await Posting.createMyCareBoardPost(userID, user.username, title, content, postedOnUsername);
     return { msg: created.msg, post: await Responses.post(created.post) };
   }
@@ -360,7 +361,6 @@ class Routes {
       return { msg: "You haven't replied to this post yet!" };
     }
   }
-
 }
 
 /** The web app. */

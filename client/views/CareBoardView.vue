@@ -2,6 +2,7 @@
 import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
 import InvitesSection from "@/components/Post/InvitesSection.vue";
 import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
+import VisitFriendsCareboardPopup from "@/components/Post/VisitFriendsCareboardPopup.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
@@ -10,6 +11,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 const userStore = useUserStore();
 
 let createPostFormShowing = ref(false);
+let visitFriendsPopupShowing = ref(false);
 let invitesSectionShowing = ref(false);
 let careBoardListKey = ref(0);
 
@@ -26,10 +28,20 @@ const closeCreateSection = () => {
 const openInvitesSection = () => {
   createPostFormShowing.value = false;
   invitesSectionShowing.value = true;
+  visitFriendsPopupShowing.value = false;
+};
+const closeVisitFriend = () => {
+  visitFriendsPopupShowing.value = false;
+};
+const openVisitFriend = () => {
+  visitFriendsPopupShowing.value = true;
+  createPostFormShowing.value = false;
+  invitesSectionShowing.value = false;
 };
 const openCreateSection = () => {
   invitesSectionShowing.value = false;
   createPostFormShowing.value = true;
+  visitFriendsPopupShowing.value = false;
 };
 const remountCareBoardList = () => {
   closeInvitesSection();
@@ -54,15 +66,21 @@ const goToMyCareboard = () => {
 
     <!-- Care Board Section -->
     <section class="care-board">
-      <h2 v-if="!userStore.currentlyViewingCareboard" class="section-title">My Care Board</h2>
-      <h2 v-else class="section-title">{{ userStore.currentlyViewingCareboard }}'s Careboard</h2>
-      <button v-if="userStore.currentlyViewingCareboard" @click="goToMyCareboard">< Go to My Careboard</button>
+      <div class="section-title">
+        <h2 v-if="!userStore.currentlyViewingCareboard">My Care Board</h2>
+        <h2 v-else>{{ userStore.currentlyViewingCareboard }}'s Careboard</h2>
+        <button class="invites-button" @click="openInvitesSection">Invite</button>
+      </div>
+      <button v-if="userStore.currentlyViewingCareboard" @click="goToMyCareboard">< Return to My Careboard</button>
       <div class="top-buttons">
-        <button :class="{ 'top-button-selected': createPostFormShowing, 'top-button': !createPostFormShowing }" @click="openCreateSection">+ Create Post</button>
-        <button class="top-button" @click="openInvitesSection">Invites</button>
+        <button v-if="!userStore.currentlyViewingCareboard" :class="{ 'top-button-selected': createPostFormShowing, 'top-button': !createPostFormShowing }" @click="openCreateSection">
+          + Create Post
+        </button>
+        <button :class="{ 'top-button-selected': visitFriendsPopupShowing, 'top-button': !visitFriendsPopupShowing }" @click="openVisitFriend">Friend's Careboards</button>
       </div>
       <CreatePostFormCareBoard v-if="createPostFormShowing" class="invites-section" @closeSection="closeCreateSection" />
       <InvitesSection v-if="invitesSectionShowing" class="invites-section" @closeSection="closeInvitesSection" @goToCareboard="remountCareBoardList" />
+      <VisitFriendsCareboardPopup v-if="visitFriendsPopupShowing" class="invites-section" @closeSection="closeVisitFriend" @goToCareboard="remountCareBoardList" />
       <CareBoardPostListComponent :key="careBoardListKey" />
     </section>
   </main>
@@ -71,6 +89,18 @@ const goToMyCareboard = () => {
 <style scoped>
 /* General Layout */
 @import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
+/* Section Titles */
+.section-title {
+  background-color: black !important;
+  font-size: 1.6rem;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
 
 .homepage {
   background-color: #ffe3e3;
@@ -98,16 +128,6 @@ const goToMyCareboard = () => {
   font-weight: bold;
 }
 
-/* Section Titles */
-.section-title {
-  font-size: 1.6rem;
-  color: #fff;
-  background-color: #000;
-  padding: 2rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
 /* Sister Circles & Care Board Sections */
 .sister-circles,
 .care-board {
@@ -131,6 +151,19 @@ const goToMyCareboard = () => {
   border-radius: 1em;
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.invites-button {
+  color: white;
+  background-color: black;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 1.2em;
+  margin-left: 10px;
+  margin-right: 10px;
+  border: 1px solid white;
+  font-size: 1rem;
 }
 
 .top-button-selected {

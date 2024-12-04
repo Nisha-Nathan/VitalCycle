@@ -20,7 +20,8 @@ const createPost = async (title: string, content: string, postedOnUsername: stri
     await fetchy("/api/mycareboard/posts", "POST", {
       body: { title, content, postedOnUsername: toPostOn },
     });
-  } catch (_) {
+  } catch (error) {
+    console.log(error);
     return;
   }
   emit("closeSection");

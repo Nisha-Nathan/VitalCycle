@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import CreatePostForm from "@/components/Post/CreatePostFormCareBoard.vue";
 import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
 import PostComponent from "./PostComponentCareBoard.vue";
-import SearchPostForm from "./SearchPostForm.vue";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 const props = defineProps(["currentlyViewing"]);
@@ -33,7 +31,7 @@ function updateEditing(id: string) {
 }
 
 onBeforeMount(async () => {
-  console.log("remounting!!");
+  console.log("remounting!!!");
   if (!userStore.currentlyViewingCareboard) {
     await getPosts(currentUsername.value);
   } else {
