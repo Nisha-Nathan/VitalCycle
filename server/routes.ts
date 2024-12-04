@@ -341,9 +341,10 @@ class Routes {
   async addReplyToPost(session: SessionDoc, postID: string, content: string) {
     const user = Sessioning.getUser(session); // Get the current user from session
     const oid = new ObjectId(postID);
+    const username = (await Authing.getUserById(user)).username;
 
     // Add a new reply
-    return await Replying.replyToPost(user, oid, content);
+    return await Replying.replyToPost(user, username, oid, content);
   }
 
   // Get all replies by specific user on specific post

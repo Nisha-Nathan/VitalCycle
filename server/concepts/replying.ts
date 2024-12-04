@@ -4,6 +4,7 @@ import DocCollection, { BaseDoc } from "../framework/doc";
 
 export interface ReplyDoc extends BaseDoc {
   author: ObjectId;
+  username: string;
   postID: ObjectId;
   content: string;
 }
@@ -16,9 +17,10 @@ export default class ReplyingConcept {
   }
 
   // Create a new post reply
-  async replyToPost(author: ObjectId, postID: ObjectId, content: string) {
+  async replyToPost(author: ObjectId, username: string, postID: ObjectId, content: string) {
     const reply = {
       author: author,
+      username: username,
       postID: postID,
       content: content,
     };

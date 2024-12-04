@@ -2,11 +2,14 @@
 import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
+import PostRepliesList from "./PostRepliesList.vue";
 
 const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
+let repliesShowing = ref(false);
 
 const deletePost = async () => {
   try {
@@ -15,6 +18,10 @@ const deletePost = async () => {
     return;
   }
   emit("refreshPosts");
+};
+
+const toggleShowReplies = async () => {
+  repliesShowing.value = !repliesShowing.value;
 };
 </script>
 
@@ -28,8 +35,9 @@ const deletePost = async () => {
     </div>
     <p class="post-content">{{ props.post.content }}</p>
     <div class="base">
-      <button class="see-replies">See Replies</button>
+      <button class="see-replies" @click="toggleShowReplies">See Replies</button>
     </div>
+    <PostRepliesList v-if="repliesShowing" :post="props.post" />
   </div>
 </template>
 
