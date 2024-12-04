@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
+import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -292,6 +292,48 @@ class Routes {
     const replies = await Replying.getRepliesOnPost(oid);
     return { replies };
   }
+  @Router.post("/invites")
+  async sendInvite(session: SessionDoc, inviteUsername: string) {
+    const myOid = Sessioning.getUser(session);
+    let sentToUserOid;
+    sentToUserOid = (await Authing.getUserByUsername(inviteUsername))._id;
+    const alreadyInvited = await Inviting.checkIfInviteExists(myOid, sentToUserOid);
+    if (alreadyInvited) {
+      throw new Error("you already invited this user!");
+    } else {
+      const myUsername = (await Authing.getUserById(myOid)).username;
+      const sentToUsername = (await Authing.getUserById(sentToUserOid)).username;
+      if (myUsername == sentToUsername) {
+        throw new Error("you cannot invite yourself!");
+      }
+      return await Inviting.inviteUser(myOid, myUsername, sentToUserOid, sentToUsername);
+    }
+  }
+
+  @Router.delete("/invites/:sentToUsername")
+  async removeSentInvite(session: SessionDoc, sentToUsername: string) {
+    const user = Sessioning.getUser(session);
+    const oidSentTo = (await Authing.getUserByUsername(sentToUsername))._id;
+    return await Inviting.removeInvite(user, oidSentTo);
+  }
+
+  @Router.get("/invites")
+  async getInvitedToBoards(session: SessionDoc) {
+    const myOid = Sessioning.getUser(session);
+    return await Inviting.getAllInvites(myOid);
+  }
+
+  @Router.get("/invites/sent")
+  async getSentInvites(session: SessionDoc) {
+    const myOid = Sessioning.getUser(session);
+    return await Inviting.getAllInvitesSent(myOid);
+  }
+
+  // debugging routes
+  // @Router.get("/logs")
+  // async getLogs() {
+  //   return await Logging.getInstance().getLogs();
+  // }
 
   // Route to add a new reply to a post
   @Router.post("/replies")

@@ -1,55 +1,71 @@
 <script setup lang="ts">
+import { useUserStore } from "@/stores/user";
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
-
-
+const userStore = useUserStore();
 
 const content = ref("");
 const title = ref("");
 const postedOnUsername = ref("");
-const emit = defineEmits(["refreshPosts"]);
-
+const emit = defineEmits(["refreshPosts", "closeSection"]);
+const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 const createPost = async (title: string, content: string, postedOnUsername: string) => {
+  let toPostOn: string = postedOnUsername;
+  if (!postedOnUsername) {
+    toPostOn = currentUsername.value;
+  }
   try {
     await fetchy("/api/mycareboard/posts", "POST", {
-      body: { title, content, postedOnUsername },
+      body: { title, content, postedOnUsername: toPostOn },
     });
   } catch (_) {
     return;
   }
+  emit("closeSection");
   emit("refreshPosts");
   emptyForm();
 };
-
 
 const emptyForm = () => {
   content.value = "";
 };
 
-
+const closeForm = () => {
+  emit("closeSection");
+};
 </script>
 
 <template>
-  <form @submit.prevent="createPost(title, content, postedOnUsername)">
-    <label for="title">Post Title:</label>
-    <textarea id="title" v-model="title" placeholder="Title of Post Here!" required> </textarea>
-    <label for="content">Post Contents:</label>
-    <textarea id="content" v-model="content" placeholder="Post Contents Here!" required> </textarea>
-    <label for="postedOnUsername">Put this post on the careboard of username: :</label>
-    <textarea id="postedOnUsername" v-model="postedOnUsername" placeholder="User123" required> </textarea>
-    <button type="submit" class="pure-button-primary pure-button">Create Post</button>
-  </form>
+  <main>
+    <button class="close-btn" @click="closeForm">X</button>
+    <h3>Create a post!</h3>
+    <form @submit.prevent="createPost(title, content, userStore.currentlyViewingCareboard)">
+      <label for="title">Post Title:</label>
+      <textarea id="title" v-model="title" placeholder="Title of Post Here!" required></textarea>
+      <label for="content">Post Contents:</label>
+      <textarea id="content" v-model="content" placeholder="Post Contents Here!" required></textarea>
+      <button type="submit" class="pure-button-primary pure-button">Create Post</button>
+    </form>
+  </main>
 </template>
 
 <style scoped>
+main {
+  color: white;
+}
 form {
-  background-color: var(--base-bg);
+  margin-top: 10px;
   border-radius: 1em;
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  padding: 1em;
+  position: relative;
+}
+
+h3 {
+  text-align: center;
 }
 
 textarea {
@@ -61,9 +77,13 @@ textarea {
   resize: none;
 }
 
-.anonymous-checkbox {
-  transform: scale(1.5);
-  margin: 10px;
+.close-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: transparent;
+  border: none;
+  color: black;
+  cursor: pointer;
 }
-
 </style>

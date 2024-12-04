@@ -39,7 +39,7 @@ export default class ReactingConcept {
     const thumbs = await this.reacts.readMany({ postID: postID, emoji: ReactEmoji.Thumb });
     const hearts = await this.reacts.readMany({ postID: postID, emoji: ReactEmoji.Heart });
     const sads = await this.reacts.readMany({ postID: postID, emoji: ReactEmoji.Sad });
-    return { thumb: thumbs.length, heart: hearts.length, sad: sads.length };
+    return { thumb: thumbs, heart: hearts, sad: sads };
   }
 
   // Get All Reacts on a Specific Post that are by a Specific User
