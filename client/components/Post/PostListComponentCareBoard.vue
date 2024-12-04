@@ -4,15 +4,17 @@ import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
-import PostComponent from "./PostComponentSisterCircles.vue";
+import PostComponent from "./PostComponentCareBoard.vue";
 import SearchPostForm from "./SearchPostForm.vue";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+const props = defineProps(["currentlyViewing"]);
 
 const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
 let searchAuthor = ref("");
+const userStore = useUserStore();
 
 async function getPosts(author?: string) {
   let query: Record<string, string> = author !== undefined ? { author } : {};
@@ -31,20 +33,29 @@ function updateEditing(id: string) {
 }
 
 onBeforeMount(async () => {
-  await getPosts(currentUsername.value);
+  console.log("remounting!!");
+  if (!userStore.currentlyViewingCareboard) {
+    await getPosts(currentUsername.value);
+  } else {
+    await getPosts(userStore.currentlyViewingCareboard);
+  }
   loaded.value = true;
 });
 </script>
 
 <template>
+  <!--
   <section v-if="isLoggedIn">
     <h2>Create a my care board post</h2>
     <CreatePostForm @refreshPosts="getPosts" />
   </section>
+-->
   <div class="row">
     <h2 v-if="!searchAuthor">My Care Board Posts:</h2>
+    <!--
     <h2 v-else>Posts on {{ searchAuthor }}'s Care Board:</h2>
     <SearchPostForm :headerText="'Go to Careboard of User:'" @getPostsByAuthor="getPosts" />
+    -->
   </div>
   <section class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">
@@ -70,12 +81,9 @@ p,
 }
 
 article {
-  background-color: var(--base-bg);
-  border-radius: 1em;
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  padding: 1em;
 }
 
 .posts {

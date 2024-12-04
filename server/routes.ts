@@ -2,13 +2,13 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Logging, Posting, Sessioning } from "./app";
+import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
+import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
+import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
-import { Mood, Symptom, FlowIntensity } from "./concepts/logging";
 
 import { z } from "zod";
-import session from "express-session";
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -147,7 +147,8 @@ class Routes {
       return { circles: await Authing.getUserCircles(id) };
     }
     const circles = await Posting.getAllCircles();
-    return { circles: await Responses.circles(circles) };
+    const result = await Responses.circles(circles);
+    return { circles: result };
   }
 
   @Router.get("/circles/:username")
@@ -243,16 +244,122 @@ class Routes {
     return await Authing.getUserCircles(id);
   }
 
-   // debugging routes
+  @Router.get("/reacts")
+  async getReactsOnPost(postID: string) {
+    const oid = new ObjectId(postID);
+    const result = await Reacting.getReactCountsOnPost(oid);
+    return result;
+  }
+
+  @Router.post("/reacts")
+  async toggleReaction(session: SessionDoc, postID: string, emoji: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(postID);
+    let emojiChoice: ReactEmoji;
+    switch (emoji) {
+      case "thumb":
+        emojiChoice = ReactEmoji.Thumb;
+        break;
+      case "heart":
+        emojiChoice = ReactEmoji.Heart;
+        break;
+      default:
+        emojiChoice = ReactEmoji.Sad;
+        break;
+    }
+    const alreadyReacted = await Reacting.checkIfReactionExists(user, oid, emojiChoice);
+    if (alreadyReacted) {
+      return await Reacting.removeUserReactionOnPost(user, oid, emojiChoice);
+    } else {
+      return await Reacting.reactToPost(user, oid, emojiChoice);
+    }
+  }
+
+  @Router.get("/reacts/bySessionUser")
+  async getReactionsByUserOnPost(session: SessionDoc, postID: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(postID);
+    const thumb = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Thumb);
+    const heart = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Heart);
+    const sad = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Sad);
+    return { thumb: thumb, heart: heart, sad: sad };
+  }
+
+  // Returns a list of reply objects
+  @Router.get("/replies")
+  async getRepliesOnPost(postID: string) {
+    const oid = new ObjectId(postID);
+    const replies = await Replying.getRepliesOnPost(oid);
+    return { replies };
+  }
+  @Router.post("/invites")
+  async sendInvite(session: SessionDoc, inviteUsername: string) {
+    const myOid = Sessioning.getUser(session);
+    let sentToUserOid;
+    sentToUserOid = (await Authing.getUserByUsername(inviteUsername))._id;
+    const alreadyInvited = await Inviting.checkIfInviteExists(myOid, sentToUserOid);
+    if (alreadyInvited) {
+      throw new Error("you already invited this user!");
+    } else {
+      const myUsername = (await Authing.getUserById(myOid)).username;
+      const sentToUsername = (await Authing.getUserById(sentToUserOid)).username;
+      if (myUsername == sentToUsername) {
+        throw new Error("you cannot invite yourself!");
+      }
+      return await Inviting.inviteUser(myOid, myUsername, sentToUserOid, sentToUsername);
+    }
+  }
+
+  @Router.delete("/invites/:sentToUsername")
+  async removeSentInvite(session: SessionDoc, sentToUsername: string) {
+    const user = Sessioning.getUser(session);
+    const oidSentTo = (await Authing.getUserByUsername(sentToUsername))._id;
+    return await Inviting.removeInvite(user, oidSentTo);
+  }
+
+  @Router.get("/invites")
+  async getInvitedToBoards(session: SessionDoc) {
+    const myOid = Sessioning.getUser(session);
+    return await Inviting.getAllInvites(myOid);
+  }
+
+  @Router.get("/invites/sent")
+  async getSentInvites(session: SessionDoc) {
+    const myOid = Sessioning.getUser(session);
+    return await Inviting.getAllInvitesSent(myOid);
+  }
+
+  // debugging routes
   // @Router.get("/logs")
   // async getLogs() {
   //   return await Logging.getInstance().getLogs();
   // }
 
-  // @Router.delete("/logs")
-  // async deleteLogs() {
-  //   return await Logging.getInstance().deleteAllLogs();
-  // }
+  // Route to add a new reply to a post
+  @Router.post("/replies")
+  async addReplyToPost(session: SessionDoc, postID: string, content: string) {
+    const user = Sessioning.getUser(session); // Get the current user from session
+    const oid = new ObjectId(postID);
+
+    // Add a new reply
+    return await Replying.replyToPost(user, oid, content);
+  }
+
+  // Get all replies by specific user on specific post
+  @Router.get("/replies/bySessionUser")
+  async getRepliesByUserOnPost(session: SessionDoc, postID: string) {
+    const user = Sessioning.getUser(session);
+    const oid = new ObjectId(postID);
+
+    // Get user's reply to post
+    const userReplies = await Replying.getUserRepliesOnPost(user, oid);
+
+    if (userReplies.length > 0) {
+      return { replies: userReplies };
+    } else {
+      return { msg: "You haven't replied to this post yet!" };
+    }
+  }
 }
 
 /** The web app. */

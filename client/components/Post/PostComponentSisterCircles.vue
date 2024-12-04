@@ -3,10 +3,15 @@ import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
 import { fetchy } from "../../utils/fetchy";
+import { onBeforeMount, ref } from "vue";
+import AddReact from "@/components/Post/AddReact.vue";
+import ReactCounts from "@/components/Post/ReactCounts.vue";
 
 const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
+
+let allReacts = ref([]);
 
 const deletePost = async () => {
   try {
@@ -16,10 +21,19 @@ const deletePost = async () => {
   }
   emit("refreshPosts");
 };
+
+const reactCountsRef = ref<InstanceType<typeof ReactCounts> | null>(null);
+
+const handleRefreshReactCounts = () => {
+  reactCountsRef.value?.getPostReacts?.();
+};
 </script>
 
 <template>
-  <h2>{{ props.post.title }}</h2>
+  <div class="titleAndReactCounts">
+    <h2>{{ props.post.title }}</h2>
+    <ReactCounts ref="reactCountsRef" :post="props.post" />
+  </div>
   <p class="author">by {{ props.post.author ? props.post.username : "anonymous" }}</p>
   <p>{{ props.post.content }}</p>
   <div class="base">
@@ -37,6 +51,7 @@ const deletePost = async () => {
       </li>
     </ul>
   </div>
+  <AddReact :post="props.post" @refreshReactCounts="handleRefreshReactCounts" />
 </template>
 
 <style scoped>
@@ -73,5 +88,11 @@ menu {
 
 .base article:only-child {
   margin-left: auto;
+}
+
+.titleAndReactCounts {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 </style>

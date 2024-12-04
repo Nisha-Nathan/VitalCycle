@@ -25,19 +25,16 @@ async function getUserCircles() {
   }
   let circleResponse;
   try {
-    circleResponse = await fetchy(`/api/circles/${currentUsername.value}`, "GET", { query });
-  } catch (_) {
+    circleResponse = await fetchy("/api/circles", "GET", { query });
+  } catch (error) {
+    console.log(error);
     return;
   }
-  circles.value =["All Circles", ...circleResponse.circles];
+  circles.value = ["All Circles", ...circleResponse.circles];
 }
-
-
-
 
 onMounted(() => {
   getUserCircles();
-
 });
 
 async function getPosts(author?: string, circle?: string) {
@@ -85,33 +82,33 @@ onBeforeMount(async () => {
 
 <template>
   <section class="header">
-    <h2 class="section-title">Sister Circles </h2>
+    <h2 class="section-title">Sister Circles</h2>
     <div class="btn-group section" role="group">
       <div v-if="circles.length !== 0" v-for="(flow, index) in circles" :key="index">
-        <input type="radio" class="btn-check" :name="`btnradio-sistercircles`" :id="`btnradio-sistercircles-${index}`"
-          v-model="selectedCircle" :value="flow" autocomplete="off" @change="getPosts(undefined,selectedCircle)">
-        <label class=" btn btn-circle " :for="`btnradio-sistercircles-${index}`">{{ flow }}</label>
+        <input
+          type="radio"
+          class="btn-check"
+          :name="`btnradio-sistercircles`"
+          :id="`btnradio-sistercircles-${index}`"
+          v-model="selectedCircle"
+          :value="flow"
+          autocomplete="off"
+          @change="getPosts(undefined, selectedCircle)"
+        />
+        <label class="btn btn-circle" :for="`btnradio-sistercircles-${index}`">{{ flow }}</label>
       </div>
     </div>
   </section>
 
-
   <section v-if="isLoggedIn">
-    <a class="btn btn-primary " data-bs-toggle="collapse" href="#createPost" role="button" aria-expanded="false"
-      aria-controls="collapse">
-      Create a sister circles post
-    </a>
+    <a class="btn btn-primary" data-bs-toggle="collapse" href="#createPost" role="button" aria-expanded="false" aria-controls="collapse"> Create a sister circles post </a>
     <div class="collapse show" id="createPost" style="">
-
       <CreatePostForm @refreshPosts="getPosts" />
     </div>
   </section>
 
   <section v-if="isLoggedIn">
-    <a class="btn btn-primary  " data-bs-toggle="collapse" href="#addCircle" role="button" aria-expanded="false"
-      aria-controls="collapse">
-      Add a Circle
-    </a>
+    <a class="btn btn-primary" data-bs-toggle="collapse" href="#addCircle" role="button" aria-expanded="false" aria-controls="collapse"> Add a Circle </a>
     <div class="collapse show" id="addCircle" style="">
       <AddCirclesForm @refreshCircles="getUserCircles" />
     </div>
@@ -187,7 +184,6 @@ article {
   width: 100%;
   margin: 20px;
   margin-left: 0;
-
 }
 
 .btn-group {
@@ -198,20 +194,20 @@ article {
 }
 
 .btn-circle {
-  border-color: #EA7575;
-  color: #EA7575;
+  border-color: #ea7575;
+  color: #ea7575;
 }
 
-.btn-check:checked+.btn,
-.btn-check:active+.btn {
+.btn-check:checked + .btn,
+.btn-check:active + .btn {
   border-color: #000000;
-  background-color: #EA7575;
-  color: #000000
+  background-color: #ea7575;
+  color: #000000;
 }
 
-.btn-check:not(:checked)+.btn {
-  border-color: #EA7575;
-  color: #EA7575;
+.btn-check:not(:checked) + .btn {
+  border-color: #ea7575;
+  color: #ea7575;
   /* Reset background to default */
 }
 </style>
