@@ -22,11 +22,13 @@ const router = createRouter({
       path: "/sister-circle",
       name: "Sister Circle",
       component: HomeView,
+      meta: { requiresAuth: true },
     },
     {
       path: "/care-board",
       name: "Care Board",
       component: CareBoardView,
+      meta: { requiresAuth: true },
     },
     {
       path: "/settings",
@@ -56,11 +58,6 @@ const router = createRouter({
       name: "CycleStats",
       component: CycleStatsView,
     },
-    // {
-    //   path: '/today',
-    //   name: 'today',
-    //   component: TodayView
-    // },
   ],
 });
 

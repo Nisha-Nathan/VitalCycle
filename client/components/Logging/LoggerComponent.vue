@@ -118,6 +118,7 @@ onMounted(() => {
         <div class="date-info">
           <div>
             <h1>{{ formatDateToday(moment(dateOfLog).toDate()) }}</h1>
+            <p>{{ selectedFlow !== "None" ? "Period Day" : "No Period Today" }}</p>
           </div>
           <button type="button" class="btn btn-icon" @click="showDatePicker = !showDatePicker">
             <img class="springtime" src="/client/assets/images/Springtime.svg" alt="Springtime Icon" />
@@ -156,3 +157,122 @@ onMounted(() => {
     <button v-if="isCurrentDate" type="submit" class="btn btn-primary">{{ isEditMode ? "Update" : "Submit" }}</button>
   </form>
 </template>
+
+<style scoped>
+/* General Styles */
+form {
+  background-color: rgba(255, 251, 254, 0.9);
+  border-color: black;
+  border: #000000 1px solid;
+  border-radius: 10px;
+}
+
+.today-view {
+  font-family: "Arial", sans-serif;
+  color: #fff;
+  background-color: #fffbfe;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 5px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.date-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-info h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #fff;
+}
+
+.date-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ffe3e3;
+}
+
+.header-actions .btn {
+  background-color: #f09b9b;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+.header-actions .btn.checklist {
+  margin-right: 0.5rem;
+}
+
+/* Content */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.journal {
+  width: 100%;
+  height: 100px;
+  border-radius: 10px;
+  border: 1px solid #ffb6b6;
+  padding: 0.5rem;
+  background-color: #fff;
+  color: #333;
+  resize: none;
+}
+
+/* Sections */
+.header,
+.mood-section,
+.flow-section,
+.symptoms-section {
+  background-color: #ea7575;
+  border-radius: 10px;
+  padding: 0.75rem;
+  gap: 10px;
+  outline-color: #fffbfe;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+}
+
+.btn-icon {
+  margin-left: 5px;
+  border: none;
+  background: transparent;
+}
+
+.btn-check {
+  margin: 5px;
+}
+
+.btn-outline {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 2px solid #fff;
+  font-size: 0.9rem;
+}
+
+.btn-outline:hover {
+  background-color: #ff7f7f;
+}
+
+</style>
+

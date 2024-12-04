@@ -1,49 +1,17 @@
 <script setup lang="ts">
 import SisterCirclesPostListComponent from "@/components/Post/PostListComponentSisterCircles.vue";
 import { useUserStore } from "@/stores/user";
-import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
-// import { onMounted, ref } from "vue";
-// let circles = ref<Array<Record<string, string>>>([]);
+
 
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 
-// async function getUserCircles() {
-//   let query: Record<string, string> = {};
-//   if (currentUsername.value) {
-//     query.author = currentUsername.value;
-//   }
-//   let circleResponse;
-//   try {
-//     circleResponse= await fetchy("/api/circles", "GET", { query });
-//   } catch (_) {
-//     return;
-//   }
-//   circles.value = circleResponse.circles;
-// }
-
-// const addCircle = async (circle: string) => {
-//   try {
-//     await fetchy("/api/circles", "POST", {
-//       body: {circle: circle },
-//     });
-//   } catch (_) {
-//     return;
-//   }
-//   getUserCircles();
-// };
-
-
-
-// onMounted(() => {
-//   getUserCircles();
-// });
 </script>
 
 <template>
-  <main class="homepage">
+  <main v--if="isLoggedIn" class="homepage">
     <!-- Header Section -->
     <!-- <section class="header">
       <h1 class="welcome-message">

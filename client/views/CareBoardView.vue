@@ -46,11 +46,11 @@ const goToMyCareboard = () => {
 <template>
   <main class="homepage">
     <!-- Header Section -->
-    <section v-if="!isLoggedIn" class="header">
+    <!-- <section v-if="!isLoggedIn" class="header">
       <h1 class="welcome-message">
         <span>Please login to access your account!</span>
       </h1>
-    </section>
+    </section> -->
 
     <!-- Care Board Section -->
     <section class="care-board">
