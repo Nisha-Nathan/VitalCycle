@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import LoggerComponent from "@/components/Logging/LoggerComponent.vue";
+import CycleStatsComponent from "@/components/Logging/CycleStatsComponent.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
+
 
 
 
@@ -24,7 +26,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
     </section>
 
     <section class="cycle-stats" v-if="isLoggedIn">
-      <!-- <h2 class="section-title">Care Board</h2> -->
+       <CycleStatsComponent/>
     </section>
   </main>
 
