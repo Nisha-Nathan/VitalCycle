@@ -1,8 +1,67 @@
+<script setup lang="ts">
+import { useUserStore } from "@/stores/user";
+import { storeToRefs } from "pinia";
+import { ref, onMounted } from "vue";
+import { fetchy } from "@/utils/fetchy";
+
+// Store references
+const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+
+// Reactive properties
+const tabs = ["Cycle History", "Activity Trends", "Weight Trends"];
+const currentTab = ref("Cycle History");
+
+const cycleStats = ref<{
+  averageCycleLength: number | null;
+  averagePeriodLength: number | null;
+  lastPeriodStart: string | null;
+} | null>(null);
+
+const isLoading = ref(false);
+const errorMessage = ref("");
+
+// Fetch Cycle Stats
+const fetchCycleStats = async () => {
+  if (!isLoggedIn.value || !currentUsername.value) {
+    cycleStats.value = null;
+    errorMessage.value = "Please log in to view your cycle statistics.";
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const response = await fetchy("/api/cycle-stats", "GET");
+    if (response?.cycleStats && Object.keys(response.cycleStats).length > 0) {
+      cycleStats.value = {
+        averageCycleLength: response.cycleStats.averageCycleLength || null,
+        averagePeriodLength: response.cycleStats.averagePeriodLength || null,
+        lastPeriodStart: response.cycleStats.lastPeriodStart
+          ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString()
+          : null,
+      };
+    } else {
+      cycleStats.value = null;
+      errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
+    }
+  } catch (error) {
+    cycleStats.value = null;
+    errorMessage.value = "Failed to fetch cycle statistics. Please try again.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fetch stats on component mount
+onMounted(() => {
+  fetchCycleStats();
+});
+</script>
+
 <template>
   <main class="cycle-stats">
     <h2 class="section-title">Cycle Trends</h2>
 
-    <!-- Tab Section -->
+    <!-- Tabs Section -->
     <div class="tabs">
       <button
         v-for="tab in tabs"
@@ -14,34 +73,38 @@
       </button>
     </div>
 
-    <!-- Cycle History Tab -->
+    <!-- Dynamic Content -->
     <div v-if="currentTab === 'Cycle History'" class="stats-overview">
-      <div class="stat-item">Average Cycle Length: 28 days</div>
-      <div class="stat-item">Average Period Length: 4 days</div>
-      <div class="stat-item">Last Menstrual Period Start: 17th Nov</div>
+      <div v-if="isLoading" class="stat-item">Loading...</div>
+      <div v-else-if="errorMessage" class="stat-item">{{ errorMessage }}</div>
+      <div v-else>
+        <div class="stat-item">
+          Average Cycle Length:
+          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "No data available" }}
+        </div>
+        <div class="stat-item">
+          Average Period Length:
+          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "No data available" }}
+        </div>
+        <div class="stat-item">
+          Last Menstrual Period Start:
+          {{ cycleStats?.lastPeriodStart || "No data available" }}
+        </div>
+      </div>
     </div>
 
-    <!-- Activity Trends Tab -->
     <div v-if="currentTab === 'Activity Trends'" class="stats-overview">
       <div class="stat-item">Recent Activities</div>
       <div class="stat-item">Activity Duration Trends</div>
       <div class="stat-item">Most Common Activities</div>
     </div>
 
-    <!-- Weight Trends Tab -->
     <div v-if="currentTab === 'Weight Trends'" class="stats-overview">
       <div class="stat-item">Weight Tracking Coming Soon!</div>
       <div class="stat-item">Track your weight changes over time</div>
     </div>
   </main>
 </template>
-
-<script setup lang="ts">
-import { ref } from 'vue';
-
-const tabs = ['Cycle History', 'Activity Trends', 'Weight Trends'];
-const currentTab = ref('Cycle History');
-</script>
 
 <style scoped>
 /* General Styling */
