@@ -8,11 +8,13 @@ import PostComponent from "./PostComponentCareBoard.vue";
 import SearchPostForm from "./SearchPostForm.vue";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+const props = defineProps(["currentlyViewing"]);
 
 const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
 let searchAuthor = ref("");
+const userStore = useUserStore();
 
 async function getPosts(author?: string) {
   let query: Record<string, string> = author !== undefined ? { author } : {};
@@ -31,7 +33,12 @@ function updateEditing(id: string) {
 }
 
 onBeforeMount(async () => {
-  await getPosts(currentUsername.value);
+  console.log("remounting!!");
+  if (!userStore.currentlyViewingCareboard) {
+    await getPosts(currentUsername.value);
+  } else {
+    await getPosts(userStore.currentlyViewingCareboard);
+  }
   loaded.value = true;
 });
 </script>
