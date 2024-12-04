@@ -18,6 +18,7 @@ interface Invite {
 const username = ref("");
 const sentInvites = ref<Invite[]>([]);
 const invitedTo = ref<Invite[]>([]);
+const xButtonsOnInvitedUsers = ref<string[]>([]);
 const userStore = useUserStore();
 
 const closeInvitesSection = () => {
@@ -34,6 +35,17 @@ const sendInvite = async (inviteUsername: string) => {
     return;
   }
   emit("emptyForm");
+  await getSentInvites();
+};
+
+const removeInvitedUser = async (sentToUsername: string) => {
+  console.log("called on username: ", sentToUsername.substring(2));
+  try {
+    await fetchy(`/api/invites/${sentToUsername.substring(2)}`, "DELETE");
+  } catch (error) {
+    console.log(error);
+    return;
+  }
   await getSentInvites();
 };
 
@@ -62,6 +74,20 @@ async function getInvites() {
   invitedTo.value = requestResults;
 }
 
+const hoverInvite = (username: string) => {
+  const button = sentInvites.value.find((invite) => invite.sentToUsername === username);
+  if (button) {
+    button.sentToUsername = "x " + username; // Temporarily change text
+  }
+};
+
+const unhoverInvite = (username: string) => {
+  const button = sentInvites.value.find((invite) => invite.sentToUsername === username);
+  if (button) {
+    button.sentToUsername = username.substring(2); // Revert to the original text
+  }
+};
+
 onBeforeMount(async () => {
   await getSentInvites();
   await getInvites();
@@ -88,16 +114,18 @@ const goToUserCareboard = (username: string) => {
           <input type="text" id="username" v-model="username" placeholder="Enter username" required />
           <button type="submit">send invite</button>
         </form>
-        <p>Invited Users (can access your careboard):</p>
+        <p class="section-title">Invited Users (can access your careboard):</p>
         <ul v-if="sentInvites.length > 0">
           <li v-for="invite in sentInvites" :key="invite.id">
-            {{ invite.sentToUsername }}
+            <button class="invited-user" @mouseover="hoverInvite(invite.sentToUsername)" @mouseout="unhoverInvite(invite.sentToUsername)" @click="removeInvitedUser(invite.sentToUsername)">
+              {{ invite.sentToUsername }}
+            </button>
           </li>
         </ul>
         <p v-else>You haven't invited anyone to your careboard yet.</p>
       </div>
       <div class="invites-part">
-        <p>Visit a friend's careboard</p>
+        <p class="section-title">Visit a friend's careboard</p>
         <ul v-if="invitedTo.length > 0">
           <li v-for="invite in invitedTo" :key="invite.id">
             <button @click="goToUserCareboard(invite.sentFromUsername)">{{ invite.sentFromUsername }}</button>
@@ -113,13 +141,11 @@ const goToUserCareboard = (username: string) => {
 /* General Layout */
 @import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
 main {
-  background-color: black;
   border-radius: 1em;
   padding: 10px;
 }
 h3 {
   text-align: center;
-  color: white;
 }
 .invites-parts {
   display: flex;
@@ -131,6 +157,9 @@ h3 {
   border-radius: 1em;
   margin: 10px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .close-btn {
@@ -139,11 +168,30 @@ h3 {
   left: 10px;
   background-color: transparent;
   border: none;
-  color: white;
   cursor: pointer;
+  color: black;
 }
 
 .section-title {
   text-align: center;
+  color: black;
+  margin-top: 0.5rem;
+}
+
+ul {
+  list-style-type: none;
+}
+
+.invited-user:hover {
+  background-color: lightcoral;
+}
+
+.invited-user {
+  background-color: lightgray;
+  border-radius: 1rem;
+  padding: 3px;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin: 0.2rem;
 }
 </style>

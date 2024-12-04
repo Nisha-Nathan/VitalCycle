@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
 import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
 import InvitesSection from "@/components/Post/InvitesSection.vue";
+import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 const userStore = useUserStore();
@@ -167,11 +167,13 @@ const goToMyCareboard = () => {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10; /* Ensures it appears on top of other elements */
-  background-color: black;
+  background-color: white;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 80%; /* Adjust the width as needed */
   max-width: 600px; /* You can set a max-width */
+  border: 1px solid black;
+  color: black;
 }
 </style>

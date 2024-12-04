@@ -18,7 +18,7 @@ const createPost = async (title: string, content: string, postedOnUsername: stri
   }
   try {
     await fetchy("/api/mycareboard/posts", "POST", {
-      body: { title, content, toPostOn },
+      body: { title, content, postedOnUsername: toPostOn },
     });
   } catch (_) {
     return;
@@ -83,7 +83,7 @@ textarea {
   left: 10px;
   background-color: transparent;
   border: none;
-  color: white;
+  color: black;
   cursor: pointer;
 }
 </style>
