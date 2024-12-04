@@ -7,11 +7,13 @@ export const useUserStore = defineStore(
   "user",
   () => {
     const currentUsername = ref("");
+    const currentlyViewingCareboard = ref("");
 
     const isLoggedIn = computed(() => currentUsername.value !== "");
 
     const resetStore = () => {
       currentUsername.value = "";
+      currentlyViewingCareboard.value = "";
     };
 
     const createUser = async (username: string, password: string) => {
@@ -33,6 +35,10 @@ export const useUserStore = defineStore(
       } catch {
         currentUsername.value = "";
       }
+    };
+
+    const goToCareboard = async (visitingUsername: string) => {
+      currentlyViewingCareboard.value = visitingUsername;
     };
 
     const logoutUser = async () => {
@@ -63,6 +69,8 @@ export const useUserStore = defineStore(
       updateUserUsername,
       updateUserPassword,
       deleteUser,
+      currentlyViewingCareboard,
+      goToCareboard,
     };
   },
   { persist: true },

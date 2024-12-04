@@ -2,16 +2,44 @@
 import { ref } from "vue";
 import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
 import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
+import InvitesSection from "@/components/Post/InvitesSection.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+const userStore = useUserStore();
 
 let createPostFormShowing = ref(false);
+let invitesSectionShowing = ref(false);
+let careBoardListKey = ref(0);
 
 const toggleCreatePostForm = () => {
-  console.log("hi ", createPostFormShowing.value);
   createPostFormShowing.value = !createPostFormShowing.value;
+};
+
+const closeInvitesSection = () => {
+  invitesSectionShowing.value = false;
+};
+const closeCreateSection = () => {
+  createPostFormShowing.value = false;
+};
+const openInvitesSection = () => {
+  createPostFormShowing.value = false;
+  invitesSectionShowing.value = true;
+};
+const openCreateSection = () => {
+  invitesSectionShowing.value = false;
+  createPostFormShowing.value = true;
+};
+const remountCareBoardList = () => {
+  closeInvitesSection();
+  closeCreateSection();
+  careBoardListKey.value++; // Increment the key to trigger remount
+};
+
+const goToMyCareboard = () => {
+  userStore.goToCareboard("");
+  remountCareBoardList();
 };
 </script>
 
@@ -26,13 +54,16 @@ const toggleCreatePostForm = () => {
 
     <!-- Care Board Section -->
     <section class="care-board">
-      <h2 class="section-title">My Care Board</h2>
+      <h2 v-if="!userStore.currentlyViewingCareboard" class="section-title">My Care Board</h2>
+      <h2 v-else class="section-title">{{ userStore.currentlyViewingCareboard }}'s Careboard</h2>
+      <button v-if="userStore.currentlyViewingCareboard" @click="goToMyCareboard">< Go to My Careboard</button>
       <div class="top-buttons">
-        <button :class="{ 'top-button-selected': createPostFormShowing, 'top-button': !createPostFormShowing }" @click="toggleCreatePostForm">+ Create Post</button>
-        <button class="top-button">+ Invite User</button>
+        <button :class="{ 'top-button-selected': createPostFormShowing, 'top-button': !createPostFormShowing }" @click="openCreateSection">+ Create Post</button>
+        <button class="top-button" @click="openInvitesSection">Invites</button>
       </div>
-      <CreatePostFormCareBoard v-if="createPostFormShowing" />
-      <CareBoardPostListComponent />
+      <CreatePostFormCareBoard v-if="createPostFormShowing" class="invites-section" @closeSection="closeCreateSection" />
+      <InvitesSection v-if="invitesSectionShowing" class="invites-section" @closeSection="closeInvitesSection" @goToCareboard="remountCareBoardList" />
+      <CareBoardPostListComponent :key="careBoardListKey" />
     </section>
   </main>
 </template>
@@ -127,5 +158,20 @@ const toggleCreatePostForm = () => {
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;
+}
+
+/* Invites Section Styling */
+.invites-section {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10; /* Ensures it appears on top of other elements */
+  background-color: black;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 80%; /* Adjust the width as needed */
+  max-width: 600px; /* You can set a max-width */
 }
 </style>

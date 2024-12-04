@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Logging, Posting, Reacting, Sessioning } from "./app";
+import { Authing, Friending, Inviting, Logging, Posting, Reacting, Sessioning } from "./app";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -283,6 +283,33 @@ class Routes {
     const heart = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Heart);
     const sad = await Reacting.checkIfReactionExists(user, oid, ReactEmoji.Sad);
     return { thumb: thumb, heart: heart, sad: sad };
+  }
+
+  @Router.post("/invites")
+  async toggleSendInvite(session: SessionDoc, inviteUsername: string) {
+    const myOid = Sessioning.getUser(session);
+    let sentToUserOid;
+    sentToUserOid = (await Authing.getUserByUsername(inviteUsername))._id;
+    const alreadyInvited = await Inviting.checkIfInviteExists(myOid, sentToUserOid);
+    if (alreadyInvited) {
+      return await Inviting.removeInvite(myOid, sentToUserOid);
+    } else {
+      const myUsername = (await Authing.getUserById(myOid)).username;
+      const sentToUsername = (await Authing.getUserById(sentToUserOid)).username;
+      return await Inviting.inviteUser(myOid, myUsername, sentToUserOid, sentToUsername);
+    }
+  }
+
+  @Router.get("/invites")
+  async getInvitedToBoards(session: SessionDoc) {
+    const myOid = Sessioning.getUser(session);
+    return await Inviting.getAllInvites(myOid);
+  }
+
+  @Router.get("/invites/sent")
+  async getSentInvites(session: SessionDoc) {
+    const myOid = Sessioning.getUser(session);
+    return await Inviting.getAllInvitesSent(myOid);
   }
 
   // debugging routes
