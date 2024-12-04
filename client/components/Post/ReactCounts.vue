@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/user";
-import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
-import { fetchy } from "../../utils/fetchy";
 import { onBeforeMount, ref } from "vue";
+import { fetchy } from "../../utils/fetchy";
 
 const props = defineProps(["post"]);
 const { currentUsername } = storeToRefs(useUserStore());
@@ -19,9 +18,9 @@ async function getPostReacts() {
     console.log(error);
     return;
   }
-  allReacts.value.thumb = requestResults.thumb;
-  allReacts.value.heart = requestResults.heart;
-  allReacts.value.sad = requestResults.sad;
+  allReacts.value.thumb = requestResults.thumb.length;
+  allReacts.value.heart = requestResults.heart.length;
+  allReacts.value.sad = requestResults.sad.length;
 }
 
 defineExpose({
