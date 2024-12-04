@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/user";
-import { storeToRefs } from "pinia";
-import { ref, onMounted } from "vue";
 import { fetchy } from "@/utils/fetchy";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
 
 // Store references
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
@@ -35,9 +35,7 @@ const fetchCycleStats = async () => {
       cycleStats.value = {
         averageCycleLength: response.cycleStats.averageCycleLength || null,
         averagePeriodLength: response.cycleStats.averagePeriodLength || null,
-        lastPeriodStart: response.cycleStats.lastPeriodStart
-          ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString()
-          : null,
+        lastPeriodStart: response.cycleStats.lastPeriodStart ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString() : null,
       };
     } else {
       cycleStats.value = null;

@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
+import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Checklist, Sessioning } from "./app";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -360,6 +360,7 @@ class Routes {
       return { msg: "You haven't replied to this post yet!" };
     }
   }
+
 }
 
 /** The web app. */

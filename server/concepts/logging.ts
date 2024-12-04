@@ -224,7 +224,7 @@ export default class LoggingConcept {
   async getLogsForExport(author: ObjectId) {
     const logs = await this.logs.readMany(
       { author },
-      { sort: { dateOfLog: -1 } }  // Most recent first
+      { sort: { dateOfLog: -1 } }, // Most recent first
     );
     return logs;
   }

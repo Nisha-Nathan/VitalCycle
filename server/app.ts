@@ -6,6 +6,7 @@ import PostingConcept from "./concepts/posting";
 import ReactingConcept from "./concepts/reacting";
 import ReplyingConcept from "./concepts/replying";
 import SessioningConcept from "./concepts/sessioning";
+import ChecklistConcept from "./concepts/checklisting";
 
 // The app is a composition of concepts instantiated here
 // and synchronized together in `routes.ts`.
@@ -15,5 +16,6 @@ export const Posting = new PostingConcept("sisterCirclePosts", "careBoardPosts",
 export const Friending = new FriendingConcept("friends");
 export const Reacting = new ReactingConcept("reacts");
 export const Replying = new ReplyingConcept("replies");
+export const Checklist = new ChecklistConcept("checklists");
 export const Inviting = new InvitingConcept("invites");
 export { default as Logging } from "./concepts/logging";
