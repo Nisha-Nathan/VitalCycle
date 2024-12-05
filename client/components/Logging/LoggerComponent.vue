@@ -181,7 +181,6 @@ form {
 }
 
 .today-view {
-  font-family: "Arial", sans-serif;
   color: #fff;
   background-color: #fffbfe;
   border-radius: 10px;

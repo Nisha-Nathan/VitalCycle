@@ -33,6 +33,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 </template>
 
 <style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
 /* General Styles */
 .todaypage {
   background-color: #ffe3e3;
@@ -40,7 +41,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   border-radius: 12px;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
+  font-family: "Quando", serif;
 }
 
 /* Welcome Section */

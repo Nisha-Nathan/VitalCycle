@@ -69,13 +69,15 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 <style scoped>
 /* General Layout */
+@import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
 .homepage {
   background-color: #ffe3e3;
   padding: 2rem;
   border-radius: 12px;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
+  font-family: "Quando", serif;
+
 }
 
 /* Welcome Section */

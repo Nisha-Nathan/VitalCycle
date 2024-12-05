@@ -168,6 +168,7 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
+
 .header {
   background-color: black;
   color: white;
