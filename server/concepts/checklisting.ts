@@ -14,21 +14,13 @@ export interface ChecklistDoc extends BaseDoc {
 }
 
 export default class ChecklistConcept {
-  private static instance: ChecklistConcept;
   public readonly checklists: DocCollection<ChecklistDoc>;
 
   /**
-   * Make an instance of Checklist.
+   * Initialize the ChecklistConcept class with a specific collection name.
    */
   constructor(collectionName: string) {
     this.checklists = new DocCollection<ChecklistDoc>(collectionName);
-  }
-
-  static getInstance(): ChecklistConcept {
-    if (!ChecklistConcept.instance) {
-      ChecklistConcept.instance = new ChecklistConcept("checklists");
-    }
-    return ChecklistConcept.instance;
   }
 
   /**
