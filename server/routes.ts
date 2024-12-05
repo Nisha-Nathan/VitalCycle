@@ -2,8 +2,8 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Checklist, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
-import { ChecklistItem } from "./concepts/checklisting";
+import { Authing, Checklist, Friending, Inviting, Logging, Opting, Posting, Reacting, Replying, Sessioning } from "./app";
+import ChecklistConcept, { ChecklistItem } from "./concepts/checklisting";
 import { BadValuesError, NotFoundError } from "./concepts/errors";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
@@ -73,6 +73,24 @@ class Routes {
     return { msg: "Logged out!" };
   }
 
+  @Router.get("/opting/:userId")
+  async getUserOptingStatus(userId: string) {
+    const id = new ObjectId(userId);
+    return await Opting.getUserOptingStatus(id);
+  }
+
+  @Router.post("/opting/:userId")
+  async initializeUserOpting(userId: string) {
+    const id = new ObjectId(userId);
+    return await Opting.initializeUserOpting(id);
+  }
+
+  @Router.patch("/opting/:userId")
+  async setUserOptingStatus(userId: string, feature: "sisterCircle" | "myCareBoard", status: boolean) {
+    const id = new ObjectId(userId);
+    return await Opting.setUserOptingStatus(id, feature, status);
+  }
+
   @Router.get("/sistercircle/posts")
   async getSisterCirclePosts(author?: string, circle?: string) {
     let posts;
@@ -114,7 +132,7 @@ class Routes {
 
   @Router.delete("/sistercircle/posts/:id")
   async deleteSisterCirclePost(session: SessionDoc, id: string) {
-    const user = Sessioning.getUser(session);
+    // const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
     // await Posting.assertAuthorIsUser(oid, user, "SisterCircle");
     return Posting.deleteSisterCirclePost(oid);
@@ -316,8 +334,7 @@ class Routes {
   @Router.post("/invites")
   async sendInvite(session: SessionDoc, inviteUsername: string) {
     const myOid = Sessioning.getUser(session);
-    let sentToUserOid;
-    sentToUserOid = (await Authing.getUserByUsername(inviteUsername))._id;
+    const sentToUserOid = (await Authing.getUserByUsername(inviteUsername))._id;
     const alreadyInvited = await Inviting.checkIfInviteExists(myOid, sentToUserOid);
     if (alreadyInvited) {
       throw new Error("you already invited this user!");
