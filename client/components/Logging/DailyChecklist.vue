@@ -33,24 +33,19 @@ async function getMyTasks() {
     console.log(error);
     return;
   }
-  console.log("got request results: ", requestResults);
   if (requestResults.checklist == null) allTasks.value = [];
   else allTasks.value = [requestResults.checklist];
-  console.log("got tasks: ", allTasks.value);
 }
 
 function getTaskItems() {
   // Check if there are any tasks and if any of those tasks have valid items
   if (allTasks.value.length === 0) return false;
 
-  console.log("wasnt 0, here is the value rn: ", allTasks.value);
-
   const firstTask = allTasks.value[0];
   const items = firstTask.items;
 
   // Validate that `items` exists and is an array
   if (!Array.isArray(items)) {
-    console.warn("Invalid items structure in the first task: ", items);
     return false;
   }
   checklistItems.value = items;
@@ -67,17 +62,14 @@ const createPlaceholderTask = async (items: string[]) => {
   }
   try {
     await fetchy("/api/checklists", "POST", {
-      body: { allItems },
+      body: { items: allItems },
     });
   } catch (error) {
-    console.log("trying update method instead");
     try {
       await fetchy("/api/checklists", "PUT", {
         body: { items: allItems },
       });
     } catch (error2) {
-      console.log("a new error occurred");
-      console.log(error2);
       return;
     }
   }
@@ -85,7 +77,6 @@ const createPlaceholderTask = async (items: string[]) => {
 };
 
 onBeforeMount(async () => {
-  console.log("mounting...");
   await getMyTasks();
 });
 </script>

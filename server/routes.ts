@@ -389,7 +389,8 @@ class Routes {
   }
 
   @Router.post("/checklists")
-  async createChecklist(session: SessionDoc, title: string, items: string[]) {
+  async createChecklist(session: SessionDoc, items: string[]) {
+    console.log("create checklist called");
     const user = Sessioning.getUser(session);
     const today = new Date();
 
