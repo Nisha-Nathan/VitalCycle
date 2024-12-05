@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { Router, getExpressRouter } from "./framework/router";
 
 import { Authing, Checklist, Friending, Inviting, Logging, Opting, Posting, Reacting, Replying, Sessioning } from "./app";
-import ChecklistConcept, { ChecklistItem } from "./concepts/checklisting";
+import { ChecklistItem } from "./concepts/checklisting";
 import { BadValuesError, NotFoundError } from "./concepts/errors";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
@@ -181,10 +181,10 @@ class Routes {
     const userCircles = await Authing.getUserCircles(user);
     const allCircles = await Posting.getAllCircles();
     let circles;
-    if(!userCircles) {
+    if (!userCircles) {
       circles = allCircles;
     } else {
-     circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+      circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
     }
     const result = await Responses.circles(circles);
     return { circles: result };
