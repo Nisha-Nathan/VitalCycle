@@ -106,8 +106,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 }
 
 /* Sister Circles & Care Board Sections */
-.sister-circles,
-.care-board {
+.sister-circles {
   background-color: #ffc1c1;
   padding: 1.5rem;
   border-radius: 12px;

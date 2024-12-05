@@ -115,6 +115,7 @@ import PostListComponentCareBoard from "@/components/Post/PostListComponentCareB
   font-family: "Quando", serif;
   font-weight: 400;
   font-style: normal;
+  padding:2rem;
 }
 
 /* Welcome Section */
@@ -134,9 +135,10 @@ import PostListComponentCareBoard from "@/components/Post/PostListComponentCareB
 }
 
 .care-board {
+  background-color: #ffc1c1;
+  padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
-  padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
