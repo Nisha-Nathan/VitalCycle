@@ -16,7 +16,8 @@ const getCurrentDate = () => {
   return date.toISOString().split("T")[0];
 };
 
-const dateOfLog = ref(getCurrentDate());
+const currentDate = ref(getCurrentDate());
+const dateOfLog = ref(currentDate.value);
 const selectedSymptoms = ref<string[]>([]);
 const selectedMood = ref<string | null>(null);
 const selectedFlow = ref<string | null>("None");
@@ -26,7 +27,9 @@ const isEditMode = ref(false);
 const showDatePicker = ref(false);
 const showDailyChecklist = ref(false);
 
-const isCurrentDate = computed(() => dateOfLog.value === getCurrentDate());
+const isCurrentDate = computed(() => {
+  
+  return dateOfLog.value === currentDate.value;});
 
 watch(selectedFlow, (newValue) => {
   emit("update-flow", newValue);
@@ -112,6 +115,8 @@ const displayChecklist = () => {
 };
 
 onMounted(() => {
+  console.log("mounted",dateOfLog.value);
+  console.log("current date",currentDate.value);
   fetchLogByDate(dateOfLog.value);
 });
 </script>
