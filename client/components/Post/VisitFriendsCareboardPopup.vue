@@ -40,6 +40,7 @@ const goToUserCareboard = (username: string) => {
   userStore.goToCareboard(username);
   console.log("store value is now: ", userStore.currentlyViewingCareboard);
   emit("goToCareboard");
+  emit("closeSection");
 };
 
 onBeforeMount(async () => {
@@ -49,8 +50,8 @@ onBeforeMount(async () => {
 
 <template>
   <main>
-    <button class="close-btn" @click="closeSection">X</button>
-    <h3>Friend's Careboards</h3>
+    <!-- <button class="close-btn" @click="closeSection">X</button> -->
+    <!-- <h3>Friend's Careboards</h3> -->
     <div class="invites-parts">
       <ul v-if="invitedTo.length > 0">
         <li v-for="invite in invitedTo" :key="invite.id">
@@ -75,7 +76,7 @@ h3 {
 .invites-parts {
   display: flex;
   flex-direction: column;
-  align-content: center;
+  align-content: left;
 }
 .invites-part {
   background-color: white;
@@ -87,10 +88,10 @@ h3 {
   align-items: center;
 }
 ul {
-  margin-top: 2rem;
+  margin-top: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .close-btn {

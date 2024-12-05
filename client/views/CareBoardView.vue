@@ -1,58 +1,59 @@
 <script setup lang="ts">
 import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
 import InvitesSection from "@/components/Post/InvitesSection.vue";
-import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard.vue";
+import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard-DONOT-USE.vue";
 import VisitFriendsCareboardPopup from "@/components/Post/VisitFriendsCareboardPopup.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
+import PostListComponentCareBoard from "@/components/Post/PostListComponentCareBoard.vue";
 
-const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
-const userStore = useUserStore();
+// const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+// const userStore = useUserStore();
 
-let createPostFormShowing = ref(false);
-let visitFriendsPopupShowing = ref(false);
-let invitesSectionShowing = ref(false);
-let careBoardListKey = ref(0);
+// let createPostFormShowing = ref(false);
+// let visitFriendsPopupShowing = ref(false);
+// let invitesSectionShowing = ref(false);
+// let careBoardListKey = ref(0);
 
-const toggleCreatePostForm = () => {
-  createPostFormShowing.value = !createPostFormShowing.value;
-};
+// const toggleCreatePostForm = () => {
+//   createPostFormShowing.value = !createPostFormShowing.value;
+// };
 
-const closeInvitesSection = () => {
-  invitesSectionShowing.value = false;
-};
-const closeCreateSection = () => {
-  createPostFormShowing.value = false;
-};
-const openInvitesSection = () => {
-  createPostFormShowing.value = false;
-  invitesSectionShowing.value = true;
-  visitFriendsPopupShowing.value = false;
-};
-const closeVisitFriend = () => {
-  visitFriendsPopupShowing.value = false;
-};
-const openVisitFriend = () => {
-  visitFriendsPopupShowing.value = true;
-  createPostFormShowing.value = false;
-  invitesSectionShowing.value = false;
-};
-const openCreateSection = () => {
-  invitesSectionShowing.value = false;
-  createPostFormShowing.value = true;
-  visitFriendsPopupShowing.value = false;
-};
-const remountCareBoardList = () => {
-  closeInvitesSection();
-  closeCreateSection();
-  careBoardListKey.value++; // Increment the key to trigger remount
-};
+// const closeInvitesSection = () => {
+//   invitesSectionShowing.value = false;
+// };
+// const closeCreateSection = () => {
+//   createPostFormShowing.value = false;
+// };
+// const openInvitesSection = () => {
+//   createPostFormShowing.value = false;
+//   invitesSectionShowing.value = true;
+//   visitFriendsPopupShowing.value = false;
+// };
+// const closeVisitFriend = () => {
+//   visitFriendsPopupShowing.value = false;
+// };
+// const openVisitFriend = () => {
+//   visitFriendsPopupShowing.value = true;
+//   createPostFormShowing.value = false;
+//   invitesSectionShowing.value = false;
+// };
+// const openCreateSection = () => {
+//   invitesSectionShowing.value = false;
+//   createPostFormShowing.value = true;
+//   visitFriendsPopupShowing.value = false;
+// };
+// const remountCareBoardList = () => {
+//   closeInvitesSection();
+//   closeCreateSection();
+//   careBoardListKey.value++; // Increment the key to trigger remount
+// };
 
-const goToMyCareboard = () => {
-  userStore.goToCareboard("");
-  remountCareBoardList();
-};
+// const goToMyCareboard = () => {
+//   userStore.goToCareboard("");
+//   remountCareBoardList();
+// };
 </script>
 
 <template>
@@ -66,6 +67,10 @@ const goToMyCareboard = () => {
 
     <!-- Care Board Section -->
     <section class="care-board">
+     <PostListComponentCareBoard/>
+    </section>
+
+    <!-- <section class="care-board">
       <div class="section-title">
         <h2 v-if="!userStore.currentlyViewingCareboard">My Care Board</h2>
         <h2 v-else>{{ userStore.currentlyViewingCareboard }}'s Careboard</h2>
@@ -82,7 +87,7 @@ const goToMyCareboard = () => {
       <InvitesSection v-if="invitesSectionShowing" class="invites-section" @closeSection="closeInvitesSection" @goToCareboard="remountCareBoardList" />
       <VisitFriendsCareboardPopup v-if="visitFriendsPopupShowing" class="invites-section" @closeSection="closeVisitFriend" @goToCareboard="remountCareBoardList" />
       <CareBoardPostListComponent :key="careBoardListKey" />
-    </section>
+    </section> -->
   </main>
 </template>
 
@@ -128,12 +133,15 @@ const goToMyCareboard = () => {
   font-weight: bold;
 }
 
-/* Sister Circles & Care Board Sections */
-.sister-circles,
 .care-board {
   border-radius: 12px;
   margin-bottom: 2rem;
+  padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.care-board :deep(h2) {
+  margin-bottom: 1rem;
 }
 
 .top-buttons {
@@ -186,11 +194,11 @@ const goToMyCareboard = () => {
 }
 
 /* Component Wrappers */
-.sister-circles > div,
 .care-board > div {
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Invites Section Styling */
