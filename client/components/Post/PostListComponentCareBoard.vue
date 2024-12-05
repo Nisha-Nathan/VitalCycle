@@ -140,6 +140,8 @@ const goToMyCareboard = () => {
     </div>
   </section>
 
+  <button v-if="userStore.currentlyViewingCareboard" class="btn btn-primary btn-go-back" type="button" @click="goToMyCareboard">Return to My Careboard</button>
+
 
   <section class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">
@@ -241,6 +243,13 @@ article {
   /* Reset background to default */
 }
 
+.btn-go-back{
+  background-color: black;
+  color: white;
+  border: none;
+}
+
+
 .btn-add-post {
   background-color: black;
   color: white;
@@ -270,6 +279,7 @@ article {
   align-self: flex-end;
 }
 
+.btn-go-back:hover,
 .btn-add-circle:hover,
 .btn-add-post:hover {
   background-color: #ea7575;

@@ -40,8 +40,6 @@ const closeForm = () => {
 
 <template>
   <main>
-    <button class="close-btn" @click="closeForm">X</button>
-    <h3>Create a post!</h3>
     <form @submit.prevent="createPost(title, content, userStore.currentlyViewingCareboard)">
       <label for="title">Post Title:</label>
       <textarea id="title" v-model="title" placeholder="Title of Post Here!" required></textarea>
@@ -57,7 +55,7 @@ main {
   color: white;
 }
 form {
-  margin-top: 10px;
+  margin-top: 0;
   border-radius: 1em;
   display: flex;
   flex-direction: column;
@@ -65,9 +63,7 @@ form {
   position: relative;
 }
 
-h3 {
-  text-align: center;
-}
+
 
 textarea {
   font-family: inherit;
