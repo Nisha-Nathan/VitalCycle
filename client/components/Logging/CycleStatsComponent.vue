@@ -114,7 +114,6 @@ onMounted(() => {
   max-width: 800px;
   margin: 0 auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
 }
 
 /* Section Title */

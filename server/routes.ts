@@ -180,7 +180,12 @@ class Routes {
     const user = Sessioning.getUser(session);
     const userCircles = await Authing.getUserCircles(user);
     const allCircles = await Posting.getAllCircles();
-    const circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+    let circles;
+    if(!userCircles) {
+      circles = allCircles;
+    } else {
+     circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+    }
     const result = await Responses.circles(circles);
     return { circles: result };
   }
@@ -395,20 +400,19 @@ class Routes {
     }
   }
 
-  // Create an instance of ChecklistConcept with a collection name
-  Checklist = new ChecklistConcept("checklists");
-
   @Router.get("/checklists")
   async getChecklists(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     const today = new Date();
 
     // Use getChecklistByDate method to fetch a checklist by user and date
+    console.log("getting checklists by date: ", user, today);
     return await Checklist.getChecklistByDate(user, today);
   }
 
   @Router.post("/checklists")
-  async createChecklist(session: SessionDoc, title: string, items: string[]) {
+  async createChecklist(session: SessionDoc, items: string[]) {
+    console.log("create checklist called");
     const user = Sessioning.getUser(session);
     const today = new Date();
 
@@ -430,7 +434,8 @@ class Routes {
   }
 
   @Router.put("/checklists")
-  async updateChecklist(session: SessionDoc, title: string, items: string[]) {
+  async updateChecklist(session: SessionDoc, items: string[]) {
+    console.log("update method called", items);
     const user = Sessioning.getUser(session);
     const today = new Date();
 
@@ -438,6 +443,7 @@ class Routes {
     const existingChecklist = await Checklist.getChecklistByDate(user, today);
 
     if (!existingChecklist.checklist) {
+      console.log("throwing error...");
       throw new NotFoundError("No checklist exists for today. Use the create method instead.");
     }
 

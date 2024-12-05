@@ -3,7 +3,7 @@ import { fetchy } from "@/utils/fetchy";
 import { formatDateToday } from "@/utils/formatDate";
 import moment from "moment";
 import { computed, onMounted, ref, watch } from "vue";
-
+import DailyChecklist from "./DailyChecklist.vue";
 // Emit flow changes to parent
 const emit = defineEmits(["update-flow"]);
 
@@ -16,7 +16,8 @@ const getCurrentDate = () => {
   return date.toISOString().split("T")[0];
 };
 
-const dateOfLog = ref(getCurrentDate());
+const currentDate = ref(getCurrentDate());
+const dateOfLog = ref(currentDate.value);
 const selectedSymptoms = ref<string[]>([]);
 const selectedMood = ref<string | null>(null);
 const selectedFlow = ref<string | null>("None");
@@ -24,8 +25,11 @@ const notes = ref("");
 const logId = ref<string | null>(null);
 const isEditMode = ref(false);
 const showDatePicker = ref(false);
+const showDailyChecklist = ref(false);
 
-const isCurrentDate = computed(() => dateOfLog.value === getCurrentDate());
+const isCurrentDate = computed(() => {
+  return dateOfLog.value === currentDate.value;
+});
 
 watch(selectedFlow, (newValue) => {
   emit("update-flow", newValue);
@@ -106,7 +110,13 @@ const handleFormSubmit = () => {
   }
 };
 
+const displayChecklist = () => {
+  showDailyChecklist.value = true;
+};
+
 onMounted(() => {
+  console.log("mounted", dateOfLog.value);
+  console.log("current date", currentDate.value);
   fetchLogByDate(dateOfLog.value);
 });
 </script>
@@ -123,6 +133,8 @@ onMounted(() => {
           <button type="button" class="btn btn-icon" @click="showDatePicker = !showDatePicker">
             <img class="springtime" src="/client/assets/images/Springtime.svg" alt="Springtime Icon" />
           </button>
+          <button @click="displayChecklist">Daily Checklist</button>
+
           <div v-if="showDatePicker">
             <input type="date" v-model="dateOfLog" @change="handleDateChange" />
           </div>
@@ -130,6 +142,7 @@ onMounted(() => {
       </div>
 
       <div class="content">
+        <DailyChecklist v-if="showDailyChecklist" @close-checklist="showDailyChecklist = false" />
         <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..." :readonly="!isCurrentDate"></textarea>
 
         <div class="btn-group mood-section" role="group" aria-label="Mood Entries">
@@ -154,7 +167,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <button v-if="isCurrentDate" type="submit" class="btn btn-primary">{{ isEditMode ? "Update" : "Submit" }}</button>
+    <button v-if="isCurrentDate" type="submit" class="btn btn-primary btn-submit">{{ isEditMode ? "Update" : "Submit" }}</button>
   </form>
 </template>
 
@@ -168,7 +181,6 @@ form {
 }
 
 .today-view {
-  font-family: "Arial", sans-serif;
   color: #fff;
   background-color: #fffbfe;
   border-radius: 10px;
@@ -270,9 +282,15 @@ h2 {
   font-size: 0.9rem;
 }
 
+.btn-submit:hover,
 .btn-outline:hover {
   background-color: #ff7f7f;
 }
 
+.btn-submit {
+  width: 100%;
+  margin: 10px;
+  background-color: black;
+  border: none;
+}
 </style>
-

@@ -4,9 +4,9 @@ import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, ref } from "vue";
+import AddCirclesForm from "./AddCirclesForm.vue";
 import PostComponent from "./PostComponentSisterCircles.vue";
 import SearchPostForm from "./SearchPostForm.vue";
-import AddCirclesForm from "./AddCirclesForm.vue";
 
 const { isLoggedIn, currentUsername } = storeToRefs(useUserStore());
 
@@ -15,7 +15,7 @@ let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
 let searchAuthor = ref("");
 let searchTitle = ref("");
-let circles = ref<Array<Record<string, string>>>([]);
+let circles = ref<Array<string>>([]);
 const selectedCircle = ref("All Circles");
 const closeBtnAddCircle = ref<HTMLButtonElement | null>(null);
 const closeBtnAddPost = ref<HTMLButtonElement | null>(null);
@@ -33,7 +33,12 @@ async function getUserCircles() {
     console.log(error);
     return;
   }
-  circles.value = ["All Circles", ...circleResponse.circles];
+  if (circleResponse.circles) {
+    circles.value = ["All Circles", ...circleResponse.circles];
+  } else {
+    circles.value = ["All Circles"];
+  }
+
 }
 
 onMounted(() => {
@@ -78,8 +83,8 @@ function updateEditing(id: string) {
 }
 
 const closeModal = () => {
- closeBtnAddCircle.value?.click();
- closeBtnAddPost.value?.click();
+  closeBtnAddCircle.value?.click();
+  closeBtnAddPost.value?.click();
 }
 
 onBeforeMount(async () => {
@@ -94,10 +99,10 @@ onBeforeMount(async () => {
     <h2 class="section-title">Sister Circles</h2>
     <div class="header-content">
       <div class="btn-group section" role="group">
-        <div v-if="circles.length !== 0" v-for="(flow, index) in circles" :key="index">
+        <div v-if="circles.length !== 0" v-for="(circle, index) in circles" :key="index">
           <input type="radio" class="btn-check" :name="`btnradio-sistercircles`" :id="`btnradio-sistercircles-${index}`"
-            v-model="selectedCircle" :value="flow" autocomplete="off" @change="getPosts(undefined, selectedCircle)" />
-          <label class="btn btn-circle" :for="`btnradio-sistercircles-${index}`">{{ flow }}</label>
+            v-model="selectedCircle" :value="circle" autocomplete="off" @change="getPosts(undefined, selectedCircle)" />
+          <label class="btn btn-circle" :for="`btnradio-sistercircles-${index}`">{{ circle }}</label>
         </div>
       </div>
 
@@ -112,13 +117,16 @@ onBeforeMount(async () => {
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createPostModalLabel">Join a new Sister Cycle</h1>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <AddCirclesForm @refreshCircles="getUserCircles" @closeForm="closeModal"/>
+                <AddCirclesForm @refreshCircles="getUserCircles" @closeForm="closeModal" />
               </div>
               <div class="modal-footer">
-                <button ref="closeBtnAddCircle" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button ref="closeBtnAddCircle" type="button" class="btn btn-secondary"
+                  data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -143,7 +151,7 @@ onBeforeMount(async () => {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <CreatePostForm @refreshPosts="getPosts" @closeForm="closeModal"/>
+            <CreatePostForm @refreshPosts="getPosts" @closeForm="closeModal" />
           </div>
           <div class="modal-footer">
             <button type="button" ref="closeBtnAddPost" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -199,6 +207,10 @@ section {
   gap: 1em;
 }
 
+.modal-title {
+  color: black;
+  margin-left: auto;
+}
 
 section,
 p,
