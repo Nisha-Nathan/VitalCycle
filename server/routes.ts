@@ -141,15 +141,27 @@ class Routes {
   }
 
   @Router.get("/circles")
-  async getCircles(username?: string) {
+  async getCircles( username?: string) {
     if (username) {
       const id = (await Authing.getUserByUsername(username))._id;
       return { circles: await Authing.getUserCircles(id) };
     }
+   
     const circles = await Posting.getAllCircles();
     const result = await Responses.circles(circles);
     return { circles: result };
   }
+
+  @Router.get("/suggest/circles")
+  async getsuggestCircles(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const userCircles = await Authing.getUserCircles(user);
+    const allCircles = await Posting.getAllCircles();
+    const circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+    const result = await Responses.circles(circles);
+    return { circles: result };
+  }
+
 
   @Router.get("/circles/:username")
   async getUserCircles(username: string) {

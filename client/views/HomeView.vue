@@ -77,7 +77,6 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 .sister-circles,
 .care-board {
   background-color: #ffc1c1;
-  padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

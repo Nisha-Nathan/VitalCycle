@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-const props = defineProps(["headerText"]);
+const props = defineProps(["headerText", "placeholder"]);
 
 const author = ref("");
 const emit = defineEmits(["getPostsByAuthor"]);
@@ -10,7 +10,7 @@ const emit = defineEmits(["getPostsByAuthor"]);
   <form @submit.prevent="emit('getPostsByAuthor', author)" class="pure-form">
     <fieldset>
       <legend>{{ props.headerText }}</legend>
-      <input id="author" type="text" v-model="author" placeholder="Username" />
+      <input id="author" type="text" v-model="author" :placeholder="props.placeholder" />
       <button type="submit" class="pure-button pure-button-primary">Search</button>
     </fieldset>
   </form>

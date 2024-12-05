@@ -25,7 +25,7 @@ export interface CircleDoc extends BaseDoc {
   description?: string;
 }
 
-const predefinedCircles = ["Fertility", "Menopause"];
+const predefinedCircles = ["Fertility", "Menopause", "Menstrual Hygiene"];
 
 /**
  * concept: Posting [Author]
