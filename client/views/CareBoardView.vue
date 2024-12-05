@@ -1,11 +1,4 @@
 <script setup lang="ts">
-import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
-import InvitesSection from "@/components/Post/InvitesSection.vue";
-import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard-DONOT-USE.vue";
-import VisitFriendsCareboardPopup from "@/components/Post/VisitFriendsCareboardPopup.vue";
-import { useUserStore } from "@/stores/user";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
 import PostListComponentCareBoard from "@/components/Post/PostListComponentCareBoard.vue";
 
 // const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
@@ -67,7 +60,7 @@ import PostListComponentCareBoard from "@/components/Post/PostListComponentCareB
 
     <!-- Care Board Section -->
     <section class="care-board">
-     <PostListComponentCareBoard/>
+      <PostListComponentCareBoard />
     </section>
 
     <!-- <section class="care-board">
@@ -115,7 +108,7 @@ import PostListComponentCareBoard from "@/components/Post/PostListComponentCareB
   font-family: "Quando", serif;
   font-weight: 400;
   font-style: normal;
-  padding:2rem;
+  padding: 2rem;
 }
 
 /* Welcome Section */
