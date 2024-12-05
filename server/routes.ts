@@ -2,7 +2,9 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
+import { Authing, Checklist, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
+import ChecklistConcept, { ChecklistItem } from "./concepts/checklisting";
+import { BadValuesError, NotFoundError } from "./concepts/errors";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -374,6 +376,78 @@ class Routes {
     } else {
       return { msg: "You haven't replied to this post yet!" };
     }
+  }
+
+  // Create an instance of ChecklistConcept with a collection name
+  Checklist = new ChecklistConcept("checklists");
+
+  @Router.get("/checklists")
+  async getChecklists(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const today = new Date();
+
+    // Use getChecklistByDate method to fetch a checklist by user and date
+    return await Checklist.getChecklistByDate(user, today);
+  }
+
+  @Router.post("/checklists")
+  async createChecklist(session: SessionDoc, title: string, items: string[]) {
+    const user = Sessioning.getUser(session);
+    const today = new Date();
+
+    // Check if a checklist already exists for today
+    const existingChecklist = await Checklist.getChecklistByDate(user, today);
+
+    if (existingChecklist.checklist) {
+      throw new BadValuesError("A checklist already exists for today. Use the update method instead.");
+    }
+
+    // Create a new checklist for today
+    const checklistItems: ChecklistItem[] = items.map((item) => ({
+      text: item,
+      checked: false,
+      lastChecked: null,
+    }));
+
+    return await Checklist.create(user, today, checklistItems);
+  }
+
+  @Router.put("/checklists")
+  async updateChecklist(session: SessionDoc, title: string, items: string[]) {
+    const user = Sessioning.getUser(session);
+    const today = new Date();
+
+    // Check if a checklist exists for today
+    const existingChecklist = await Checklist.getChecklistByDate(user, today);
+
+    if (!existingChecklist.checklist) {
+      throw new NotFoundError("No checklist exists for today. Use the create method instead.");
+    }
+
+    // Update the checklist with new items
+    const checklistItems: ChecklistItem[] = items.map((item) => ({
+      text: item,
+      checked: false,
+      lastChecked: null,
+    }));
+
+    return await Checklist.updateChecklist(existingChecklist.checklist._id, checklistItems, today);
+  }
+
+  @Router.delete("/checklists")
+  async deleteChecklist(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const today = new Date();
+
+    // Check if a checklist exists for today
+    const existingChecklist = await Checklist.getChecklistByDate(user, today);
+
+    if (!existingChecklist.checklist) {
+      throw new NotFoundError("No checklist exists for today to delete.");
+    }
+
+    // Delete the checklist for today
+    return await Checklist.delete(existingChecklist.checklist._id);
   }
 }
 
