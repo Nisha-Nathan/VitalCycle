@@ -114,12 +114,13 @@ class Routes {
   async deleteSisterCirclePost(session: SessionDoc, id: string) {
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
-    await Posting.assertAuthorIsUser(oid, user, "SisterCircle");
+    // await Posting.assertAuthorIsUser(oid, user, "SisterCircle");
     return Posting.deleteSisterCirclePost(oid);
   }
 
   @Router.get("/mycareboard/posts")
   async getMyCareBoardPosts(author: string) {
+    console.log("getting posts by author route...");
     const posts = await Posting.getMyCareBoardPostsByDestinationUsername(author);
     return Responses.posts(posts);
   }
@@ -135,19 +136,20 @@ class Routes {
 
   @Router.delete("/mycareboard/posts/:id")
   async deleteMyCareBoardPost(session: SessionDoc, id: string) {
-    const user = Sessioning.getUser(session);
+    console.log("start of route!!!!!!!!");
+    //const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
-    await Posting.assertAuthorIsUser(oid, user, "MyCareBoard");
-    return Posting.deleteMyCareBoardPost(oid);
+    // await Posting.assertAuthorIsUser(oid, user, "MyCareBoard");
+    return await Posting.deleteMyCareBoardPost(oid);
   }
 
   @Router.get("/circles")
-  async getCircles( username?: string) {
+  async getCircles(username?: string) {
     if (username) {
       const id = (await Authing.getUserByUsername(username))._id;
       return { circles: await Authing.getUserCircles(id) };
     }
-   
+
     const circles = await Posting.getAllCircles();
     const result = await Responses.circles(circles);
     return { circles: result };
@@ -162,7 +164,6 @@ class Routes {
     const result = await Responses.circles(circles);
     return { circles: result };
   }
-
 
   @Router.get("/circles/:username")
   async getUserCircles(username: string) {

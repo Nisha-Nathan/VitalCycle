@@ -15,7 +15,14 @@ let searchAuthor = ref("");
 const userStore = useUserStore();
 
 async function getPosts(author?: string) {
-  let query: Record<string, string> = author !== undefined ? { author } : {};
+  console.log("get posts called with author: ", author);
+  let toGet;
+  if (!userStore.currentlyViewingCareboard) {
+    toGet = currentUsername.value;
+  } else {
+    toGet = userStore.currentlyViewingCareboard;
+  }
+  let query: Record<string, string> = { author: toGet };
   let postResults;
   try {
     postResults = await fetchy("/api/mycareboard/posts", "GET", { query });
