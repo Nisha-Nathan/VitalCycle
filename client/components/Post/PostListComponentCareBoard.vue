@@ -17,6 +17,7 @@ let editing = ref("");
 let searchAuthor = ref("");
 const userStore = useUserStore();
 let careBoardListKey = ref(0);
+const closeBtn = ref<HTMLButtonElement | null>(null);
 
 async function getPosts(author?: string) {
   console.log("get posts called with author: ", author);
@@ -59,6 +60,10 @@ const goToMyCareboard = () => {
   userStore.goToCareboard("");
   remountCareBoardList();
 };
+
+const closeModal = () => {
+ closeBtn.value?.click();
+}
 </script>
 
 <template>
@@ -75,13 +80,13 @@ const goToMyCareboard = () => {
             <div class="modal-content">
               <div class="modal-header">
                 <h1 class="modal-title fs-5" id="staticBackdropLabel">Friends' Careboards</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <VisitFriendsCareboardPopup class="invites-section" @goToCareboard="remountCareBoardList" />
+                <VisitFriendsCareboardPopup class="invites-section" @goToCareboard="remountCareBoardList" @closeSection="closeModal" />
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" ref="closeBtn" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -125,7 +130,7 @@ const goToMyCareboard = () => {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="createPostModalLabel">Create A Sister Circles Post</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <CreatePostFormCareBoard @refreshPosts="getPosts" />
@@ -194,7 +199,7 @@ article {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  padding: 1em;
+  
 }
 
 .posts {

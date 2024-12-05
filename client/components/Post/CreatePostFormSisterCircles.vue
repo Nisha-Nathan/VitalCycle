@@ -12,7 +12,7 @@ const title = ref("");
 const selectedCircle = ref("");
 const isAnonymous = ref(true);
 const allCircles = ref<Circle[]>([]);
-const emit = defineEmits(["refreshPosts"]);
+const emit = defineEmits(["refreshPosts","closeForm"]);
 
 const createPost = async (title: string, content: string, anonymous: boolean, circle: string) => {
   try {
@@ -23,6 +23,7 @@ const createPost = async (title: string, content: string, anonymous: boolean, ci
     return;
   }
   emit("refreshPosts");
+  emit("closeForm");
   emptyForm();
 };
 
