@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import AddReact from "@/components/Post/AddReact.vue";
+import ReactCounts from "@/components/Post/ReactCounts.vue";
 import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
-import { onBeforeMount, ref } from "vue";
-import AddReact from "@/components/Post/AddReact.vue";
-import ReactCounts from "@/components/Post/ReactCounts.vue";
 
 const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
@@ -14,12 +14,21 @@ const { currentUsername } = storeToRefs(useUserStore());
 let allReacts = ref([]);
 
 const deletePost = async () => {
+  console.log("delete post called");
   try {
-    await fetchy(`/api/posts/${props.post._id}`, "DELETE");
-  } catch {
+    const idToSend = String(props.post._id);
+    //await fetchy(`/api/mycareboard/posts/${props.post._id}`, "DELETE");
+    await fetchy(`/api/sistercircle/posts/${idToSend}`, "DELETE");
+  } catch (error) {
+    console.log(error);
     return;
   }
   emit("refreshPosts");
+  console.log("finished");
+};
+
+const isAuthor = (postUsername: string) => {
+  return postUsername == currentUsername.value;
 };
 
 const reactCountsRef = ref<InstanceType<typeof ReactCounts> | null>(null);
@@ -37,8 +46,7 @@ const handleRefreshReactCounts = () => {
   <p class="author">by {{ props.post.author ? props.post.username : "anonymous" }}</p>
   <p>{{ props.post.content }}</p>
   <div class="base">
-    <menu v-if="props.post.author == currentUsername">
-      <li><button class="btn-small pure-button" @click="emit('editPost', props.post._id)">Edit</button></li>
+    <menu v-if="isAuthor(props.post.username)">
       <li><button class="button-error btn-small pure-button" @click="deletePost">Delete</button></li>
     </menu>
     <article class="timestamp">

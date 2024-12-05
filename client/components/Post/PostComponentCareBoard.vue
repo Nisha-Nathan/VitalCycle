@@ -13,13 +13,10 @@ let repliesShowing = ref(false);
 const userStore = useUserStore();
 
 const deletePost = async () => {
-  console.log("delete post called");
   try {
     const idToSend = String(props.post._id);
-    console.log("in try, id is: ", idToSend);
     //await fetchy(`/api/mycareboard/posts/${props.post._id}`, "DELETE");
     await fetchy(`/api/mycareboard/posts/${idToSend}`, "DELETE");
-    console.log("end of try");
   } catch (error) {
     console.log(error);
     return;
@@ -30,8 +27,6 @@ const deletePost = async () => {
 const toggleShowReplies = async () => {
   repliesShowing.value = !repliesShowing.value;
 };
-
-console.log(props.post);
 </script>
 
 <template>
