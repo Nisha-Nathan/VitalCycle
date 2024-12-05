@@ -28,8 +28,8 @@ const showDatePicker = ref(false);
 const showDailyChecklist = ref(false);
 
 const isCurrentDate = computed(() => {
-  
-  return dateOfLog.value === currentDate.value;});
+  return dateOfLog.value === currentDate.value;
+});
 
 watch(selectedFlow, (newValue) => {
   emit("update-flow", newValue);
@@ -115,8 +115,8 @@ const displayChecklist = () => {
 };
 
 onMounted(() => {
-  console.log("mounted",dateOfLog.value);
-  console.log("current date",currentDate.value);
+  console.log("mounted", dateOfLog.value);
+  console.log("current date", currentDate.value);
   fetchLogByDate(dateOfLog.value);
 });
 </script>
@@ -142,7 +142,7 @@ onMounted(() => {
       </div>
 
       <div class="content">
-        <DailyChecklist v-if="showDailyChecklist" />
+        <DailyChecklist v-if="showDailyChecklist" @close-checklist="showDailyChecklist = false" />
         <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..." :readonly="!isCurrentDate"></textarea>
 
         <div class="btn-group mood-section" role="group" aria-label="Mood Entries">
@@ -288,11 +288,9 @@ h2 {
 }
 
 .btn-submit {
-  width:100%;
-  margin:10px;
+  width: 100%;
+  margin: 10px;
   background-color: black;
   border: none;
 }
-
-
 </style>

@@ -5,7 +5,7 @@ import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
 
 const { currentUsername } = storeToRefs(useUserStore());
-const emit = defineEmits(["refreshReactCounts"]);
+const emit = defineEmits(["refreshReactCounts", "closeChecklist"]);
 
 interface ChecklistItem {
   text: string;
@@ -79,10 +79,15 @@ const createPlaceholderTask = async (items: string[]) => {
 onBeforeMount(async () => {
   await getMyTasks();
 });
+
+const closeChecklist = () => {
+  emit("closeChecklist");  // Emit event to parent component to hide the checklist
+};
 </script>
 
 <template>
   <div class="dailyChecklist">
+    <button @click="closeChecklist" class="close-btn">X</button> <!-- Close button -->
     <h3>Daily Checklist</h3>
     <ul v-if="getTaskItems()">
       <li v-for="task in checklistItems"><input type="checkbox"> {{ task.text }}</input></li>
@@ -95,13 +100,20 @@ onBeforeMount(async () => {
 .dailyChecklist {
   background-color: white;
   color: black;
-  position: absolute;
-  left: 10;
-  top: 10;
-  padding: 20px;
+  position: fixed; /* Use fixed to keep it in place even if the page scrolls */
+  top: 50%; /* Position the top edge at the vertical center of the page */
+  left: 50%; /* Position the left edge at the horizontal center of the page */
+  transform: translate(-50%, -50%); /* Offset the element by 50% of its width and height to truly center it */
+  padding: 80px;
+  padding-top: 30px;
+  padding-bottom: 30px;
   border: 1px solid black;
   border-radius: 1rem;
-  z-index: 100;
+  z-index: 100; /* Ensure it's above other elements */
+}
+
+h3 {
+  margin-bottom: 20px;
 }
 
 ul {
@@ -112,6 +124,16 @@ ul {
 
 li {
     margin: 5px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 </style>
