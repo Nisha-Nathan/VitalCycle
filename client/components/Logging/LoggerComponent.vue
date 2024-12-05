@@ -167,7 +167,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <button v-if="isCurrentDate" type="submit" class="btn btn-primary">{{ isEditMode ? "Update" : "Submit" }}</button>
+    <button v-if="isCurrentDate" type="submit" class="btn btn-primary btn-submit">{{ isEditMode ? "Update" : "Submit" }}</button>
   </form>
 </template>
 
@@ -283,7 +283,17 @@ h2 {
   font-size: 0.9rem;
 }
 
+.btn-submit:hover,
 .btn-outline:hover {
   background-color: #ff7f7f;
 }
+
+.btn-submit {
+  width:100%;
+  margin:10px;
+  background-color: black;
+  border: none;
+}
+
+
 </style>
