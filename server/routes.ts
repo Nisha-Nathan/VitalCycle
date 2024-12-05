@@ -162,7 +162,12 @@ class Routes {
     const user = Sessioning.getUser(session);
     const userCircles = await Authing.getUserCircles(user);
     const allCircles = await Posting.getAllCircles();
-    const circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+    let circles;
+    if(!userCircles) {
+      circles = allCircles;
+    } else {
+     circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+    }
     const result = await Responses.circles(circles);
     return { circles: result };
   }
