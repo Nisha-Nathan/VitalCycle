@@ -1,10 +1,11 @@
-<script setup lang="ts">import { useUserStore } from "@/stores/user";
+<script setup lang="ts">
+import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
-import PostComponent from "./PostComponentCareBoard.vue";
 import CreatePostFormCareBoard from "./CreatePostFormCareBoard.vue";
 import InvitesSection from "./InvitesSection.vue";
+import PostComponent from "./PostComponentCareBoard.vue";
 import VisitFriendsCareboardPopup from "./VisitFriendsCareboardPopup.vue";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
@@ -18,7 +19,14 @@ const userStore = useUserStore();
 let careBoardListKey = ref(0);
 
 async function getPosts(author?: string) {
-  let query: Record<string, string> = author !== undefined ? { author } : {};
+  console.log("get posts called with author: ", author);
+  let toGet;
+  if (!userStore.currentlyViewingCareboard) {
+    toGet = currentUsername.value;
+  } else {
+    toGet = userStore.currentlyViewingCareboard;
+  }
+  let query: Record<string, string> = { author: toGet };
   let postResults;
   try {
     postResults = await fetchy("/api/mycareboard/posts", "GET", { query });
@@ -47,29 +55,22 @@ const remountCareBoardList = () => {
   careBoardListKey.value++; // Increment the key to trigger remount
 };
 
-
 const goToMyCareboard = () => {
   userStore.goToCareboard("");
   remountCareBoardList();
 };
-
-
 </script>
 
 <template>
-
   <section class="header">
     <h2 class="section-title" v-if="!userStore.currentlyViewingCareboard">My Care Board</h2>
     <h2 class="section-title" v-else>{{ userStore.currentlyViewingCareboard }}'s Careboard</h2>
     <div class="header-content">
-
       <div class="friends-careboard">
-        <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal"
-          data-bs-target="#friendsCareboardModal">Friends' Careboards </button>
+        <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal" data-bs-target="#friendsCareboardModal">Friends' Careboards</button>
 
         <!-- Modal -->
-        <div class="modal fade" id="friendsCareboardModal" tabindex="-1" aria-labelledby="friendsCareboardModalLabel"
-          aria-hidden="true">
+        <div class="modal fade" id="friendsCareboardModal" tabindex="-1" aria-labelledby="friendsCareboardModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -77,7 +78,7 @@ const goToMyCareboard = () => {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <VisitFriendsCareboardPopup class="invites-section" @goToCareboard="remountCareBoardList" @closeSection="closeModal"/>
+                <VisitFriendsCareboardPopup class="invites-section" @goToCareboard="remountCareBoardList" />
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -87,10 +88,8 @@ const goToMyCareboard = () => {
         </div>
       </div>
 
-
       <div class="add-circle">
-        <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal"
-          data-bs-target="#inviteModal">Invite Friends <i class="bi bi-plus"></i> </button>
+        <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal" data-bs-target="#inviteModal">Invite Friends <i class="bi bi-plus"></i></button>
 
         <!-- Modal -->
         <div class="modal fade" id="inviteModal" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
@@ -121,8 +120,7 @@ const goToMyCareboard = () => {
     </button>
 
     <!-- Modal -->
-    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -163,7 +161,6 @@ const goToMyCareboard = () => {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-top: 0;
   max-width: unset;
-
 }
 
 .header-content {
@@ -183,7 +180,6 @@ section {
   flex-direction: column;
   gap: 1em;
 }
-
 
 section,
 p,
@@ -230,14 +226,14 @@ article {
   color: #ea7575;
 }
 
-.btn-check:checked+.btn,
-.btn-check:active+.btn {
+.btn-check:checked + .btn,
+.btn-check:active + .btn {
   border-color: #000000;
   background-color: #ea7575;
   color: #000000;
 }
 
-.btn-check:not(:checked)+.btn {
+.btn-check:not(:checked) + .btn {
   border-color: #ea7575;
   color: #ea7575;
   /* Reset background to default */
@@ -270,7 +266,6 @@ article {
 
 .bi-plus-lg {
   font-size: 2em;
-
 }
 
 .btn-add-circle {
@@ -284,16 +279,14 @@ article {
 .btn-add-post:hover {
   background-color: #ea7575;
   color: white;
-
 }
 
 .btn-add-post:hover {
   border-color: black !important;
 }
 
-.modal-title{
+.modal-title {
   color: black;
   margin-left: auto;
 }
-
 </style>

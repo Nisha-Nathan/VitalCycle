@@ -10,11 +10,18 @@ const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
 let repliesShowing = ref(false);
+const userStore = useUserStore();
 
 const deletePost = async () => {
+  console.log("delete post called");
   try {
-    await fetchy(`/api/posts/${props.post._id}`, "DELETE");
-  } catch {
+    const idToSend = String(props.post._id);
+    console.log("in try, id is: ", idToSend);
+    //await fetchy(`/api/mycareboard/posts/${props.post._id}`, "DELETE");
+    await fetchy(`/api/mycareboard/posts/${idToSend}`, "DELETE");
+    console.log("end of try");
+  } catch (error) {
+    console.log(error);
     return;
   }
   emit("refreshPosts");
@@ -23,6 +30,8 @@ const deletePost = async () => {
 const toggleShowReplies = async () => {
   repliesShowing.value = !repliesShowing.value;
 };
+
+console.log(props.post);
 </script>
 
 <template>
@@ -35,7 +44,8 @@ const toggleShowReplies = async () => {
     </div>
     <p class="post-content">{{ props.post.content }}</p>
     <div class="base">
-      <button class="see-replies" @click="toggleShowReplies">See Replies</button>
+      <button class="see-replies" @click="toggleShowReplies">{{ repliesShowing ? "Hide Replies" : "See Replies" }}</button>
+      <button class="delete" v-if="!userStore.currentlyViewingCareboard" @click="deletePost">delete</button>
     </div>
     <PostRepliesList v-if="repliesShowing" :post="props.post" />
   </div>
@@ -59,14 +69,18 @@ const toggleShowReplies = async () => {
 
 .post-title {
   color: white;
+  margin-left: 2rem;
 }
 
 .post-header {
   background-color: black;
-  padding: 1.5rem;
+  padding: 1rem;
   padding-bottom: 0;
   border-top-left-radius: 1em;
   border-top-right-radius: 1em;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 .see-replies {
   background-color: #ea7575;
@@ -75,6 +89,25 @@ const toggleShowReplies = async () => {
   border-radius: 0.5em;
   margin: 10px;
   width: fit-content;
+}
+
+.see-replies:hover {
+  background-color: white;
+  color: rgb(77, 76, 76);
+}
+
+.delete {
+  background-color: #ea7575;
+  color: white;
+  border: 1px solid white;
+  border-radius: 0.5em;
+  margin: 10px;
+  width: fit-content;
+}
+
+.delete:hover {
+  background-color: red;
+  border: 1px solid red;
 }
 p {
   margin: 0em;
@@ -104,8 +137,8 @@ menu {
 
 .base {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  justify-content: flex-end;
 }
 
 .base article:only-child {

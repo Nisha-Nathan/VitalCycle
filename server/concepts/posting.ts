@@ -167,6 +167,7 @@ export default class PostingConcept {
 
   // Delete MyCareBoard Post
   async deleteMyCareBoardPost(_id: ObjectId) {
+    console.log("start");
     await this.myCareBoardPosts.deleteOne({ _id });
     return { msg: "MyCareBoard post deleted!" };
   }
@@ -179,7 +180,7 @@ export default class PostingConcept {
     if (!post) {
       throw new NotFoundError(`${collectionType} post ${_id} does not exist!`);
     }
-
+    console.log("in assert!!!");
     if (!post.author || post.author.toString() !== user.toString()) {
       throw new PostAuthorNotMatchError(user, _id);
     }
