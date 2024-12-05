@@ -39,7 +39,6 @@ const sendInvite = async (inviteUsername: string) => {
 };
 
 const removeInvitedUser = async (sentToUsername: string) => {
-  console.log("called on username: ", sentToUsername.substring(2));
   try {
     await fetchy(`/api/invites/${sentToUsername.substring(2)}`, "DELETE");
   } catch (error) {

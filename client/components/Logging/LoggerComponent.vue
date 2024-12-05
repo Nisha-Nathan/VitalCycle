@@ -3,7 +3,7 @@ import { fetchy } from "@/utils/fetchy";
 import { formatDateToday } from "@/utils/formatDate";
 import moment from "moment";
 import { computed, onMounted, ref, watch } from "vue";
-
+import DailyChecklist from "./DailyChecklist.vue";
 // Emit flow changes to parent
 const emit = defineEmits(["update-flow"]);
 
@@ -24,6 +24,7 @@ const notes = ref("");
 const logId = ref<string | null>(null);
 const isEditMode = ref(false);
 const showDatePicker = ref(false);
+const showDailyChecklist = ref(false);
 
 const isCurrentDate = computed(() => dateOfLog.value === getCurrentDate());
 
@@ -106,6 +107,10 @@ const handleFormSubmit = () => {
   }
 };
 
+const displayChecklist = () => {
+  showDailyChecklist.value = true;
+};
+
 onMounted(() => {
   fetchLogByDate(dateOfLog.value);
 });
@@ -123,6 +128,8 @@ onMounted(() => {
           <button type="button" class="btn btn-icon" @click="showDatePicker = !showDatePicker">
             <img class="springtime" src="/client/assets/images/Springtime.svg" alt="Springtime Icon" />
           </button>
+          <button @click="displayChecklist">Daily Checklist</button>
+
           <div v-if="showDatePicker">
             <input type="date" v-model="dateOfLog" @change="handleDateChange" />
           </div>
@@ -130,6 +137,7 @@ onMounted(() => {
       </div>
 
       <div class="content">
+        <DailyChecklist v-if="showDailyChecklist" />
         <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..." :readonly="!isCurrentDate"></textarea>
 
         <div class="btn-group mood-section" role="group" aria-label="Mood Entries">
@@ -273,6 +281,4 @@ h2 {
 .btn-outline:hover {
   background-color: #ff7f7f;
 }
-
 </style>
-

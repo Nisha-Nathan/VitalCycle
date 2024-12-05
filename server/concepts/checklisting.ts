@@ -27,7 +27,8 @@ export default class ChecklistConcept {
    * Create a new checklist entry (by author, for date DateOfChecklist)
    */
   async create(author: ObjectId, dateOfChecklist: Date, items: ChecklistItem[]) {
-    const _id = await this.checklists.createOne({ author, dateOfChecklist, items });
+    const dateOnly = new Date(dateOfChecklist.getFullYear(), dateOfChecklist.getMonth(), dateOfChecklist.getDate());
+    const _id = await this.checklists.createOne({ author, dateOfChecklist: dateOnly, items });
     return { msg: "Checklist successfully created!", checklist: await this.checklists.readOne({ _id }) };
   }
 
@@ -90,6 +91,8 @@ export default class ChecklistConcept {
     const item = checklist.items[itemIndex];
     item.checked = true;
     item.lastChecked = new Date(); // Set last checked date to now
+    const dateOnly = new Date(item.lastChecked.getFullYear(), item.lastChecked.getMonth(), item.lastChecked.getDate());
+    item.lastChecked = dateOnly;
     await this.checklists.partialUpdateOne({ _id }, { items: checklist.items });
 
     return { msg: "Item checked off successfully!", checklist };
@@ -120,9 +123,10 @@ export default class ChecklistConcept {
    * Fetch a checklist by author and date (useful to refresh data for a new day)
    */
   async getChecklistByDate(author: ObjectId, date: Date) {
-    const checklist = await this.checklists.readOne({ author, dateOfChecklist: date });
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const checklist = await this.checklists.readOne({ author, dateOfChecklist: dateOnly });
     if (checklist === null) {
-      return { msg: "Checklist not found" };
+      return { msg: "Checklist not found", checklist };
     }
     return { msg: "Successfully retrieved checklist!", checklist };
   }
@@ -138,6 +142,9 @@ export default class ChecklistConcept {
    * Update an existing checklist (change items or date)
    */
   async updateChecklist(_id: ObjectId, items: ChecklistItem[], dateOfChecklist: Date) {
+    console.log("in checklisting, update called");
+    const dateOnly = new Date(dateOfChecklist.getFullYear(), dateOfChecklist.getMonth(), dateOfChecklist.getDate());
+
     const checklist = await this.checklists.readOne({ _id });
     if (!checklist) {
       throw new Error("Checklist not found");
@@ -146,10 +153,12 @@ export default class ChecklistConcept {
     const updatedChecklist = {
       ...checklist,
       items,
-      dateOfChecklist,
+      dateOnly,
     };
 
+    console.log("starting partial pudate");
     await this.checklists.partialUpdateOne({ _id }, updatedChecklist);
+    console.log("finished partial update");
     return { msg: "Checklist updated successfully!", checklist: updatedChecklist };
   }
 }

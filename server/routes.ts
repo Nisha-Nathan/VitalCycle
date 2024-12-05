@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { Router, getExpressRouter } from "./framework/router";
 
 import { Authing, Checklist, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
-import ChecklistConcept, { ChecklistItem } from "./concepts/checklisting";
+import { ChecklistItem } from "./concepts/checklisting";
 import { BadValuesError, NotFoundError } from "./concepts/errors";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
@@ -378,15 +378,13 @@ class Routes {
     }
   }
 
-  // Create an instance of ChecklistConcept with a collection name
-  Checklist = new ChecklistConcept("checklists");
-
   @Router.get("/checklists")
   async getChecklists(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     const today = new Date();
 
     // Use getChecklistByDate method to fetch a checklist by user and date
+    console.log("getting checklists by date: ", user, today);
     return await Checklist.getChecklistByDate(user, today);
   }
 
@@ -413,7 +411,8 @@ class Routes {
   }
 
   @Router.put("/checklists")
-  async updateChecklist(session: SessionDoc, title: string, items: string[]) {
+  async updateChecklist(session: SessionDoc, items: string[]) {
+    console.log("update method called", items);
     const user = Sessioning.getUser(session);
     const today = new Date();
 
@@ -421,6 +420,7 @@ class Routes {
     const existingChecklist = await Checklist.getChecklistByDate(user, today);
 
     if (!existingChecklist.checklist) {
+      console.log("throwing error...");
       throw new NotFoundError("No checklist exists for today. Use the create method instead.");
     }
 
