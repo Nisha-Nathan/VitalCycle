@@ -17,6 +17,9 @@ let searchAuthor = ref("");
 let searchTitle = ref("");
 let circles = ref<Array<Record<string, string>>>([]);
 const selectedCircle = ref("All Circles");
+const closeBtnAddCircle = ref<HTMLButtonElement | null>(null);
+const closeBtnAddPost = ref<HTMLButtonElement | null>(null);
+
 
 async function getUserCircles() {
   let query: Record<string, string> = {};
@@ -74,6 +77,11 @@ function updateEditing(id: string) {
   editing.value = id;
 }
 
+const closeModal = () => {
+ closeBtnAddCircle.value?.click();
+ closeBtnAddPost.value?.click();
+}
+
 onBeforeMount(async () => {
   await getPosts();
   loaded.value = true;
@@ -107,10 +115,10 @@ onBeforeMount(async () => {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <AddCirclesForm @refreshCircles="getUserCircles" />
+                <AddCirclesForm @refreshCircles="getUserCircles" @closeForm="closeModal"/>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button ref="closeBtnAddCircle" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -135,10 +143,10 @@ onBeforeMount(async () => {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <CreatePostForm @refreshPosts="getPosts" />
+            <CreatePostForm @refreshPosts="getPosts" @closeForm="closeModal"/>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" ref="closeBtnAddPost" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
