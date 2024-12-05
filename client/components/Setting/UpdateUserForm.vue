@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useUserStore } from "@/stores/user";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 let username = ref("");
 let currentPassword = ref("");
 let newPassword = ref("");
 
-const { updateUserUsername, updateUserPassword, updateSession } = useUserStore();
+const { updateUserUsername, updateUserPassword, updateSession, sisterCircleOptIn, myCareBoardOptIn, fetchOptingStatus, updateOptingStatus } = useUserStore();
 
 async function updateUsername() {
   await updateUserUsername(username.value);
@@ -19,6 +19,10 @@ async function updatePassword() {
   await updateSession();
   currentPassword.value = newPassword.value = "";
 }
+
+onMounted(() => {
+  fetchOptingStatus();
+});
 </script>
 
 <template>
@@ -39,4 +43,19 @@ async function updatePassword() {
       <button type="submit" class="pure-button pure-button-primary">Update password</button>
     </fieldset>
   </form>
+
+  <h2>Opt-in Preferences</h2>
+  <div class="pure-form">
+    <fieldset>
+      <legend>Manage your preferences</legend>
+      <label>
+        <input type="checkbox" v-model="sisterCircleOptIn" @change="() => updateOptingStatus('sisterCircle', sisterCircleOptIn)" />
+        SisterCircle
+      </label>
+      <label>
+        <input type="checkbox" v-model="myCareBoardOptIn" @change="() => updateOptingStatus('myCareBoard', myCareBoardOptIn)" />
+        MyCareBoard
+      </label>
+    </fieldset>
+  </div>
 </template>
