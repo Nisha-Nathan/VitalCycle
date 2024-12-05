@@ -105,8 +105,8 @@ const goToUserCareboard = (username: string) => {
 
 <template>
   <main>
-    <button class="close-btn" @click="closeInvitesSection">X</button>
-    <h3>Invites</h3>
+    <!-- <button class="close-btn" @click="closeInvitesSection">X</button> -->
+    <!-- <h3>Invites</h3> -->
     <div class="invites-parts">
       <div class="invites-part">
         <p class="section-title">Invite a user to your careboard</p>
