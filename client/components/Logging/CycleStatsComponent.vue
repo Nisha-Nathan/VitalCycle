@@ -30,7 +30,7 @@ const fetchCycleStats = async () => {
 
   isLoading.value = true;
   try {
-    const response = await fetchy("/api/cycle/stats", "GET");
+    const response = await fetchy("/api/cycles/stats", "GET");
     console.log("API Response:", response); // Log the full response
 
     if (response?.stats) {
