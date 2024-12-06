@@ -132,6 +132,7 @@ export default class AuthenticatingConcept {
     const circles = (await this.users.readOne({ _id }))?.circles ?? [];
     const newCircles = circles.filter((c) => c !== circle);
     await this.users.partialUpdateOne({ _id }, { circles: newCircles });
+    return { msg: "User removed from circle!", user: await this.users.readOne({ _id }) };
   }
 
   private async assertGoodCredentials(username: string, password: string) {

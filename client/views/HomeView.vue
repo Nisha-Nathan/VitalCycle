@@ -1,75 +1,31 @@
 <script setup lang="ts">
 import SisterCirclesPostListComponent from "@/components/Post/PostListComponentSisterCircles.vue";
 import { useUserStore } from "@/stores/user";
-import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
-// import { onMounted, ref } from "vue";
-// let circles = ref<Array<Record<string, string>>>([]);
+
 
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
-
-// async function getUserCircles() {
-//   let query: Record<string, string> = {};
-//   if (currentUsername.value) {
-//     query.author = currentUsername.value;
-//   }
-//   let circleResponse;
-//   try {
-//     circleResponse= await fetchy("/api/circles", "GET", { query });
-//   } catch (_) {
-//     return;
-//   }
-//   circles.value = circleResponse.circles;
-// }
-
-// const addCircle = async (circle: string) => {
-//   try {
-//     await fetchy("/api/circles", "POST", {
-//       body: {circle: circle },
-//     });
-//   } catch (_) {
-//     return;
-//   }
-//   getUserCircles();
-// };
-
-
-
-// onMounted(() => {
-//   getUserCircles();
-// });
 </script>
 
 <template>
   <main class="homepage">
-    <!-- Header Section -->
-    <!-- <section class="header">
-      <h1 class="welcome-message">
-        <span v-if="isLoggedIn">Welcome, {{ currentUsername }}!</span>
-        <span v-else>Please login to access your account!</span>
-      </h1>
-    </section> -->
+
 
     <!-- Sister Circles Section -->
     <section class="sister-circles">
-      <!-- <h2 class="section-title">Sister Circles</h2> -->
-     
       <SisterCirclesPostListComponent />
     </section>
 
-    <!-- Care Board Section -->
-    <!-- <section class="care-board">
-      <h2 class="section-title">Care Board</h2>
-      <CareBoardPostListComponent />
-    </section> -->
+
   </main>
 </template>
 
 <style scoped>
 /* General Layout */
 @import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
+
 .homepage {
   background-color: #ffe3e3;
   padding: 2rem;
@@ -122,8 +78,8 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 }
 
 /* Component Wrappers */
-.sister-circles > div,
-.care-board > div {
+.sister-circles>div,
+.care-board>div {
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;

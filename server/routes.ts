@@ -184,6 +184,13 @@ class Routes {
     return await Authing.addUserToCircle(user, circles);
   }
 
+  @Router.post("/remove/circles")
+  async removeUserCircle(session: SessionDoc, circle: string) {
+    const user = Sessioning.getUser(session);
+    return await Authing.removeUserFromCircle(user, circle);
+
+  }
+
   @Router.get("/friends")
   async getFriends(session: SessionDoc) {
     const user = Sessioning.getUser(session);

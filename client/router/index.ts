@@ -8,6 +8,7 @@ import LoginView from "../views/LoginView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import SettingView from "../views/SettingView.vue";
 import TodayView from "../views/TodayView.vue";
+import UserProfileView from "../views/UserProfileView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -52,11 +53,12 @@ const router = createRouter({
       name: "not-found",
       component: NotFoundView,
     },
-    // {
-    //   path: "/cycle-stats",
-    //   name: "CycleStats",
-    //   component: CycleStatsView,
-    // },
+
+    {
+      path: "/user-profile",
+      name: "UserProfile",
+      component: UserProfileView,
+    },
   ],
 });
 
