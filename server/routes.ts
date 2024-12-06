@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb";
 import { Router, getExpressRouter } from "./framework/router";
 
 import { Authing, Checklist, Friending, Inviting, Logging, Opting, Posting, Reacting, Replying, Sessioning, Notification } from "./app";
-import { ChecklistItem } from "./concepts/checklisting";
 import { BadValuesError, NotFoundError } from "./concepts/errors";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
@@ -448,75 +447,37 @@ class Routes {
     }
   }
 
-  @Router.get("/checklists")
-  async getChecklists(session: SessionDoc) {
-    const user = Sessioning.getUser(session);
-    const today = new Date();
-
-    // Use getChecklistByDate method to fetch a checklist by user and date
-    return await Checklist.getChecklistByDate(user, today);
+  @Router.get("/checklisting/:userId/:date")
+  async getChecklist(userId: string, date: string) {
+    const id = new ObjectId(userId);
+    return await Checklist.getChecklist(id, date);
   }
 
-  @Router.post("/checklists")
-  async createChecklist(session: SessionDoc, items: string[]) {
-    const user = Sessioning.getUser(session);
-    const today = new Date();
-
-    // Check if a checklist already exists for today
-    const existingChecklist = await Checklist.getChecklistByDate(user, today);
-
-    if (existingChecklist.checklist) {
-      throw new BadValuesError("A checklist already exists for today. Use the update method instead.");
-    }
-
-    // Create a new checklist for today
-    const checklistItems: ChecklistItem[] = items.map((item) => ({
-      text: item,
-      checked: false,
-      lastChecked: null,
-    }));
-
-    return await Checklist.create(user, today, checklistItems);
+  @Router.post("/checklisting/:userId/:date/initialize")
+  async initializeChecklist(userId: string, date: string) {
+    const id = new ObjectId(userId);
+    await Checklist.initializeChecklist(id, date);
+    return { msg: "Checklist initialized successfully!" };
   }
 
-  @Router.put("/checklists")
-  async updateChecklist(session: SessionDoc, items: string[]) {
-    console.log("update method called", items);
-    const user = Sessioning.getUser(session);
-    const today = new Date();
-
-    // Check if a checklist exists for today
-    const existingChecklist = await Checklist.getChecklistByDate(user, today);
-
-    if (!existingChecklist.checklist) {
-      console.log("throwing error...");
-      throw new NotFoundError("No checklist exists for today. Use the create method instead.");
-    }
-
-    // Update the checklist with new items
-    const checklistItems: ChecklistItem[] = items.map((item) => ({
-      text: item,
-      checked: false,
-      lastChecked: null,
-    }));
-
-    return await Checklist.updateChecklist(existingChecklist.checklist._id, checklistItems, today);
+  @Router.post("/checklisting/:userId/:date/task")
+  async addTask(userId: string, date: string, description: string) {
+    const id = new ObjectId(userId);
+    return await Checklist.addTask(id, date, description);
   }
 
-  @Router.delete("/checklists")
-  async deleteChecklist(session: SessionDoc) {
-    const user = Sessioning.getUser(session);
-    const today = new Date();
+  @Router.delete("/checklisting/:userId/:date/task/:taskIndex")
+  async removeTask(userId: string, date: string, taskIndex: string) {
+    const id = new ObjectId(userId);
+    const index = parseInt(taskIndex, 10);
+    return await Checklist.removeTask(id, date, index);
+  }
 
-    // Check if a checklist exists for today
-    const existingChecklist = await Checklist.getChecklistByDate(user, today);
-
-    if (!existingChecklist.checklist) {
-      throw new NotFoundError("No checklist exists for today to delete.");
-    }
-
-    // Delete the checklist for today
-    return await Checklist.delete(existingChecklist.checklist._id);
+  @Router.patch("/checklisting/:userId/:date/task/:taskIndex")
+  async toggleTask(userId: string, date: string, taskIndex: string) {
+    const id = new ObjectId(userId);
+    const index = parseInt(taskIndex, 10);
+    return await Checklist.toggleTask(id, date, index);
   }
 }
 
