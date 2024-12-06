@@ -2,97 +2,127 @@
 import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
-import { onBeforeMount, ref } from "vue";
-
+import { onMounted, onUnmounted, ref, toRefs, watch } from "vue";
 const { currentUsername } = storeToRefs(useUserStore());
-const emit = defineEmits(["refreshReactCounts", "closeChecklist"]);
+
+const props = defineProps<{
+  currentDate: string; // Date passed from the parent component
+}>();
+const emit = defineEmits(["close-checklist"]);
+const { currentDate } = toRefs(props); // Make the currentDate reactive
 
 interface ChecklistItem {
   text: string;
   checked: boolean;
-  lastChecked: Date | null;
 }
 
-interface ChecklistDoc {
-  author: string;
-  dateOfChecklist: Date;
-  items: ChecklistItem[];
-  id: string;
-}
+const checklistItems = ref<ChecklistItem[]>([]);
+const newTask = ref("");
 
-let allTasks = ref<ChecklistDoc[]>([]);
-let checklistItems = ref<ChecklistItem[]>([]);
-const placeholderTask: string[] = ["Hi this is a task"];
-
-async function getMyTasks() {
-  let query: Record<string, string> = {};
-  let requestResults;
+// Fetch tasks for the current date
+const getMyTasks = async () => {
   try {
-    requestResults = await fetchy("/api/checklists", "GET", { query });
+    const userName = currentUsername.value; // Assuming username maps to user ID
+    const userInfo = await fetchy(`/api/users/${userName}`, "GET");
+    const userId = userInfo._id;
+    const response = await fetchy(`/api/checklisting/${userId}/${currentDate.value}`, "GET");
+    checklistItems.value = response.tasks.map((task: any) => ({
+      text: task.description,
+      checked: task.completed,
+    }));
   } catch (error) {
-    console.log(error);
-    return;
+    console.error("Error fetching tasks:", error);
+    checklistItems.value = [];
   }
-  if (requestResults.checklist == null) allTasks.value = [];
-  else allTasks.value = [requestResults.checklist];
-}
-
-function getTaskItems() {
-  // Check if there are any tasks and if any of those tasks have valid items
-  if (allTasks.value.length === 0) return false;
-
-  const firstTask = allTasks.value[0];
-  const items = firstTask.items;
-
-  // Validate that `items` exists and is an array
-  if (!Array.isArray(items)) {
-    return false;
-  }
-  checklistItems.value = items;
-  return items;
-}
-
-const createPlaceholderTask = async (items: string[]) => {
-  const allItems = [];
-  for (const prevItem of checklistItems.value) {
-    allItems.push(prevItem.text);
-  }
-  for (const newItem of items) {
-    allItems.push(newItem);
-  }
-  try {
-    await fetchy("/api/checklists", "POST", {
-      body: { items: allItems },
-    });
-  } catch (error) {
-    try {
-      await fetchy("/api/checklists", "PUT", {
-        body: { items: allItems },
-      });
-    } catch (error2) {
-      return;
-    }
-  }
-  getMyTasks();
 };
 
-onBeforeMount(async () => {
+// Add a new task
+const addNewTask = async () => {
+  if (!newTask.value.trim()) return;
+  try {
+    const userName = currentUsername.value; // Assuming username maps to user ID
+    const userInfo = await fetchy(`/api/users/${userName}`, "GET");
+    const userId = userInfo._id;
+
+    // Check if the checklist exists by attempting to fetch it
+    try {
+      await fetchy(`/api/checklisting/${userId}/${currentDate.value}`, "GET");
+    } catch {
+      await fetchy(`/api/checklisting/${userId}/${currentDate.value}/initialize`, "POST");
+    }
+
+    await fetchy(`/api/checklisting/${userId}/${currentDate.value}/task`, "POST", {
+      body: { description: newTask.value.trim() },
+    });
+    newTask.value = "";
+    await getMyTasks();
+  } catch (error) {
+    console.error("Failed to add new task:", error);
+  }
+};
+
+// Delete a task
+const deleteTask = async (index: number) => {
+  try {
+    const userName = currentUsername.value; // Assuming username maps to user ID
+    const userInfo = await fetchy(`/api/users/${userName}`, "GET");
+    const userId = userInfo._id;
+    await fetchy(`/api/checklisting/${userId}/${currentDate.value}/task/${index}`, "DELETE");
+    checklistItems.value.splice(index, 1);
+  } catch (error) {
+    console.error("Failed to delete task:", error);
+  }
+};
+
+// Toggle task status
+const toggleTaskStatus = async (index: number) => {
+  try {
+    const userName = currentUsername.value; // Assuming username maps to user ID
+    const userInfo = await fetchy(`/api/users/${userName}`, "GET");
+    const userId = userInfo._id;
+    await fetchy(`/api/checklisting/${userId}/${props.currentDate}/task/${index}`, "PATCH");
+  } catch (error) {
+    console.error("Failed to toggle task status:", error);
+  }
+  await getMyTasks();
+};
+
+// Watch for changes in the currentDate prop and reload tasks
+watch(currentDate, async () => {
   await getMyTasks();
 });
 
-const closeChecklist = () => {
-  emit("closeChecklist");  // Emit event to parent component to hide the checklist
+// Close checklist on outside click
+const handleOutsideClick = (event: MouseEvent) => {
+  const checklistElement = document.querySelector(".dailyChecklist");
+  if (checklistElement && !checklistElement.contains(event.target as Node)) {
+    emit("close-checklist");
+  }
 };
+
+onMounted(async () => {
+  await getMyTasks();
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleOutsideClick);
+});
 </script>
 
 <template>
   <div class="dailyChecklist">
-    <button @click="closeChecklist" class="close-btn">X</button> <!-- Close button -->
-    <h3>Daily Checklist</h3>
-    <ul v-if="getTaskItems()">
-      <li v-for="task in checklistItems"><input type="checkbox"> {{ task.text }}</input></li>
+    <!-- Close Button -->
+    <button class="close-btn" @click="$emit('close-checklist')">X</button>
+    <h3>Checklist for {{ currentDate }}</h3>
+    <ul>
+      <li v-for="(task, index) in checklistItems" :key="index">
+        <input type="checkbox" v-model="task.checked" @change="() => toggleTaskStatus(index)" />
+        {{ task.text }}
+        <button @click="() => deleteTask(index)" class="delete-btn">Delete</button>
+      </li>
     </ul>
-    <button @click="createPlaceholderTask(placeholderTask)">Add placeholder task</button>
+    <input type="text" v-model="newTask" placeholder="Enter a new task" />
+    <button @click="addNewTask">Add Task</button>
   </div>
 </template>
 
@@ -100,16 +130,16 @@ const closeChecklist = () => {
 .dailyChecklist {
   background-color: white;
   color: black;
-  position: fixed; /* Use fixed to keep it in place even if the page scrolls */
-  top: 50%; /* Position the top edge at the vertical center of the page */
-  left: 50%; /* Position the left edge at the horizontal center of the page */
-  transform: translate(-50%, -50%); /* Offset the element by 50% of its width and height to truly center it */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   padding: 80px;
   padding-top: 30px;
   padding-bottom: 30px;
   border: 1px solid black;
   border-radius: 1rem;
-  z-index: 100; /* Ensure it's above other elements */
+  z-index: 100;
 }
 
 h3 {
@@ -117,13 +147,15 @@ h3 {
 }
 
 ul {
-    list-style-type: none;
-    display: flex;
-    flex-direction: column;
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
 }
 
 li {
-    margin: 5px;
+  margin: 5px;
+  display: flex;
+  align-items: center;
 }
 
 .close-btn {
@@ -136,4 +168,20 @@ li {
   cursor: pointer;
 }
 
+input[type="text"] {
+  margin-top: 10px;
+  padding: 5px;
+  font-size: 1rem;
+}
+
+.delete-btn {
+  margin-left: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  align-self: flex-end; /* Aligns the button properly */
+}
 </style>
