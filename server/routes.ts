@@ -256,7 +256,7 @@ class Routes {
   async getCycleStats(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     const stats = await Logging.getInstance().calculateCycleStats(user);
-    return { msg: "Successfully retrieved cycle statistics!", stats };
+    return { message: "Successfully retrieved cycle statistics!", stats };
   }
 
   @Router.get("/exercise")

@@ -257,6 +257,8 @@ article {
   color: #ea7575;
 }
 
+
+
 .btn-check:checked+.btn,
 .btn-check:active+.btn {
   border-color: #000000;
@@ -308,5 +310,10 @@ article {
 
 .btn-add-post:hover {
   border-color: black !important;
+}
+
+.btn-check:hover + .btn{
+  background-color: #ea7575;
+  color: white;
 }
 </style>
