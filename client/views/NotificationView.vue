@@ -1,32 +1,27 @@
 <script setup lang="ts">
-import SisterCirclesPostListComponent from "@/components/Post/PostListComponentSisterCircles.vue";
-import { useUserStore } from "@/stores/user";
-import { storeToRefs } from "pinia";
+import NotificationListComponent from '@/components/UserProfile/NotificationListComponent.vue';
 
-
-
-const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 </script>
 
 <template>
-  <main class="homepage">
+    <main class="notificationspage">
 
 
-    <!-- Sister Circles Section -->
-    <section class="sister-circles">
-      <SisterCirclesPostListComponent />
-    </section>
+        <!-- Care Board Section -->
+        <section class="notification">
+            <NotificationListComponent />
+        </section>
 
 
-  </main>
+    </main>
 </template>
 
 <style scoped>
 /* General Layout */
 @import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
 
-.homepage {
+.notificationspage {
   background-color: #ffe3e3;
   padding: 2rem;
   border-radius: 12px;
@@ -58,7 +53,7 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 }
 
 /* Sister Circles & Care Board Sections */
-.sister-circles {
+.notification {
   background-color: #ffc1c1;
   padding: 1.5rem;
   border-radius: 12px;
@@ -66,12 +61,12 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.sister-circles :deep(h2) {
+.notification :deep(h2) {
   margin-bottom: 1rem;
 }
 
 /* Component Wrappers */
-.sister-circles>div {
+.notification>div {
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;

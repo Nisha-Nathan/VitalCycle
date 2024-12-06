@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import router from "@/router";
 import { useUserStore } from "@/stores/user";
 import { onMounted, ref } from "vue";
 
@@ -6,7 +7,7 @@ let username = ref("");
 let currentPassword = ref("");
 let newPassword = ref("");
 
-const { updateUserUsername, updateUserPassword, updateSession, sisterCircleOptIn, myCareBoardOptIn, fetchOptingStatus, updateOptingStatus } = useUserStore();
+const { updateUserUsername, updateUserPassword, updateSession, deleteUser, sisterCircleOptIn, myCareBoardOptIn, fetchOptingStatus, updateOptingStatus } = useUserStore();
 
 async function updateUsername() {
   await updateUserUsername(username.value);
@@ -18,6 +19,11 @@ async function updatePassword() {
   await updateUserPassword(currentPassword.value, newPassword.value);
   await updateSession();
   currentPassword.value = newPassword.value = "";
+}
+
+async function delete_() {
+  await deleteUser();
+  void router.push({ name: "Today" });
 }
 
 onMounted(() => {
@@ -44,6 +50,8 @@ onMounted(() => {
     </fieldset>
   </form>
 
+
+
   <h2>Opt-in Preferences</h2>
   <div class="pure-form">
     <fieldset>
@@ -58,4 +66,6 @@ onMounted(() => {
       </label>
     </fieldset>
   </div>
+
+  <button class="button-error pure-button" @click="delete_">Delete User</button>
 </template>

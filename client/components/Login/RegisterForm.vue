@@ -5,13 +5,18 @@ import { ref } from "vue";
 
 const username = ref("");
 const password = ref("");
-const { createUser, loginUser, updateSession } = useUserStore();
+const { createUser, loginUser, updateSession,initializeUserOpting} = useUserStore();
 
 async function register() {
   await createUser(username.value, password.value);
+  console.log("User registered");
+  await initializeUserOpting(username.value);
   await loginUser(username.value, password.value);
+  console.log("User logged in");
+  
   void updateSession();
   void router.push({ name: "Today" });
+  console.log("User registered and logged in");
 }
 </script>
 

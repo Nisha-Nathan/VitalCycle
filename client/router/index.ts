@@ -8,6 +8,8 @@ import LoginView from "../views/LoginView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
 import SettingView from "../views/SettingView.vue";
 import TodayView from "../views/TodayView.vue";
+import UserProfileView from "../views/UserProfileView.vue";
+import NotificationView from "../views/NotificationView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -51,6 +53,20 @@ const router = createRouter({
       path: "/:catchAll(.*)",
       name: "not-found",
       component: NotFoundView,
+    },
+
+    {
+      path: "/user-profile",
+      name: "UserProfile",
+      component: UserProfileView,
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: "/notifications",
+      name: "Notifications",
+      component: NotificationView,
+      meta: { requiresAuth: true },
     },
   ],
 });

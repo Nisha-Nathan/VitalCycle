@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import LoggerComponent from "@/components/Logging/LoggerComponent.vue";
 import CycleStatsComponent from "@/components/Logging/CycleStatsComponent.vue";
+import LoggerComponent from "@/components/Logging/LoggerComponent.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
-
-
-
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 </script>
 
 <template>
-
   <main class="todaypage">
     <!-- Header Section -->
     <section v-if="!isLoggedIn" class="header">
@@ -21,15 +17,13 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
     </section>
 
     <section class="logger" v-if="isLoggedIn">
-
       <LoggerComponent />
     </section>
 
     <section class="cycle-stats" v-if="isLoggedIn">
-       <CycleStatsComponent/>
+      <CycleStatsComponent />
     </section>
   </main>
-
 </template>
 
 <style scoped>
@@ -87,11 +81,25 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 }
 
 /* Component Wrappers */
-.logger>div,
-.cycle-stats>div {
+.logger > div,
+.cycle-stats > div {
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.see-replies {
+  background-color: #ea7575;
+  color: white;
+  border: 1px solid white;
+  border-radius: 0.5em;
+  margin: 10px;
+  width: fit-content;
+}
+
+.see-replies:hover {
+  background-color: white;
+  color: rgb(77, 76, 76);
 }
 </style>

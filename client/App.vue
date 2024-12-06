@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useToastStore } from "@/stores/toast";
 import { useUserStore } from "@/stores/user";
+import { useNotificationStore } from "./stores/notification";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
@@ -10,11 +11,17 @@ const currentRouteName = computed(() => currentRoute.name);
 const userStore = useUserStore();
 const { isLoggedIn, sisterCircleOptIn, myCareBoardOptIn } = storeToRefs(userStore);
 const { toast } = storeToRefs(useToastStore());
+const notificationStore = useNotificationStore();
+const { deliveredCount } = storeToRefs(notificationStore);
+
 
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
+    if (isLoggedIn.value) {
+      await notificationStore.fetchDeliveredCount();
+    }
   } catch {
     // User is not logged in
   }
@@ -25,10 +32,15 @@ onBeforeMount(async () => {
   <nav class="navbar">
     <RouterLink to="/" class="nav-item">Today</RouterLink>
     <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Sister Circles</RouterLink>
-    <!-- <RouterLink to="/cycle-stats" class="nav-item" v-if="isLoggedIn">Cycle Stats</RouterLink> -->
     <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn && myCareBoardOptIn">Care Board</RouterLink>
-    <RouterLink to="/settings" class="nav-item" v-if="isLoggedIn">Settings</RouterLink>
     <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
+    <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
+    <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn">
+      <button type="button" class="btn btn-primary btn-notifications">
+        Notifications <span class="badge bg-secondary bg-notifications">{{ deliveredCount }}</span>
+      </button>
+    </RouterLink>
+
   </nav>
   <RouterView />
 </template>
@@ -49,5 +61,15 @@ onBeforeMount(async () => {
 
 .nav-item.router-link-active {
   font-weight: bold;
+}
+
+.btn-notifications {
+  background-color: black;
+  border: none;
+}
+
+.btn-notifications:hover {
+  background-color: #EA7575;
+  border: none;
 }
 </style>

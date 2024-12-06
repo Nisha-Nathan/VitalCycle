@@ -20,13 +20,15 @@ export const useUserStore = defineStore(
     };
 
     const createUser = async (username: string, password: string) => {
+      console.log("createUser");
       await fetchy("/api/users", "POST", {
         body: { username, password },
       });
-      const userInfo = await fetchy(`api/users/${username}`, "GET");
-      const userId = userInfo._id;
-      await fetchy(`/api/opting/${userId}`, "POST");
+      // const userInfo = await fetchy(`api/users/${username}`, "GET");
+      // const userId = userInfo._id;
     };
+
+   
 
     const loginUser = async (username: string, password: string) => {
       await fetchy("/api/login", "POST", {
@@ -40,6 +42,16 @@ export const useUserStore = defineStore(
         currentUsername.value = username;
       } catch {
         currentUsername.value = "";
+      }
+    };
+
+    const initializeUserOpting = async (username:string) => {
+      try {
+        await fetchy(`/api/opting/${username}`, "POST", {
+          body: { username },
+        });
+      } catch (error) {
+        console.error("Failed to initialize user opting:", error);
       }
     };
 
@@ -110,6 +122,7 @@ export const useUserStore = defineStore(
       myCareBoardOptIn,
       fetchOptingStatus,
       updateOptingStatus,
+      initializeUserOpting
     };
   },
   { persist: true },

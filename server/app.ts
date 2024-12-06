@@ -8,6 +8,7 @@ import ReplyingConcept from "./concepts/replying";
 import SessioningConcept from "./concepts/sessioning";
 import ChecklistConcept from "./concepts/checklisting";
 import OptingConcept from "./concepts/opting";
+import NotificationConcept from "./concepts/notification";
 
 // The app is a composition of concepts instantiated here
 // and synchronized together in `routes.ts`.
@@ -20,4 +21,6 @@ export const Replying = new ReplyingConcept("replies");
 export const Checklist = new ChecklistConcept("checklists");
 export const Inviting = new InvitingConcept("invites");
 export const Opting = new OptingConcept("opting");
+export const Notification = new NotificationConcept("notifications");
+
 export { default as Logging } from "./concepts/logging";
