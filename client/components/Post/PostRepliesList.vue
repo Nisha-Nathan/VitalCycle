@@ -10,6 +10,7 @@ const props = defineProps(["post"]);
 const loaded = ref(false);
 let replies = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
+let replyText = ref("");
 let searchAuthor = ref("");
 const userStore = useUserStore();
 
@@ -18,24 +19,23 @@ async function getReplies() {
   let postResults;
   try {
     postResults = await fetchy("/api/replies", "GET", { query });
-    console.log("post results: ", postResults);
   } catch (error) {
     return;
   }
   replies.value = postResults.replies;
-  console.log("replies: ", replies.value);
 }
 
-const addDefaultReply = async () => {
-  const placeholderContent = "Hi this is a reply.";
+const addReply = async (textString: string) => {
   try {
     await fetchy("/api/replies", "POST", {
-      body: { postID: props.post._id, content: placeholderContent },
+      body: { postID: props.post._id, content: textString },
     });
   } catch (error) {
     console.log(error);
     return;
   }
+  getReplies();
+  replyText.value = "";
 };
 
 function updateEditing(id: string) {
@@ -57,7 +57,10 @@ onBeforeMount(async () => {
   </section>
   <p v-else-if="loaded">No replies found</p>
   <p v-else>Loading...</p>
-  <button @click="addDefaultReply">+ Add placeholder reply</button>
+  <form @submit.prevent="addReply(replyText)">
+    <textarea v-model="replyText" placeholder="Write your reply here..." rows="3" required></textarea>
+    <button type="submit">Post Reply</button>
+  </form>
 </template>
 
 <style scoped>
@@ -65,5 +68,31 @@ article {
   background-color: white;
   border: 1px solid black;
   margin: 10px;
+}
+
+textarea {
+  margin-bottom: 10px;
+  padding: 10px;
+  resize: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+form {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #0056b3;
 }
 </style>

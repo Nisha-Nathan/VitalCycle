@@ -18,9 +18,9 @@ let searchAuthor = ref("");
 const userStore = useUserStore();
 let careBoardListKey = ref(0);
 const closeBtn = ref<HTMLButtonElement | null>(null);
+const closeBtnPost = ref<HTMLButtonElement | null>(null);
 
 async function getPosts(author?: string) {
-  console.log("get posts called with author: ", author);
   let toGet;
   if (!userStore.currentlyViewingCareboard) {
     toGet = currentUsername.value;
@@ -43,7 +43,6 @@ function updateEditing(id: string) {
 }
 
 onBeforeMount(async () => {
-  console.log("remounting!!!");
   if (!userStore.currentlyViewingCareboard) {
     await getPosts(currentUsername.value);
   } else {
@@ -63,6 +62,7 @@ const goToMyCareboard = () => {
 
 const closeModal = () => {
  closeBtn.value?.click();
+ closeBtnPost.value?.click();
 }
 </script>
 
@@ -133,10 +133,10 @@ const closeModal = () => {
             <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <CreatePostFormCareBoard @refreshPosts="getPosts" />
+            <CreatePostFormCareBoard @refreshPosts="getPosts" @closeSection="closeModal" />
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" ref="closeBtnPost" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

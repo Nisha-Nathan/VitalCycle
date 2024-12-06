@@ -33,9 +33,7 @@ const emptyForm = () => {
   content.value = "";
 };
 
-const closeForm = () => {
-  emit("closeSection");
-};
+
 </script>
 
 <template>
@@ -45,7 +43,7 @@ const closeForm = () => {
       <textarea id="title" v-model="title" placeholder="Title of Post Here!" required></textarea>
       <label for="content">Post Contents:</label>
       <textarea id="content" v-model="content" placeholder="Post Contents Here!" required></textarea>
-      <button type="submit" class="pure-button-primary pure-button">Create Post</button>
+      <button type="submit" class="btn btn-primary btn-submit">Create Post</button>
     </form>
   </main>
 </template>
@@ -62,8 +60,6 @@ form {
   gap: 0.5em;
   position: relative;
 }
-
-
 
 textarea {
   font-family: inherit;
@@ -82,5 +78,16 @@ textarea {
   border: none;
   color: black;
   cursor: pointer;
+}
+
+.btn-submit:hover {
+  background-color: #ff7f7f;
+}
+
+.btn-submit {
+  margin: auto;
+  width: 100%;
+  background-color: black;
+  border: none;
 }
 </style>

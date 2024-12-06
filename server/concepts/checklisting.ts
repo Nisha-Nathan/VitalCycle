@@ -1,164 +1,91 @@
+// server/concepts/checklisting.ts - implemented by Ao Qu
+
 import { ObjectId } from "mongodb";
 import DocCollection, { BaseDoc } from "../framework/doc";
+import { NotFoundError } from "./errors";
 
-export interface ChecklistItem {
-  text: string;
-  checked: boolean;
-  lastChecked: Date | null;
+export interface Task {
+  description: string;
+  completed: boolean;
 }
 
 export interface ChecklistDoc extends BaseDoc {
-  author: ObjectId;
-  dateOfChecklist: Date;
-  items: ChecklistItem[];
+  userId: ObjectId;
+  date: string; // Stored as ISO date string (e.g., "2024-12-05")
+  tasks: Task[];
 }
 
+/**
+ * concept: Checklist
+ */
 export default class ChecklistConcept {
-  public readonly checklists: DocCollection<ChecklistDoc>;
+  public readonly userChecklist: DocCollection<ChecklistDoc>;
 
-  /**
-   * Initialize the ChecklistConcept class with a specific collection name.
-   */
-  constructor(collectionName: string) {
-    this.checklists = new DocCollection<ChecklistDoc>(collectionName);
+  constructor(checklistCollection: string) {
+    this.userChecklist = new DocCollection<ChecklistDoc>(checklistCollection);
   }
 
-  /**
-   * Create a new checklist entry (by author, for date DateOfChecklist)
-   */
-  async create(author: ObjectId, dateOfChecklist: Date, items: ChecklistItem[]) {
-    const dateOnly = new Date(dateOfChecklist.getFullYear(), dateOfChecklist.getMonth(), dateOfChecklist.getDate());
-    const _id = await this.checklists.createOne({ author, dateOfChecklist: dateOnly, items });
-    return { msg: "Checklist successfully created!", checklist: await this.checklists.readOne({ _id }) };
+  // Initialize a checklist for a user on a specific date
+  async initializeChecklist(userId: ObjectId, date: string) {
+    const existingChecklist = await this.userChecklist.readOne({ userId, date });
+    if (!existingChecklist) {
+      await this.userChecklist.createOne({
+        userId,
+        date,
+        tasks: [],
+      });
+    }
   }
 
-  /**
-   * Remove a specific checklist entry by its id
-   */
-  async delete(_id: ObjectId) {
-    await this.checklists.deleteOne({ _id });
-    return { msg: "Checklist deleted successfully!" };
-  }
-
-  /**
-   * Add a new item to a user's checklist
-   */
-  async addItem(_id: ObjectId, text: string) {
-    const checklist = await this.checklists.readOne({ _id });
+  // Get the checklist for a user on a specific date
+  async getChecklist(userId: ObjectId, date: string) {
+    const checklist = await this.userChecklist.readOne({ userId, date });
     if (!checklist) {
-      throw new Error("Checklist not found");
+      throw new NotFoundError(`Checklist for userId ${userId} on ${date} not found`);
     }
-
-    const newItem: ChecklistItem = { text, checked: false, lastChecked: null };
-    checklist.items.push(newItem);
-    await this.checklists.partialUpdateOne({ _id }, { items: checklist.items });
-
-    return { msg: "Item added successfully!", checklist };
+    return checklist;
   }
 
-  /**
-   * Remove an item from the checklist by its index
-   */
-  async removeItem(_id: ObjectId, itemIndex: number) {
-    const checklist = await this.checklists.readOne({ _id });
+  // Add a task to the user's checklist on a specific date
+  async addTask(userId: ObjectId, date: string, description: string) {
+    const checklist = await this.userChecklist.readOne({ userId, date });
     if (!checklist) {
-      throw new Error("Checklist not found");
+      throw new NotFoundError(`Checklist for userId ${userId} on ${date} not found`);
     }
 
-    if (itemIndex < 0 || itemIndex >= checklist.items.length) {
-      throw new Error("Item index is out of bounds");
-    }
-
-    checklist.items.splice(itemIndex, 1);
-    await this.checklists.partialUpdateOne({ _id }, { items: checklist.items });
-
-    return { msg: "Item removed successfully!", checklist };
+    // Add the task manually to the array
+    const updateTasks = [...checklist.tasks, { description, completed: false }];
+    await this.userChecklist.partialUpdateOne({ userId, date }, { tasks: updateTasks });
+    return { msg: "Task added successfully!" };
   }
 
-  /**
-   * Cross off an item (mark it as checked) and update the last checked time
-   */
-  async checkOffItem(_id: ObjectId, itemIndex: number) {
-    const checklist = await this.checklists.readOne({ _id });
-    if (!checklist) {
-      throw new Error("Checklist not found");
+  // Remove a task from the checklist by its index
+  async removeTask(userId: ObjectId, date: string, taskIndex: number) {
+    const checklist = await this.getChecklist(userId, date);
+
+    if (taskIndex < 0 || taskIndex >= checklist.tasks.length) {
+      throw new NotFoundError(`Task at index ${taskIndex} not found in the checklist`);
     }
 
-    if (itemIndex < 0 || itemIndex >= checklist.items.length) {
-      throw new Error("Item index is out of bounds");
-    }
+    checklist.tasks.splice(taskIndex, 1); // Remove task at the specified index
 
-    const item = checklist.items[itemIndex];
-    item.checked = true;
-    item.lastChecked = new Date(); // Set last checked date to now
-    const dateOnly = new Date(item.lastChecked.getFullYear(), item.lastChecked.getMonth(), item.lastChecked.getDate());
-    item.lastChecked = dateOnly;
-    await this.checklists.partialUpdateOne({ _id }, { items: checklist.items });
+    await this.userChecklist.replaceOne({ userId, date }, checklist);
 
-    return { msg: "Item checked off successfully!", checklist };
+    return { msg: "Task removed successfully!" };
   }
 
-  /**
-   * Uncheck an item (mark it as unchecked) and reset the last checked time
-   */
-  async uncheckItem(_id: ObjectId, itemIndex: number) {
-    const checklist = await this.checklists.readOne({ _id });
-    if (!checklist) {
-      throw new Error("Checklist not found");
+  // Toggle task completion status by its index
+  async toggleTask(userId: ObjectId, date: string, taskIndex: number) {
+    const checklist = await this.getChecklist(userId, date);
+
+    if (taskIndex < 0 || taskIndex >= checklist.tasks.length) {
+      throw new NotFoundError(`Task at index ${taskIndex} not found in the checklist`);
     }
 
-    if (itemIndex < 0 || itemIndex >= checklist.items.length) {
-      throw new Error("Item index is out of bounds");
-    }
+    checklist.tasks[taskIndex].completed = !checklist.tasks[taskIndex].completed; // Toggle status
 
-    const item = checklist.items[itemIndex];
-    item.checked = false;
-    item.lastChecked = null; // Reset last checked date
-    await this.checklists.partialUpdateOne({ _id }, { items: checklist.items });
+    await this.userChecklist.replaceOne({ userId, date }, checklist);
 
-    return { msg: "Item unchecked successfully!", checklist };
-  }
-
-  /**
-   * Fetch a checklist by author and date (useful to refresh data for a new day)
-   */
-  async getChecklistByDate(author: ObjectId, date: Date) {
-    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const checklist = await this.checklists.readOne({ author, dateOfChecklist: dateOnly });
-    if (checklist === null) {
-      return { msg: "Checklist not found", checklist };
-    }
-    return { msg: "Successfully retrieved checklist!", checklist };
-  }
-
-  /**
-   * Fetch all checklists for a specific user
-   */
-  async getChecklistsByUser(author: ObjectId) {
-    return await this.checklists.readMany({ author });
-  }
-
-  /**
-   * Update an existing checklist (change items or date)
-   */
-  async updateChecklist(_id: ObjectId, items: ChecklistItem[], dateOfChecklist: Date) {
-    console.log("in checklisting, update called");
-    const dateOnly = new Date(dateOfChecklist.getFullYear(), dateOfChecklist.getMonth(), dateOfChecklist.getDate());
-
-    const checklist = await this.checklists.readOne({ _id });
-    if (!checklist) {
-      throw new Error("Checklist not found");
-    }
-
-    const updatedChecklist = {
-      ...checklist,
-      items,
-      dateOnly,
-    };
-
-    console.log("starting partial pudate");
-    await this.checklists.partialUpdateOne({ _id }, updatedChecklist);
-    console.log("finished partial update");
-    return { msg: "Checklist updated successfully!", checklist: updatedChecklist };
+    return { msg: `Task at index ${taskIndex} completion status toggled!` };
   }
 }

@@ -125,8 +125,6 @@ const displayChecklist = () => {
 };
 
 onMounted(() => {
-  console.log("mounted", dateOfLog.value);
-  console.log("current date", currentDate.value);
   fetchLogByDate(dateOfLog.value);
 });
 </script>
@@ -152,7 +150,7 @@ onMounted(() => {
       </div>
 
       <div class="content">
-        <DailyChecklist v-if="showDailyChecklist" @close-checklist="showDailyChecklist = false" />
+        <DailyChecklist v-if="showDailyChecklist" :current-date="dateOfLog" @close-checklist="showDailyChecklist = false" />
         <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..." :readonly="!isCurrentDate"></textarea>
 
         <div class="btn-group mood-section" role="group" aria-label="Mood Entries">

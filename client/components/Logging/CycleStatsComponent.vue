@@ -49,6 +49,7 @@ const fetchCycleStats = async () => {
       errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
     }
   } catch (error) {
+    console.log("error: ", error);
     cycleStats.value = null;
     errorMessage.value = "Failed to fetch cycle statistics. Please try again.";
   } finally {
