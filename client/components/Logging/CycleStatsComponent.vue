@@ -8,13 +8,18 @@ import { onMounted, ref } from "vue";
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 // Reactive properties
-const tabs = ["Cycle History", "Activity Trends", "Weight Trends"];
+const tabs = ["Cycle History", "Activity Trends"];
 const currentTab = ref("Cycle History");
 
 const cycleStats = ref<{
   averageCycleLength: number | null;
   averagePeriodLength: number | null;
   lastPeriodStart: string | null;
+} | null>(null);
+
+const activityStats = ref<{
+  activityStreak: number | null;
+  lastLoggedActivity: string | null;
 } | null>(null);
 
 const isLoading = ref(false);
@@ -33,11 +38,6 @@ const fetchCycleStats = async () => {
     const response = await fetchy("/api/cycles/stats", "GET");
     if (response?.stats) {
       cycleStats.value = response.stats;
-      // {
-      //   averageCycleLength: response.cycleStats.averageCycleLength || null,
-      //   averagePeriodLength: response.cycleStats.averagePeriodLength || null,
-      //   lastPeriodStart: response.cycleStats.lastPeriodStart ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString() : null,
-      // };
     } else {
       cycleStats.value = null;
       errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
@@ -51,9 +51,36 @@ const fetchCycleStats = async () => {
   }
 };
 
+// Fetch Cycle Stats
+const fetchActivityStats = async () => {
+  if (!isLoggedIn.value || !currentUsername.value) {
+    activityStats.value = null;
+    errorMessage.value = "Please log in to view your activity statistics.";
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const response = await fetchy("/api/activity/stats", "GET");
+    if (response?.stats) {
+      activityStats.value = response.stats;
+    } else {
+      activityStats.value = null;
+      errorMessage.value = "No activity data found. Start logging to see statistics!";
+    }
+  } catch (error) {
+    console.log("error: ", error);
+    activityStats.value = null;
+    errorMessage.value = "Failed to fetch activity statistics. Please try again.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 // Fetch stats on component mount
 onMounted(() => {
   fetchCycleStats();
+  fetchActivityStats();
 });
 </script>
 
@@ -89,9 +116,19 @@ onMounted(() => {
     </div>
 
     <div v-if="currentTab === 'Activity Trends'" class="stats-overview">
-      <div class="stat-item">Recent Activities</div>
-      <div class="stat-item">Activity Duration Trends</div>
-      <div class="stat-item">Most Common Activities</div>
+      <div v-if="isLoading" class="stat-item">Loading...</div>
+      <div v-else-if="errorMessage" class="stat-item">{{ errorMessage }}</div>
+      <div v-else>
+        <!-- Displaying activity stats -->
+        <div class="stat-item">
+          Activity Streak:
+          {{ activityStats?.activityStreak? `${activityStats.activityStreak} days` : "Insufficient data. At least 1 day of activity." }}
+        </div>
+        <div class="stat-item">
+          Last Logged Activity
+          {{ activityStats?.lastLoggedActivity || "No data available" }}
+        </div>
+      </div>
     </div>
 
     <div v-if="currentTab === 'Weight Trends'" class="stats-overview">

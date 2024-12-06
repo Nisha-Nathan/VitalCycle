@@ -10,6 +10,7 @@ const emit = defineEmits(["update-flow"]);
 const definedMoods = ["Angry", "Happy", "Calm", "Sad", "Confused"];
 const definedFlowIntensities = ["None", "Light", "Medium", "Heavy"];
 const definedSymptoms = ["Abdominal Cramps", "Headache", "Acne", "Fatigue", "Constipation", "Diarrhea", "Nausea", "Bloating", "Chills", "Mood swings", "Dry skin"];
+const definedActivities = ["Walking", "Running", "Biking", "Weightlifting", "Yoga", "Meditation", "Dance", "HIIT", "Other"]
 
 const getCurrentDate = () => {
   const date = new Date();
@@ -19,6 +20,7 @@ const getCurrentDate = () => {
 const currentDate = ref(getCurrentDate());
 const dateOfLog = ref(currentDate.value);
 const selectedSymptoms = ref<string[]>([]);
+const selectedActivity = ref<string | null>(null);
 const selectedMood = ref<string | null>(null);
 const selectedFlow = ref<string | null>("None");
 const notes = ref("");
@@ -44,6 +46,7 @@ const submitLog = async () => {
         mood: selectedMood.value,
         flow: selectedFlow.value,
         notes: notes.value,
+        activity: selectedActivity.value,
       },
     });
     logId.value = response.log.id;
@@ -164,6 +167,22 @@ onMounted(() => {
             <label class="btn btn-outline" :for="`btnradio-sym-${index}`">{{ symptom }}</label>
           </div>
         </div>
+
+        <div class="btn-group activity-section" role="group" aria-label="Activity Entries">
+          <div v-for="(activity, index) in definedActivities" :key="index">
+            <input
+              type="radio"
+              class="btn-check"
+              name="btnradio-activity"
+              :id="`btnradio-activity-${index}`"
+              v-model="selectedActivity"
+              :value="activity"
+              autocomplete="off"
+              :disabled="!isCurrentDate"
+            />
+            <label class="btn btn-outline" :for="`btnradio-activity-${index}`">{{ activity }}</label>
+          </div>
+        </div>
       </div>
     </div>
     <button v-if="isCurrentDate" type="submit" class="btn btn-primary btn-submit">{{ isEditMode ? "Update" : "Submit" }}</button>
@@ -250,7 +269,8 @@ form {
 .header,
 .mood-section,
 .flow-section,
-.symptoms-section {
+.symptoms-section,
+.activity-section {
   background-color: #ea7575;
   border-radius: 10px;
   padding: 0.75rem;
