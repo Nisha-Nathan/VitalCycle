@@ -9,7 +9,7 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 const currentRoute = useRoute();
 const currentRouteName = computed(() => currentRoute.name);
 const userStore = useUserStore();
-const { isLoggedIn } = storeToRefs(userStore);
+const { isLoggedIn, sisterCircleOptIn, myCareBoardOptIn } = storeToRefs(userStore);
 const { toast } = storeToRefs(useToastStore());
 const notificationStore = useNotificationStore();
 const { deliveredCount } = storeToRefs(notificationStore);
@@ -29,8 +29,8 @@ onBeforeMount(async () => {
 <template>
   <nav class="navbar">
     <RouterLink to="/" class="nav-item">Today</RouterLink>
-    <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn">Sister Circles</RouterLink>
-    <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn">Care Board</RouterLink>
+    <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Sister Circles</RouterLink>
+    <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn && myCareBoardOptIn">Care Board</RouterLink>
     <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
     <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
     <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn"> <button type="button" class="btn btn-primary">

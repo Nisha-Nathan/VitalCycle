@@ -11,7 +11,7 @@ import PostListComponentCareBoard from "@/components/Post/PostListComponentCareB
 
     <!-- Care Board Section -->
     <section class="care-board">
-     <PostListComponentCareBoard/>
+      <PostListComponentCareBoard />
     </section>
 
  
@@ -42,7 +42,7 @@ import PostListComponentCareBoard from "@/components/Post/PostListComponentCareB
   font-family: "Quando", serif;
   font-weight: 400;
   font-style: normal;
-  padding:2rem;
+  padding: 2rem;
 }
 
 /* Welcome Section */

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import router from "@/router";
 import { useUserStore } from "@/stores/user";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 let username = ref("");
 let currentPassword = ref("");
 let newPassword = ref("");
 
-const { updateUserUsername, updateUserPassword, updateSession, deleteUser } = useUserStore();
+const { updateUserUsername, updateUserPassword, updateSession, deleteUser, sisterCircleOptIn, myCareBoardOptIn, fetchOptingStatus, updateOptingStatus } = useUserStore();
 
 async function updateUsername() {
   await updateUserUsername(username.value);
@@ -25,6 +25,10 @@ async function delete_() {
   await deleteUser();
   void router.push({ name: "Today" });
 }
+
+onMounted(() => {
+  fetchOptingStatus();
+});
 </script>
 
 <template>
@@ -47,4 +51,19 @@ async function delete_() {
   </form>
 
   <button class="button-error pure-button" @click="delete_">Delete User</button>
+
+  <h2>Opt-in Preferences</h2>
+  <div class="pure-form">
+    <fieldset>
+      <legend>Manage your preferences</legend>
+      <label>
+        <input type="checkbox" v-model="sisterCircleOptIn" @change="() => updateOptingStatus('sisterCircle', sisterCircleOptIn)" />
+        SisterCircle
+      </label>
+      <label>
+        <input type="checkbox" v-model="myCareBoardOptIn" @change="() => updateOptingStatus('myCareBoard', myCareBoardOptIn)" />
+        MyCareBoard
+      </label>
+    </fieldset>
+  </div>
 </template>

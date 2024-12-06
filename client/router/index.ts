@@ -23,13 +23,13 @@ const router = createRouter({
       path: "/sister-circle",
       name: "Sister Circle",
       component: HomeView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresSisterCircle: true },
     },
     {
       path: "/care-board",
       name: "Care Board",
       component: CareBoardView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresCareBoard: true },
     },
     {
       path: "/settings",
@@ -70,13 +70,25 @@ const router = createRouter({
 });
 
 /**
- * Navigation guards to prevent user from accessing wrong pages.
+ * Navigation guards to prevent user from accessing pages without proper opting preferences.
  */
 router.beforeEach((to, from) => {
-  const { isLoggedIn } = storeToRefs(useUserStore());
+  const userStore = useUserStore();
+  const { isLoggedIn, sisterCircleOptIn, myCareBoardOptIn } = storeToRefs(userStore);
 
+  // Redirect to login if authentication is required and user is not logged in
   if (to.meta.requiresAuth && !isLoggedIn.value) {
     return { name: "Login" };
+  }
+
+  // Prevent access to Sister Circle if the user has opted out
+  if (to.meta.requiresSisterCircle && !sisterCircleOptIn.value) {
+    return { name: "Settings" };
+  }
+
+  // Prevent access to Care Board if the user has opted out
+  if (to.meta.requiresCareBoard && !myCareBoardOptIn.value) {
+    return { name: "Settings" };
   }
 });
 
