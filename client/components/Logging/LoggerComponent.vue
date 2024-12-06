@@ -10,6 +10,10 @@ const emit = defineEmits(["update-flow"]);
 const definedMoods = ["Angry", "Happy", "Calm", "Sad", "Confused"];
 const definedFlowIntensities = ["None", "Light", "Medium", "Heavy"];
 const definedSymptoms = ["Abdominal Cramps", "Headache", "Acne", "Fatigue", "Constipation", "Diarrhea", "Nausea", "Bloating", "Chills", "Mood swings", "Dry skin"];
+const weight = ref<number | null>(null); // Reactive property for weight
+
+const exerciseActivities = ref<string | null>(null); // Store selected activity
+const definedActivities = ["Running", "Cycling", "Yoga", "Strength Training", "Swimming", "Walking"]; // List of exercise activities
 
 const getCurrentDate = () => {
   const date = new Date();
@@ -44,6 +48,8 @@ const submitLog = async () => {
         mood: selectedMood.value,
         flow: selectedFlow.value,
         notes: notes.value,
+        weight: weight.value,
+        exercise: exerciseActivities.value,
       },
     });
     logId.value = response.log.id;
@@ -61,6 +67,8 @@ const updateLog = async () => {
         mood: selectedMood.value,
         flow: selectedFlow.value,
         notes: notes.value,
+        weight: weight.value,
+        exercise: exerciseActivities.value,
       },
     });
   } catch (_) {
@@ -81,6 +89,7 @@ const fetchLogByDate = async (date: string) => {
       selectedMood.value = log.mood;
       selectedFlow.value = log.flow;
       notes.value = log.notes;
+      weight.value = log.weight || null;
       logId.value = log._id;
       isEditMode.value = true;
     } else {
@@ -91,6 +100,7 @@ const fetchLogByDate = async (date: string) => {
       selectedFlow.value = "None";
       notes.value = "";
       logId.value = null;
+      weight.value = null;
       isEditMode.value = false;
     }
   } catch (_) {
@@ -163,6 +173,19 @@ onMounted(() => {
             <input type="checkbox" class="btn-check" name="btnradio-sym" :id="`btnradio-sym-${index}`" v-model="selectedSymptoms" :value="symptom" autocomplete="off" :disabled="!isCurrentDate" />
             <label class="btn btn-outline" :for="`btnradio-sym-${index}`">{{ symptom }}</label>
           </div>
+        </div>
+        <div class="weight-section">
+          <label for="weight">Weight (lbs):</label>
+          <input type="number" id="weight" v-model="weight" placeholder="Enter your weight" :readonly="!isCurrentDate" class="weight-input" />
+        </div>
+        <div class="exercise-activity-section">
+          <label class="exercise-label" for="exercise-activity">Exercise Activity Logger:</label>
+          <select id="exercise-activity" v-model="exerciseActivities" :disabled="!isCurrentDate" class="exercise-activity-dropdown">
+            <option value="" disabled>Select an activity</option>
+            <option v-for="activity in definedActivities" :key="activity" :value="activity">
+              {{ activity }}
+            </option>
+          </select>
         </div>
       </div>
     </div>
@@ -250,7 +273,8 @@ form {
 .header,
 .mood-section,
 .flow-section,
-.symptoms-section {
+.symptoms-section,
+.weight-section {
   background-color: #ea7575;
   border-radius: 10px;
   padding: 0.75rem;
@@ -259,6 +283,30 @@ form {
   display: flex;
   flex-wrap: wrap;
 }
+
+.exercise-activity-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+}
+
+.exercise-activity-dropdown {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ffb6b6;
+  border-radius: 10px;
+}
+.exercise-label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
 
 h2 {
   font-size: 1.2rem;

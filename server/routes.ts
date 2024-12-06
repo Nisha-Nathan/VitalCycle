@@ -259,6 +259,13 @@ class Routes {
     return { message: "Successfully retrieved cycle statistics!", stats };
   }
 
+  @Router.get("/exercise")
+  async getExerciseLogs(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const stats = await Logging.getInstance().getLogsForExport(user);
+    return { msg: "Successfully retrieved exercise statistics!", stats };
+  }
+
   @Router.post("/logs")
   async createLog(session: SessionDoc, dateOfLog: Date, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
     const user = Sessioning.getUser(session);

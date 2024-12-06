@@ -38,9 +38,11 @@ export enum FlowIntensity {
   Heavy = "Heavy",
 }
 
-// export enum FlowIntensity {
-//     Light, Medium, Heavy
-// }
+export interface ExerciseLog {
+  activity: string; // Type of exercise
+  duration: number; // Duration in minutes
+  intensity: string; // Exercise intensity (e.g., "Low", "Medium", "High")
+}
 
 export interface LoggingDoc extends BaseDoc {
   author: ObjectId;
@@ -49,6 +51,7 @@ export interface LoggingDoc extends BaseDoc {
   mood: Mood | null;
   flow: FlowIntensity | null;
   notes: string;
+  exercises: ExerciseLog[];
 }
 
 export interface CycleStats {
@@ -205,6 +208,49 @@ export default class LoggingConcept {
       lastPeriodStart,
       predictedNextPeriod,
     };
+  }
+
+  // Method to create a new log with exercises
+  async createExerciseLog(
+    author: ObjectId,
+    dateOfLog: Date,
+    symptoms: Symptom[],
+    mood: Mood | null,
+    flow: FlowIntensity | null,
+    notes: string,
+    exercises: ExerciseLog[], // New exercise log data
+  ) {
+    const _id = await this.logs.createOne({
+      author,
+      dateOfLog,
+      symptoms,
+      mood,
+      flow,
+      notes,
+      exercises, // Saving exercise log data
+    });
+    return { msg: "Log successfully created with exercise data!", log: await this.logs.readOne({ _id }) };
+  }
+
+  // Method to add an exercise entry to an existing log
+  async addExerciseToLog(_id: ObjectId, exercise: ExerciseLog) {
+    const log = await this.logs.readOne({ _id });
+    if (!log) {
+      throw new Error("Log not found");
+    }
+
+    log.exercises.push(exercise); // Add new exercise to the exercises array
+    await this.logs.partialUpdateOne({ _id }, { exercises: log.exercises });
+    return { msg: "Exercise added successfully!", log: await this.logs.readOne({ _id }) };
+  }
+
+  // Get exercise logs for a specific date
+  async getExerciseLogs(author: ObjectId, date: Date) {
+    const log = await this.logs.readOne({ author, dateOfLog: date });
+    if (log === null) {
+      return { msg: "Log not found" };
+    }
+    return { msg: "Successfully retrieved exercise logs!", exercises: log.exercises };
   }
 
   private calculateRegularityScore(cycleLengths: number[]): number {

@@ -3,18 +3,26 @@ import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
+import Chart from "chart.js/auto"; // Import Chart.js
+
 
 // Store references
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 // Reactive properties
-const tabs = ["Cycle History", "Activity Trends", "Weight Trends"];
+const tabs = ["Cycle History", "Activity Trends"];
 const currentTab = ref("Cycle History");
 
 const cycleStats = ref<{
   averageCycleLength: number | null;
   averagePeriodLength: number | null;
   lastPeriodStart: string | null;
+} | null>(null);
+
+const exerciseStats = ref<{
+  averageActivityDuration: number | null;
+  mostCommonActivities: string | null;
+  // activity duration later?
 } | null>(null);
 
 const isLoading = ref(false);
@@ -31,12 +39,11 @@ const fetchCycleStats = async () => {
   isLoading.value = true;
   try {
     const response = await fetchy("/api/cycles/stats", "GET");
-    if (response?.cycleStats && Object.keys(response.cycleStats).length > 0) {
-      cycleStats.value = {
-        averageCycleLength: response.cycleStats.averageCycleLength || null,
-        averagePeriodLength: response.cycleStats.averagePeriodLength || null,
-        lastPeriodStart: response.cycleStats.lastPeriodStart ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString() : null,
-      };
+    console.log("API Response:", response); // Log the full response
+
+    if (response?.stats) {
+      cycleStats.value = response.stats; // Assign the stats directly
+      renderGraph(response.stats.periodStarts);
     } else {
       cycleStats.value = null;
       errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
@@ -50,9 +57,76 @@ const fetchCycleStats = async () => {
   }
 };
 
+// Render graph after data is fetched
+const renderGraph = (periodStarts: Array<{ date: string; cycleLength: number }>) => {
+  const ctx = document.getElementById("cycleStatsGraph") as HTMLCanvasElement;
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: periodStarts.map((item) => item.date),
+      datasets: [
+        {
+          label: "Cycle Length",
+          data: periodStarts.map((item) => item.cycleLength),
+          borderColor: "blue",
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Date",
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "Cycle Length (Days)",
+          },
+        },
+      },
+    },
+  });
+};
+
+
+// Fetch Exercise Stats
+const fetchExerciseStats = async () => {
+  if (!isLoggedIn.value || !currentUsername.value) {
+    exerciseStats.value = null;
+    errorMessage.value = "Please log in to view your exercise statistics.";
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const response = await fetchy("/api/exercise", "GET");
+    console.log("API Response:", response); // Log the full response
+
+    if (response?.stats) {
+      exerciseStats.value = response.stats; // Assign the stats directly
+    } else {
+      exerciseStats.value = null;
+      errorMessage.value = "No cycle data found. Start logging your exercise to see statistics!";
+    }
+  } catch (error) {
+    exerciseStats.value = null;
+    errorMessage.value = "Failed to fetch exercise statistics. Please try again.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 // Fetch stats on component mount
 onMounted(() => {
   fetchCycleStats();
+  fetchExerciseStats();
 });
 </script>
 
@@ -74,23 +148,38 @@ onMounted(() => {
       <div v-else>
         <div class="stat-item">
           Average Cycle Length:
-          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "No data available" }}
+          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "Not enough data yet! At least 2 cycles needed." }}
         </div>
         <div class="stat-item">
           Average Period Length:
-          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "No data available" }}
+          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "At least 1 full period needed." }}
         </div>
         <div class="stat-item">
           Last Menstrual Period Start:
           {{ cycleStats?.lastPeriodStart || "No data available" }}
         </div>
+
+        <!-- Graph Container -->
+        <div class="stat-item">
+          <canvas id="cycleStatsGraph"></canvas>
+        </div>
       </div>
     </div>
 
     <div v-if="currentTab === 'Activity Trends'" class="stats-overview">
-      <div class="stat-item">Recent Activities</div>
-      <div class="stat-item">Activity Duration Trends</div>
-      <div class="stat-item">Most Common Activities</div>
+      <div v-if="isLoading" class="stat-item">Loading...</div>
+      <div v-else-if="errorMessage" class="stat-item">{{ errorMessage }}</div>
+      <div v-else>
+        <!-- Example: Displaying Exercise Stats -->
+        <div class="stat-item">
+          Average Activity Duration:
+          {{ exerciseStats?.averageActivityDuration ? `${exerciseStats.averageActivityDuration} minutes` : "No data available" }}
+        </div>
+        <div class="stat-item">
+          Most Common Activities:
+          {{ exerciseStats?.mostCommonActivities?.join(", ") || "No data available" }}
+        </div>
+      </div>
     </div>
 
     <div v-if="currentTab === 'Weight Trends'" class="stats-overview">
@@ -110,6 +199,12 @@ onMounted(() => {
   max-width: 800px;
   margin: 0 auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#cycleStatsGraph {
+  width: 100%;
+  height: 300px;
+  margin-top: 1.5rem;
 }
 
 /* Section Title */
