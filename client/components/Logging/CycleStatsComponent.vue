@@ -3,12 +3,14 @@ import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
+import Chart from "chart.js/auto"; // Import Chart.js
+
 
 // Store references
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 
 // Reactive properties
-const tabs = ["Cycle History", "Activity Trends", "Weight Trends"];
+const tabs = ["Cycle History", "Activity Trends"];
 const currentTab = ref("Cycle History");
 
 const cycleStats = ref<{
@@ -41,6 +43,7 @@ const fetchCycleStats = async () => {
 
     if (response?.stats) {
       cycleStats.value = response.stats; // Assign the stats directly
+      renderGraph(response.stats.periodStarts);
     } else {
       cycleStats.value = null;
       errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
@@ -52,6 +55,45 @@ const fetchCycleStats = async () => {
     isLoading.value = false;
   }
 };
+
+// Render graph after data is fetched
+const renderGraph = (periodStarts: Array<{ date: string; cycleLength: number }>) => {
+  const ctx = document.getElementById("cycleStatsGraph") as HTMLCanvasElement;
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: periodStarts.map((item) => item.date),
+      datasets: [
+        {
+          label: "Cycle Length",
+          data: periodStarts.map((item) => item.cycleLength),
+          borderColor: "blue",
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Date",
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: "Cycle Length (Days)",
+          },
+        },
+      },
+    },
+  });
+};
+
 
 // Fetch Exercise Stats
 const fetchExerciseStats = async () => {
@@ -105,7 +147,7 @@ onMounted(() => {
       <div v-else>
         <div class="stat-item">
           Average Cycle Length:
-          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "Not enough data yet! At least 2 cycles needed. " }}
+          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "Not enough data yet! At least 2 cycles needed." }}
         </div>
         <div class="stat-item">
           Average Period Length:
@@ -115,10 +157,15 @@ onMounted(() => {
           Last Menstrual Period Start:
           {{ cycleStats?.lastPeriodStart || "No data available" }}
         </div>
+
+        <!-- Graph Container -->
+        <div class="stat-item">
+          <canvas id="cycleStatsGraph"></canvas>
+        </div>
       </div>
     </div>
 
-    <div v-if="currentTab === 'Exercise Trends'" class="stats-overview">
+    <div v-if="currentTab === 'Activity Trends'" class="stats-overview">
       <div v-if="isLoading" class="stat-item">Loading...</div>
       <div v-else-if="errorMessage" class="stat-item">{{ errorMessage }}</div>
       <div v-else>
@@ -151,6 +198,12 @@ onMounted(() => {
   max-width: 800px;
   margin: 0 auto;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#cycleStatsGraph {
+  width: 100%;
+  height: 300px;
+  margin-top: 1.5rem;
 }
 
 /* Section Title */
