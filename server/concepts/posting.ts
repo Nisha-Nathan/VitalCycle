@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import DocCollection, { BaseDoc } from "../framework/doc";
+import { circleMockData, myCareBoardMockData, sisterCircleMockData } from "../mockData/posting";
 import { NotAllowedError, NotFoundError } from "./errors";
 
 export interface SisterCirclePostDoc extends BaseDoc {
@@ -41,9 +42,28 @@ export default class PostingConcept {
     this.circles = new DocCollection<CircleDoc>(circlesCollection);
 
     // Initialize default circles
-    this.initializeDefaultCircles();
+    void this.initializeDefaultCircles();
+    void this.injectMockData();
   }
 
+  async injectMockData() {
+    // Add circles
+    for (const circle of circleMockData) {
+      await this.circles.createOne(circle);
+    }
+
+    // Add SisterCircle posts
+    for (const post of sisterCircleMockData) {
+      await this.sisterCirclePosts.createOne(post);
+    }
+
+    // Add MyCareBoard posts
+    for (const post of myCareBoardMockData) {
+      await this.myCareBoardPosts.createOne(post);
+    }
+
+    console.log("Mock data injected successfully!");
+  }
   private async initializeDefaultCircles() {
     const existingCircles = await this.circles.readMany({});
 
