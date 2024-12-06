@@ -38,9 +38,17 @@ export enum FlowIntensity {
   Heavy = "Heavy",
 }
 
-// export enum FlowIntensity {
-//     Light, Medium, Heavy
-// }
+export enum Activity {
+  Walking = "Walking",
+  Running = "Running",
+  Biking = "Biking",
+  Weightlifting = "Weightlifting",
+  Yoga = "Yoga",
+  Meditation = "Meditation",
+  Dance = "Dance",
+  HIIT = "HIIT",
+  Other = "Other",
+}
 
 export interface LoggingDoc extends BaseDoc {
   author: ObjectId;
@@ -49,6 +57,7 @@ export interface LoggingDoc extends BaseDoc {
   mood: Mood | null;
   flow: FlowIntensity | null;
   notes: string;
+  activities: Activity[];
 }
 
 export interface CycleStats {
@@ -61,11 +70,10 @@ export interface CycleStats {
   predictedNextPeriod: Date | null;
 }
 
-export interface WeightLog {
-  _id: ObjectId;
-  userId: ObjectId;
-  weight: number;
-  date: Date;
+export interface ActivityStats {
+  author: ObjectId;
+  dateOfLog: Date;
+  activities: Activity[];
 }
 
 export default class LoggingConcept {
@@ -94,6 +102,12 @@ export default class LoggingConcept {
     return { msg: "Log successfully created!", log: await this.logs.readOne({ _id }) };
   }
 
+  // Create a new activity log entry
+  async createActivityLog(author: ObjectId, dateOfLog: Date, activities: Activity[]) {
+    const _id = await this.logs.createOne({ author, dateOfLog, activities });
+    return { msg: "Activity Log successfully created!", log: await this.logs.readOne({ _id }) };
+  }
+
   /**
    * Remove a specific daily log by its id
    */
@@ -102,12 +116,41 @@ export default class LoggingConcept {
     return { msg: "Log deleted successfully!" };
   }
 
+  // Get all activity logs
+  async getActivityLogs() {
+    return await this.logs.readMany({});
+  }
+
+  // Get activity log by author and date
+  async getActivityLogByDate(author: ObjectId, date: Date) {
+    const log = await this.logs.readOne({ author, dateOfLog: date });
+    if (log === null) {
+      return;
+    }
+    return { log };
+  }
+
+  // Delete a specific activity log by its ID
+  async deleteActivityLog(_id: ObjectId) {
+    await this.logs.deleteOne({ _id });
+    return { msg: "Activity Log deleted successfully!" };
+  }
+
   async update(_id: ObjectId, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
     const log = await this.logs.readOne({ _id });
     if (!log) {
       throw new Error("Log not found");
     }
     const id = await this.logs.partialUpdateOne({ _id }, { symptoms, mood, flow, notes });
+    return { msg: "Log updated successfully!", log: await this.logs.readOne({ _id: id }) };
+  }
+
+  async updateActivityLog(_id: ObjectId, activities: Activity[]) {
+    const log = await this.logs.readOne({ _id });
+    if (!log) {
+      throw new Error("Log not found");
+    }
+    const id = await this.logs.partialUpdateOne({ _id }, { activities });
     return { msg: "Log updated successfully!", log: await this.logs.readOne({ _id: id }) };
   }
 
@@ -126,7 +169,7 @@ export default class LoggingConcept {
       // return { msg: "Log not found" };
       return;
     }
-    return {  log };
+    return { log };
   }
 
   async getLogs() {
@@ -204,6 +247,59 @@ export default class LoggingConcept {
       regularityScore,
       lastPeriodStart,
       predictedNextPeriod,
+    };
+  }
+
+  async calculateActivityStats(author: ObjectId): Promise<{
+    activityStreak: number;
+    lastLoggedActivity: { date: Date; activities: Activity[] } | null;
+  }> {
+    // Fetch all activity logs for the user, sorted by date
+    const logs = await this.logs.readMany({ author }, { sort: { dateOfLog: 1 } });
+
+    if (logs.length === 0) {
+      // No logs, return default values
+      return { activityStreak: 0, lastLoggedActivity: null };
+    }
+
+    // Initialize streak and last activity details
+    let streak = 0;
+    let currentStreakDate: Date | null = null;
+    let lastLoggedActivity: { date: Date; activities: Activity[] } | null = null;
+
+    // Iterate through logs in reverse to calculate streaks
+    for (let i = logs.length - 1; i >= 0; i--) {
+      const log = logs[i];
+      const logDate = new Date(log.dateOfLog);
+      const activities = log.activities;
+
+      // Set last logged activity (most recent log)
+      if (!lastLoggedActivity) {
+        lastLoggedActivity = { date: logDate, activities };
+      }
+
+      // Check if the log is consecutive
+      if (currentStreakDate === null) {
+        // Start a streak from the last logged activity
+        currentStreakDate = logDate;
+        streak = 1;
+      } else {
+        const dayDifference = Math.floor((currentStreakDate.getTime() - logDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (dayDifference === 1) {
+          // Consecutive day, increment streak
+          streak++;
+          currentStreakDate = logDate;
+        } else if (dayDifference > 1) {
+          // Streak broken
+          break;
+        }
+      }
+    }
+
+    return {
+      activityStreak: streak,
+      lastLoggedActivity,
     };
   }
 
