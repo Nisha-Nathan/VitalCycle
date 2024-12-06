@@ -50,7 +50,7 @@ onMounted(() => {
     </fieldset>
   </form>
 
-  <button class="button-error pure-button" @click="delete_">Delete User</button>
+
 
   <h2>Opt-in Preferences</h2>
   <div class="pure-form">
@@ -66,4 +66,6 @@ onMounted(() => {
       </label>
     </fieldset>
   </div>
+
+  <button class="button-error pure-button" @click="delete_">Delete User</button>
 </template>

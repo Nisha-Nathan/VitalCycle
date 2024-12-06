@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useNotificationStore } from "@/stores/notification";
 import { useUserStore } from "@/stores/user";
+import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
 const notificationStore = useNotificationStore();
 const { currentUsername } = storeToRefs(useUserStore());
-const notifications = ref<Array<string>>([]);
+const notifications = ref<Array<Record<string, string>>>([]);
 
 async function deleteNotification(id: string) {
     try {
@@ -56,9 +57,12 @@ onMounted(() => {
         <section class="notifications">
             <div>
                 <ol v-if="notifications.length > 0">
-                    <li v-for="notification in notifications" :key="notification">
-                        <p>{{ notification }}</p>
-                        <button class="btn btn-delete" @click="deleteNotification(notification)">Remove
+                    <li v-for="notification in notifications" :key="notification._id">
+                        <div>
+                            <p class="notification-message">{{ notification.notificationContent }}</p>
+                            <p class="notification-time">{{ formatDate(new Date(notification.notificationTime)) }}</p>
+                        </div>
+                        <button class="btn btn-delete" @click="deleteNotification(notification._id)">Remove
                             Notification</button>
                     </li>
                 </ol>
@@ -100,19 +104,32 @@ li {
     flex-direction: row;
     justify-content: space-between;
     border-bottom: 1px solid black;
+    width: 100%;
 }
 
 .notifications {
     align-items: center;
 }
 
+.notification-message{
+    margin-bottom: 5px;
+}
+.notification-time{
+    font-size: 0.8em;
+    color: grey;
+    margin-left:10px;
+    margin-top:0;
+}
+
 .btn-delete {
     background-color: black;
     color: white;
     margin-bottom: 5px;
+    
 }
 
 .btn-delete:hover {
+    
     background-color: #ea7575;
     color: white;
 }

@@ -59,12 +59,14 @@ const router = createRouter({
       path: "/user-profile",
       name: "UserProfile",
       component: UserProfileView,
+      meta: { requiresAuth: true },
     },
 
     {
       path: "/notifications",
       name: "Notifications",
       component: NotificationView,
+      meta: { requiresAuth: true },
     },
   ],
 });
