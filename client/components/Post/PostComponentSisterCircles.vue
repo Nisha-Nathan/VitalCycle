@@ -6,10 +6,12 @@ import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
+import PostRepliesList from "./PostRepliesList.vue";
 
 const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
+let repliesShowing = ref(false);
 
 let allReacts = ref([]);
 
@@ -36,6 +38,10 @@ const reactCountsRef = ref<InstanceType<typeof ReactCounts> | null>(null);
 const handleRefreshReactCounts = () => {
   reactCountsRef.value?.getPostReacts?.();
 };
+
+const toggleShowReplies = async () => {
+  repliesShowing.value = !repliesShowing.value;
+};
 </script>
 
 <template>
@@ -60,6 +66,8 @@ const handleRefreshReactCounts = () => {
     </ul>
   </div>
   <AddReact :post="props.post" @refreshReactCounts="handleRefreshReactCounts" />
+  <button class="see-replies" @click="toggleShowReplies">{{ repliesShowing ? "Hide Replies" : "See Replies" }}</button>
+  <PostRepliesList v-if="repliesShowing" :post="props.post" />
 </template>
 
 <style scoped>
@@ -102,5 +110,19 @@ menu {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.see-replies {
+  background-color: #ea7575;
+  color: black;
+  border: 1px solid black;
+  border-radius: 0.5em;
+  margin: 10px;
+  width: fit-content;
+}
+
+.see-replies:hover {
+  background-color: lightgray;
+  color: black;
 }
 </style>

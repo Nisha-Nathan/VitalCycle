@@ -30,7 +30,7 @@ const fetchCycleStats = async () => {
 
   isLoading.value = true;
   try {
-    const response = await fetchy("/api/cycle-stats", "GET");
+    const response = await fetchy("/api/cycles/stats", "GET");
     if (response?.cycleStats && Object.keys(response.cycleStats).length > 0) {
       cycleStats.value = {
         averageCycleLength: response.cycleStats.averageCycleLength || null,
@@ -42,6 +42,7 @@ const fetchCycleStats = async () => {
       errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
     }
   } catch (error) {
+    console.log("error: ", error);
     cycleStats.value = null;
     errorMessage.value = "Failed to fetch cycle statistics. Please try again.";
   } finally {
@@ -61,12 +62,7 @@ onMounted(() => {
 
     <!-- Tabs Section -->
     <div class="tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab"
-        :class="['tab', { active: currentTab === tab }]"
-        @click="currentTab = tab"
-      >
+      <button v-for="tab in tabs" :key="tab" :class="['tab', { active: currentTab === tab }]" @click="currentTab = tab">
         {{ tab }}
       </button>
     </div>
