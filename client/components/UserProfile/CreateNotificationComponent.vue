@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { fetchy } from '@/utils/fetchy';
-import { ref, watch, watchEffect } from 'vue';
+import { ref } from 'vue';
 
 
 const notificationTime = ref<string>("");
@@ -39,11 +39,7 @@ const printTime = () => {
     console.log(notificationTime.value);
 };
 
-// Watch the notificationTime ref and log its value and type whenever it changes
-watch(notificationTime, (newValue) => {
-    console.log('Notification Time:', newValue);
-    console.log('Type:', typeof newValue);
-});
+
 </script>
 
 
@@ -73,7 +69,7 @@ watch(notificationTime, (newValue) => {
                 <option value="Weekly">Weekly</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary btn-submit">Create Notification</button>
 
     </form>
 
@@ -87,6 +83,17 @@ watch(notificationTime, (newValue) => {
 
 #notificationTime {
     width: 100%;
+}
+
+.btn-submit:hover {
+  background-color: #ff7f7f;
+}
+
+.btn-submit {
+  margin: 10px;
+  width: 100%;
+  background-color: black;
+  border: none;
 }
 
 </style>

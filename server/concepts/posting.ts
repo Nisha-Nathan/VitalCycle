@@ -115,13 +115,13 @@ export default class PostingConcept {
     if (!circle) {
       throw new Error(`Circle with name ${circleName} not found`);
     }
-    const posts = await this.sisterCirclePosts.readMany({ circles: { $in: [circle.name] } });
+    const posts = await this.sisterCirclePosts.readMany({ circles: { $in: [circle.name] } },{ sort: { dateUpdated: -1 } });
     return posts;
   }
 
   // Fetch SisterCircle Posts by Author
   async getSisterCirclePostsByAuthor(author: ObjectId) {
-    return await this.sisterCirclePosts.readMany({ author });
+    return await this.sisterCirclePosts.readMany({ author },{ sort: { dateUpdated: -1 } });
   }
 
   private titleContains(title: string, search: string): boolean {
@@ -136,7 +136,7 @@ export default class PostingConcept {
 
     try {
       // Fetch all posts
-      const posts = await this.sisterCirclePosts.readMany({});
+      const posts = await this.sisterCirclePosts.readMany({},{ sort: { dateUpdated: -1 } });
 
       // Filter posts where the title contains the search string (case-insensitive)
       const filteredPosts = posts.filter((post) => this.titleContains(post.title, title));
@@ -151,12 +151,12 @@ export default class PostingConcept {
 
   // Fetch MyCareboard Posts by Board Posted To
   async getMyCareBoardPostsByDestinationUsername(postedOnUsername: string) {
-    return await this.myCareBoardPosts.readMany({ postedOnUsername });
+    return await this.myCareBoardPosts.readMany({ postedOnUsername },{ sort: { dateUpdated: -1 } });
   }
 
   // Fetch MyCareBoard Posts by Author
   async getMyCareBoardPostsByAuthor(author: ObjectId) {
-    return await this.myCareBoardPosts.readMany({ author });
+    return await this.myCareBoardPosts.readMany({ author },{ sort: { dateUpdated: -1 } });
   }
 
   // Delete SisterCircle Post
@@ -167,7 +167,6 @@ export default class PostingConcept {
 
   // Delete MyCareBoard Post
   async deleteMyCareBoardPost(_id: ObjectId) {
-    console.log("start");
     await this.myCareBoardPosts.deleteOne({ _id });
     return { msg: "MyCareBoard post deleted!" };
   }
@@ -180,7 +179,6 @@ export default class PostingConcept {
     if (!post) {
       throw new NotFoundError(`${collectionType} post ${_id} does not exist!`);
     }
-    console.log("in assert!!!");
     if (!post.author || post.author.toString() !== user.toString()) {
       throw new PostAuthorNotMatchError(user, _id);
     }

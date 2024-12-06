@@ -53,7 +53,6 @@ async function getSentInvites() {
   let requestResults;
   try {
     requestResults = await fetchy("/api/invites/sent", "GET", { query });
-    console.log("request results: ", requestResults);
   } catch (error) {
     console.log(error);
     return;

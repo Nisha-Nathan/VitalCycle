@@ -14,7 +14,6 @@ const { toast } = storeToRefs(useToastStore());
 const notificationStore = useNotificationStore();
 const { deliveredCount } = storeToRefs(notificationStore);
 
-
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
@@ -26,31 +25,44 @@ onBeforeMount(async () => {
     // User is not logged in
   }
 });
+
+
 </script>
 
 <template>
-  <nav class="navbar">
-    <RouterLink to="/" class="nav-item">Today</RouterLink>
-    <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Sister Circles</RouterLink>
-    <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn && myCareBoardOptIn">Care Board</RouterLink>
-    <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
-    <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
-    <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn">
-      <button type="button" class="btn btn-primary btn-notifications">
-        Notifications <span class="badge bg-secondary bg-notifications">{{ deliveredCount }}</span>
-      </button>
-    </RouterLink>
+  <header>
+    <nav class="navbar">
+      <RouterLink to="/" class="nav-item">Today</RouterLink>
+      <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Sister Circles
+      </RouterLink>
+      <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn && myCareBoardOptIn">Care Board</RouterLink>
+      <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
+      <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
+      <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn">
+        <button type="button" class="btn btn-primary btn-notifications">
+          Notifications <span class="badge bg-secondary bg-notifications">{{ deliveredCount }}</span>
+        </button>
+      </RouterLink>
+    </nav>
 
-  </nav>
+    <p v-if="toast" :class="toast.style" class="toast-message">{{ toast.message }}</p>
+   
+  </header>
+
   <RouterView />
 </template>
 
 <style scoped>
+@import "./assets/toast.css";
+@import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
+
+
 .navbar {
   display: flex;
   gap: 1rem;
   padding: 1rem;
   background-color: #f8f9fa;
+  font-family: "Quando", serif;
 }
 
 .nav-item {
@@ -61,6 +73,16 @@ onBeforeMount(async () => {
 
 .nav-item.router-link-active {
   font-weight: bold;
+}
+
+.toast-message{
+  font-size:1em;
+  margin:10px;
+  border-radius: 10px;
+  width:90%;
+  text-align: center;
+  justify-self: center;
+  font-family: "Quando", serif;
 }
 
 .btn-notifications {

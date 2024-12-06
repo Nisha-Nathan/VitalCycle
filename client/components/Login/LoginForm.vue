@@ -38,4 +38,14 @@ h3 {
   display: flex;
   justify-content: center;
 }
+
+button{
+  background-color: black;
+  border-radius: 10px;
+}
+
+button:hover{
+  background-color: #EA7575;
+  border: 1.5px solid white;
+}
 </style>

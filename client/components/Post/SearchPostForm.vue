@@ -11,7 +11,7 @@ const emit = defineEmits(["getPostsByAuthor"]);
     <fieldset>
       <legend>{{ props.headerText }}</legend>
       <input id="author" type="text" v-model="author" :placeholder="props.placeholder" />
-      <button type="submit" class="pure-button pure-button-primary">Search</button>
+      <button type="submit" class="btn btn-primary btn-submit">Search</button>
     </fieldset>
   </form>
 </template>
@@ -22,5 +22,15 @@ form {
   gap: 0.5em;
   padding: 1em;
   align-items: center;
+}
+
+.btn-submit:hover {
+  background-color: #ff7f7f;
+}
+
+.btn-submit {
+  margin: auto;
+  background-color: black;
+  border: none;
 }
 </style>

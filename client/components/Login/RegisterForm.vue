@@ -9,14 +9,11 @@ const { createUser, loginUser, updateSession,initializeUserOpting} = useUserStor
 
 async function register() {
   await createUser(username.value, password.value);
-  console.log("User registered");
   await initializeUserOpting(username.value);
   await loginUser(username.value, password.value);
-  console.log("User logged in");
   
   void updateSession();
   void router.push({ name: "Today" });
-  console.log("User registered and logged in");
 }
 </script>
 
@@ -43,5 +40,15 @@ async function register() {
 h3 {
   display: flex;
   justify-content: center;
+}
+
+button{
+  background-color: black;
+  border-radius: 10px;
+}
+
+button:hover{
+  background-color: #EA7575;
+  border: 1.5px solid white;
 }
 </style>

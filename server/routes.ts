@@ -75,7 +75,6 @@ class Routes {
 
   @Router.get("/opting/:userId")
   async getUserOptingStatus(username: string) {
-    console.log("getting user opting status...");
     const id = (await Authing.getUserByUsername(username))._id;
     return await Opting.getUserOptingStatus(id);
   }
@@ -141,7 +140,6 @@ class Routes {
 
   @Router.get("/mycareboard/posts")
   async getMyCareBoardPosts(author: string) {
-    console.log("getting posts by author route...");
     const posts = await Posting.getMyCareBoardPostsByDestinationUsername(author);
     return Responses.posts(posts);
   }
@@ -157,7 +155,6 @@ class Routes {
 
   @Router.delete("/mycareboard/posts/:id")
   async deleteMyCareBoardPost(session: SessionDoc, id: string) {
-    console.log("start of route!!!!!!!!");
     //const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
     // await Posting.assertAuthorIsUser(oid, user, "MyCareBoard");
@@ -378,21 +375,17 @@ class Routes {
   async createNotification(session: SessionDoc, notifyAbout: string, frequency: string, timeFrame: { hours: number; minutes: number }) {
     const user = Sessioning.getUser(session);
 
-    // Extract details from the request body
-    // const { notifyAbout, frequency, timeFrame } = body;
-
-    console.log("notifyAbout: ", notifyAbout);
-    console.log("frequency: ", frequency);
-    console.log("timeFrame: ", timeFrame);
     if (!notifyAbout || !frequency || !timeFrame || timeFrame.hours == null || timeFrame.minutes == null) {
       throw new Error("Invalid input: 'notifyAbout', 'frequency', and 'timeFrame' are required.");
     }
 
     // Call your NotificationConcept to create the notification
-    return await Notification.createNotification(user, notifyAbout, frequency as "once" | "daily" | "weekly", {
+    const result = await Notification.createNotification(user, notifyAbout, frequency as "once" | "daily" | "weekly", {
       hours: timeFrame.hours,
       minutes: timeFrame.minutes,
     });
+    return {}
+
   }
 
   @Router.get("/notifications/deliver")
@@ -461,13 +454,11 @@ class Routes {
     const today = new Date();
 
     // Use getChecklistByDate method to fetch a checklist by user and date
-    console.log("getting checklists by date: ", user, today);
     return await Checklist.getChecklistByDate(user, today);
   }
 
   @Router.post("/checklists")
   async createChecklist(session: SessionDoc, items: string[]) {
-    console.log("create checklist called");
     const user = Sessioning.getUser(session);
     const today = new Date();
 

@@ -31,7 +31,6 @@ function updateEditing(id: string) {
 }
 
 onBeforeMount(async () => {
-  console.log("remounting!!!");
   if (!userStore.currentlyViewingCareboard) {
     await getPosts(currentUsername.value);
   } else {

@@ -12,7 +12,7 @@ const title = ref("");
 const selectedCircle = ref("");
 const isAnonymous = ref(true);
 const allCircles = ref<Circle[]>([]);
-const emit = defineEmits(["refreshPosts","closeForm"]);
+const emit = defineEmits(["refreshPosts", "closeForm"]);
 
 const createPost = async (title: string, content: string, anonymous: boolean, circle: string) => {
   try {
@@ -71,7 +71,7 @@ onBeforeMount(async () => {
         </option>
       </select>
     </div>
-    <button type="submit" class="pure-button-primary pure-button">Create Post</button>
+    <button type="submit" class="btn btn-primary btn-submit">Create Post</button>
   </form>
 </template>
 
@@ -97,5 +97,16 @@ textarea {
 .anonymous-checkbox {
   transform: scale(1.5);
   margin: 10px;
+}
+
+.btn-submit:hover {
+  background-color: #ff7f7f;
+}
+
+.btn-submit {
+  margin: auto;
+  width: 100%;
+  background-color: black;
+  border: none;
 }
 </style>

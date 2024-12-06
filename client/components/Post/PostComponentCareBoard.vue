@@ -2,7 +2,7 @@
 import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
 import PostRepliesList from "./PostRepliesList.vue";
 
@@ -11,6 +11,19 @@ const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
 let repliesShowing = ref(false);
 const userStore = useUserStore();
+
+const isExpanded = ref(false); // Flag to track if the post is expanded
+
+const toggleContent = () => {
+  isExpanded.value = !isExpanded.value; // Toggle between truncated and full content
+};
+
+// Truncated content logic
+const truncatedContent = computed(() => {
+  return isExpanded.value
+    ? props.post.content
+    : props.post.content.slice(0, 200) + (props.post.content.length > 200 ? "..." : ""); // Show truncated content
+});
 
 const deletePost = async () => {
   try {
@@ -37,9 +50,14 @@ const toggleShowReplies = async () => {
         <p>{{ formatDate(props.post.dateUpdated) }}</p>
       </article>
     </div>
-    <p class="post-content">{{ props.post.content }}</p>
+    <p class="post-content"> {{ truncatedContent }}
+      <button type="button" class="btn btn-primary btn-sm" v-if="props.post.content.length > 200"
+        @click="toggleContent">{{ isExpanded ? "Read Less" : "Read More" }}
+      </button>
+    </p>
     <div class="base">
-      <button class="see-replies" @click="toggleShowReplies">{{ repliesShowing ? "Hide Replies" : "See Replies" }}</button>
+      <button class="see-replies" @click="toggleShowReplies">{{ repliesShowing ? "Hide Replies" : "See Replies"
+        }}</button>
       <button class="delete" v-if="!userStore.currentlyViewingCareboard" @click="deletePost">delete</button>
     </div>
     <PostRepliesList v-if="repliesShowing" :post="props.post" />
@@ -77,6 +95,7 @@ const toggleShowReplies = async () => {
   display: flex;
   flex-direction: column;
 }
+
 .see-replies {
   background-color: #ea7575;
   color: white;
@@ -104,6 +123,7 @@ const toggleShowReplies = async () => {
   background-color: red;
   border: 1px solid red;
 }
+
 p {
   margin: 0em;
 }
@@ -138,5 +158,19 @@ menu {
 
 .base article:only-child {
   margin-left: auto;
+}
+
+.btn-sm {
+  background-color: transparent;
+  border-color: black;
+  color: black;
+  font-size: small;
+  height: fit-content;
+  font-weight: medium;
+}
+
+.btn-sm:hover {
+  background-color: black;
+  color: white;
 }
 </style>

@@ -35,10 +35,8 @@ async function getInvites() {
 }
 
 const goToUserCareboard = (username: string) => {
-  console.log("going to user careboard: ", username);
   closeSection();
   userStore.goToCareboard(username);
-  console.log("store value is now: ", userStore.currentlyViewingCareboard);
   emit("goToCareboard");
   emit("closeSection");
 };

@@ -115,8 +115,6 @@ const displayChecklist = () => {
 };
 
 onMounted(() => {
-  console.log("mounted", dateOfLog.value);
-  console.log("current date", currentDate.value);
   fetchLogByDate(dateOfLog.value);
 });
 </script>

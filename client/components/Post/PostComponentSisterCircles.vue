@@ -4,7 +4,7 @@ import ReactCounts from "@/components/Post/ReactCounts.vue";
 import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
 
 const props = defineProps(["post"]);
@@ -13,8 +13,21 @@ const { currentUsername } = storeToRefs(useUserStore());
 
 let allReacts = ref([]);
 
+const isExpanded = ref(false); // Flag to track if the post is expanded
+
+const toggleContent = () => {
+  isExpanded.value = !isExpanded.value; // Toggle between truncated and full content
+};
+
+// Truncated content logic
+const truncatedContent = computed(() => {
+  return isExpanded.value
+    ? props.post.content
+    : props.post.content.slice(0, 200) + (props.post.content.length > 200 ? "..." : ""); // Show truncated content
+});
+
 const deletePost = async () => {
-  console.log("delete post called");
+  // console.log("delete post called");
   try {
     const idToSend = String(props.post._id);
     //await fetchy(`/api/mycareboard/posts/${props.post._id}`, "DELETE");
@@ -24,7 +37,6 @@ const deletePost = async () => {
     return;
   }
   emit("refreshPosts");
-  console.log("finished");
 };
 
 const isAuthor = (postUsername: string) => {
@@ -44,18 +56,24 @@ const handleRefreshReactCounts = () => {
     <ReactCounts ref="reactCountsRef" :post="props.post" />
   </div>
   <p class="author">by {{ props.post.author ? props.post.username : "anonymous" }}</p>
-  <p>{{ props.post.content }}</p>
+  <p>
+    {{ truncatedContent }}
+    <button type="button" class="btn btn-primary btn-sm" v-if="props.post.content.length > 200"
+      @click="toggleContent">{{ isExpanded ? "Read Less" : "Read More" }}
+    </button>
+  </p>
   <div class="base">
     <menu v-if="isAuthor(props.post.username)">
       <li><button class="button-error btn-small pure-button" @click="deletePost">Delete</button></li>
     </menu>
     <article class="timestamp">
-      <p v-if="props.post.dateCreated !== props.post.dateUpdated">Edited on: {{ formatDate(props.post.dateUpdated) }}</p>
+      <p v-if="props.post.dateCreated !== props.post.dateUpdated">Edited on: {{ formatDate(props.post.dateUpdated) }}
+      </p>
       <p v-else>Created on: {{ formatDate(props.post.dateCreated) }}</p>
     </article>
     <ul>
       <li v-for="circle in props.post.circles" :key="circle">
-        {{ circle }}
+        <span class="badge rounded-pill bg-dark "> {{ circle }}</span>
       </li>
     </ul>
   </div>
@@ -102,5 +120,23 @@ menu {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.bg-dark {
+  font-weight: lighter;
+}
+
+.btn-sm {
+  background-color: transparent;
+  border-color: black;
+  color: black;
+  font-size: small;
+  height: fit-content;
+  font-weight: medium;
+}
+
+.btn-sm:hover {
+  background-color: black;
+  color: white;
 }
 </style>

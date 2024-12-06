@@ -18,12 +18,10 @@ async function getReplies() {
   let postResults;
   try {
     postResults = await fetchy("/api/replies", "GET", { query });
-    console.log("post results: ", postResults);
   } catch (error) {
     return;
   }
   replies.value = postResults.replies;
-  console.log("replies: ", replies.value);
 }
 
 const addDefaultReply = async () => {

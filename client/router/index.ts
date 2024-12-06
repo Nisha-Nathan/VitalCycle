@@ -6,10 +6,10 @@ import CareBoardView from "../views/CareBoardView.vue";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import NotFoundView from "../views/NotFoundView.vue";
-import SettingView from "../views/SettingView.vue";
 import TodayView from "../views/TodayView.vue";
 import UserProfileView from "../views/UserProfileView.vue";
 import NotificationView from "../views/NotificationView.vue";
+import RegisterView from "../views/RegisterView.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,12 +32,6 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresCareBoard: true },
     },
     {
-      path: "/settings",
-      name: "Settings",
-      component: SettingView,
-      meta: { requiresAuth: true },
-    },
-    {
       path: "/login",
       name: "Login",
       component: LoginView,
@@ -45,7 +39,19 @@ const router = createRouter({
       beforeEnter: (to, from) => {
         const { isLoggedIn } = storeToRefs(useUserStore());
         if (isLoggedIn.value) {
-          return { name: "Settings" };
+          return { name: "UserProfile" };
+        }
+      },
+    },
+    {
+      path: "/register",
+      name: "Register",
+      component: RegisterView,
+      meta: { requiresAuth: false },
+      beforeEnter: (to, from) => {
+        const { isLoggedIn } = storeToRefs(useUserStore());
+        if (isLoggedIn.value) {
+          return { name: "UserProfile" };
         }
       },
     },

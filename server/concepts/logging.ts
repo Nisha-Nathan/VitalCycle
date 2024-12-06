@@ -123,9 +123,10 @@ export default class LoggingConcept {
   async getLogByDate(author: ObjectId, date: Date) {
     const log = await this.logs.readOne({ author, dateOfLog: date });
     if (log === null) {
-      return { msg: "Log not found" };
+      // return { msg: "Log not found" };
+      return;
     }
-    return { msg: "Successfully retrieved logs!", log };
+    return {  log };
   }
 
   async getLogs() {
