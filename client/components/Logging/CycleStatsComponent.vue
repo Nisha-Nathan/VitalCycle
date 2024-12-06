@@ -31,12 +31,13 @@ const fetchCycleStats = async () => {
   isLoading.value = true;
   try {
     const response = await fetchy("/api/cycles/stats", "GET");
-    if (response?.cycleStats && Object.keys(response.cycleStats).length > 0) {
-      cycleStats.value = {
-        averageCycleLength: response.cycleStats.averageCycleLength || null,
-        averagePeriodLength: response.cycleStats.averagePeriodLength || null,
-        lastPeriodStart: response.cycleStats.lastPeriodStart ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString() : null,
-      };
+    if (response?.stats) {
+      cycleStats.value = response.stats;
+      // {
+      //   averageCycleLength: response.cycleStats.averageCycleLength || null,
+      //   averagePeriodLength: response.cycleStats.averagePeriodLength || null,
+      //   lastPeriodStart: response.cycleStats.lastPeriodStart ? new Date(response.cycleStats.lastPeriodStart).toLocaleDateString() : null,
+      // };
     } else {
       cycleStats.value = null;
       errorMessage.value = "No cycle data found. Start logging your cycles to see statistics!";
@@ -74,11 +75,11 @@ onMounted(() => {
       <div v-else>
         <div class="stat-item">
           Average Cycle Length:
-          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "No data available" }}
+          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "Insufficient data. At least 2 cycles." }}
         </div>
         <div class="stat-item">
           Average Period Length:
-          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "No data available" }}
+          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "Insufficient data. At least 1 full period." }}
         </div>
         <div class="stat-item">
           Last Menstrual Period Start:
