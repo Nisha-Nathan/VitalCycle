@@ -46,12 +46,6 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.welcome-message {
-  font-size: 1.8rem;
-  color: #000;
-  font-weight: bold;
-}
-
 /* Section Titles */
 .section-title {
   font-size: 1.6rem;
@@ -72,14 +66,12 @@ const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.sister-circles :deep(h2),
-.care-board :deep(h2) {
+.sister-circles :deep(h2) {
   margin-bottom: 1rem;
 }
 
 /* Component Wrappers */
-.sister-circles>div,
-.care-board>div {
+.sister-circles>div {
   padding: 1rem;
   background-color: #ffe3e3;
   border-radius: 8px;

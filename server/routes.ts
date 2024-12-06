@@ -74,8 +74,9 @@ class Routes {
   }
 
   @Router.get("/opting/:userId")
-  async getUserOptingStatus(userId: string) {
-    const id = new ObjectId(userId);
+  async getUserOptingStatus(username: string) {
+    console.log("getting user opting status...");
+    const id = (await Authing.getUserByUsername(username))._id;
     return await Opting.getUserOptingStatus(id);
   }
 
