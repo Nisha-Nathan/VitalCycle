@@ -9,16 +9,6 @@ const frequency = ref("How frequently would you like to be notified?");
 
 const createNotification = async () => {
     try {
-        console.log('Notify About:', notifyAbout.value);
-        console.log('Frequency:', frequency.value);
-        console.log('Notification Time:', notificationTime.value, typeof notificationTime.value);
-        // await fetchy("/api/notifications", "POST", {
-        //     body: {
-        //         notifyAbout: notifyAbout.value,
-        //         frequency: frequency.value,
-        //         timeFrame: notificationTime.value,
-        //     },
-        // });
         const [hours, minutes] = notificationTime.value.split(":").map(Number);
         await fetchy("/api/create/notification", "POST", {
             body: {

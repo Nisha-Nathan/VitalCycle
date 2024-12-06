@@ -19,7 +19,9 @@ const { deliveredCount } = storeToRefs(notificationStore);
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
-    await notificationStore.fetchDeliveredCount();
+    if (isLoggedIn.value) {
+      await notificationStore.fetchDeliveredCount();
+    }
   } catch {
     // User is not logged in
   }
@@ -33,9 +35,11 @@ onBeforeMount(async () => {
     <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn && myCareBoardOptIn">Care Board</RouterLink>
     <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
     <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
-    <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn"> <button type="button" class="btn btn-primary">
-        Notifications <span class="badge bg-secondary">{{ deliveredCount }}</span>
-      </button></RouterLink>
+    <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn">
+      <button type="button" class="btn btn-primary btn-notifications">
+        Notifications <span class="badge bg-secondary bg-notifications">{{ deliveredCount }}</span>
+      </button>
+    </RouterLink>
 
   </nav>
   <RouterView />
@@ -57,5 +61,15 @@ onBeforeMount(async () => {
 
 .nav-item.router-link-active {
   font-weight: bold;
+}
+
+.btn-notifications {
+  background-color: black;
+  border: none;
+}
+
+.btn-notifications:hover {
+  background-color: #EA7575;
+  border: none;
 }
 </style>
