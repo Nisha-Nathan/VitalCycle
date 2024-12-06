@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Checklist, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning } from "./app";
+import { Authing, Checklist, Friending, Inviting, Logging, Posting, Reacting, Replying, Sessioning, Notification } from "./app";
 import { ChecklistItem } from "./concepts/checklisting";
 import { BadValuesError, NotFoundError } from "./concepts/errors";
 import { FlowIntensity, Mood, Symptom } from "./concepts/logging";
@@ -163,10 +163,10 @@ class Routes {
     const userCircles = await Authing.getUserCircles(user);
     const allCircles = await Posting.getAllCircles();
     let circles;
-    if(!userCircles) {
+    if (!userCircles) {
       circles = allCircles;
     } else {
-     circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
+      circles = allCircles.filter((circle) => !userCircles.includes(circle.name));
     }
     const result = await Responses.circles(circles);
     return { circles: result };
@@ -188,7 +188,6 @@ class Routes {
   async removeUserCircle(session: SessionDoc, circle: string) {
     const user = Sessioning.getUser(session);
     return await Authing.removeUserFromCircle(user, circle);
-
   }
 
   @Router.get("/friends")
@@ -355,6 +354,54 @@ class Routes {
   async getSentInvites(session: SessionDoc) {
     const myOid = Sessioning.getUser(session);
     return await Inviting.getAllInvitesSent(myOid);
+  }
+
+  @Router.post("/create/notification")
+  async createNotification(session: SessionDoc, notifyAbout: string, frequency: string, timeFrame: { hours: number; minutes: number }) {
+    const user = Sessioning.getUser(session);
+
+    // Extract details from the request body
+    // const { notifyAbout, frequency, timeFrame } = body;
+
+    console.log("notifyAbout: ", notifyAbout);
+    console.log("frequency: ", frequency);
+    console.log("timeFrame: ", timeFrame);
+    if (!notifyAbout || !frequency || !timeFrame || timeFrame.hours == null || timeFrame.minutes == null) {
+      throw new Error("Invalid input: 'notifyAbout', 'frequency', and 'timeFrame' are required.");
+    }
+
+    // Call your NotificationConcept to create the notification
+    return await Notification.createNotification(user, notifyAbout, frequency as "once" | "daily" | "weekly", {
+      hours: timeFrame.hours,
+      minutes: timeFrame.minutes,
+    });
+  }
+
+  @Router.get("/notifications/deliver")
+  async deliverNotifications() {
+    const result = await Notification.deliverPendingNotifications();
+    return result;
+  }
+
+  @Router.delete("/notifications/:id")
+  async deleteNotification(id: string) {
+    const notificationOid = new ObjectId(id);
+    const result = await Notification.deleteNotification(notificationOid);
+    return result;
+  }
+
+  @Router.delete("/notifications")
+  async deleteNotifications(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const result = await Notification.deleteAllNotifications(user);
+    return result;
+  }
+
+  @Router.get("/notifications/delivered")
+  async getDeliveredNotifications(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const result = await Notification.getDeliveredNotifications(user);
+    return result;
   }
 
   // debugging routes

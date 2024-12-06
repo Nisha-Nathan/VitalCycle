@@ -1,93 +1,20 @@
 <script setup lang="ts">
-import CreatePostFormCareBoard from "@/components/Post/CreatePostFormCareBoard.vue";
-import InvitesSection from "@/components/Post/InvitesSection.vue";
-import CareBoardPostListComponent from "@/components/Post/PostListComponentCareBoard-DONOT-USE.vue";
-import VisitFriendsCareboardPopup from "@/components/Post/VisitFriendsCareboardPopup.vue";
-import { useUserStore } from "@/stores/user";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
 import PostListComponentCareBoard from "@/components/Post/PostListComponentCareBoard.vue";
 
-// const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
-// const userStore = useUserStore();
 
-// let createPostFormShowing = ref(false);
-// let visitFriendsPopupShowing = ref(false);
-// let invitesSectionShowing = ref(false);
-// let careBoardListKey = ref(0);
 
-// const toggleCreatePostForm = () => {
-//   createPostFormShowing.value = !createPostFormShowing.value;
-// };
-
-// const closeInvitesSection = () => {
-//   invitesSectionShowing.value = false;
-// };
-// const closeCreateSection = () => {
-//   createPostFormShowing.value = false;
-// };
-// const openInvitesSection = () => {
-//   createPostFormShowing.value = false;
-//   invitesSectionShowing.value = true;
-//   visitFriendsPopupShowing.value = false;
-// };
-// const closeVisitFriend = () => {
-//   visitFriendsPopupShowing.value = false;
-// };
-// const openVisitFriend = () => {
-//   visitFriendsPopupShowing.value = true;
-//   createPostFormShowing.value = false;
-//   invitesSectionShowing.value = false;
-// };
-// const openCreateSection = () => {
-//   invitesSectionShowing.value = false;
-//   createPostFormShowing.value = true;
-//   visitFriendsPopupShowing.value = false;
-// };
-// const remountCareBoardList = () => {
-//   closeInvitesSection();
-//   closeCreateSection();
-//   careBoardListKey.value++; // Increment the key to trigger remount
-// };
-
-// const goToMyCareboard = () => {
-//   userStore.goToCareboard("");
-//   remountCareBoardList();
-// };
 </script>
 
 <template>
   <main class="homepage">
-    <!-- Header Section -->
-    <!-- <section v-if="!isLoggedIn" class="header">
-      <h1 class="welcome-message">
-        <span>Please login to access your account!</span>
-      </h1>
-    </section> -->
+  
 
     <!-- Care Board Section -->
     <section class="care-board">
      <PostListComponentCareBoard/>
     </section>
 
-    <!-- <section class="care-board">
-      <div class="section-title">
-        <h2 v-if="!userStore.currentlyViewingCareboard">My Care Board</h2>
-        <h2 v-else>{{ userStore.currentlyViewingCareboard }}'s Careboard</h2>
-        <button class="invites-button" @click="openInvitesSection">Invite</button>
-      </div>
-      <button v-if="userStore.currentlyViewingCareboard" @click="goToMyCareboard">< Return to My Careboard</button>
-      <div class="top-buttons">
-        <button v-if="!userStore.currentlyViewingCareboard" :class="{ 'top-button-selected': createPostFormShowing, 'top-button': !createPostFormShowing }" @click="openCreateSection">
-          + Create Post
-        </button>
-        <button :class="{ 'top-button-selected': visitFriendsPopupShowing, 'top-button': !visitFriendsPopupShowing }" @click="openVisitFriend">Friend's Careboards</button>
-      </div>
-      <CreatePostFormCareBoard v-if="createPostFormShowing" class="invites-section" @closeSection="closeCreateSection" />
-      <InvitesSection v-if="invitesSectionShowing" class="invites-section" @closeSection="closeInvitesSection" @goToCareboard="remountCareBoardList" />
-      <VisitFriendsCareboardPopup v-if="visitFriendsPopupShowing" class="invites-section" @closeSection="closeVisitFriend" @goToCareboard="remountCareBoardList" />
-      <CareBoardPostListComponent :key="careBoardListKey" />
-    </section> -->
+ 
   </main>
 </template>
 

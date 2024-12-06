@@ -45,7 +45,7 @@ onBeforeMount(() => {
 
 <template>
     <h2>Your Sister Circles</h2>
-    <div>
+    <div class="circles">
         <ol v-if="circles.length > 0">
             <li v-for="circle in circles" :key="circle">
                 <p>{{ circle }}</p>
@@ -69,6 +69,10 @@ p {
     margin: 0;
     padding: 5px;
     font-size: 1.2em;
+}
+
+.circles{
+    align-items: center;
 }
 
 .btn-delete {

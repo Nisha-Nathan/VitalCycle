@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useToastStore } from "@/stores/toast";
 import { useUserStore } from "@/stores/user";
+import { useNotificationStore } from "./stores/notification";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
@@ -10,11 +11,15 @@ const currentRouteName = computed(() => currentRoute.name);
 const userStore = useUserStore();
 const { isLoggedIn } = storeToRefs(userStore);
 const { toast } = storeToRefs(useToastStore());
+const notificationStore = useNotificationStore();
+const { deliveredCount } = storeToRefs(notificationStore);
+
 
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
+    await notificationStore.fetchDeliveredCount();
   } catch {
     // User is not logged in
   }
@@ -28,6 +33,9 @@ onBeforeMount(async () => {
     <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn">Care Board</RouterLink>
     <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
     <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
+    <RouterLink to="/notifications" class="nav-item" v-if="isLoggedIn"> <button type="button" class="btn btn-primary">
+        Notifications <span class="badge bg-secondary">{{ deliveredCount }}</span>
+      </button></RouterLink>
 
   </nav>
   <RouterView />
