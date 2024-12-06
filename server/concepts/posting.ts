@@ -43,7 +43,7 @@ export default class PostingConcept {
 
     // Initialize default circles
     void this.initializeDefaultCircles();
-    void this.injectMockData();
+    // void this.injectMockData();
   }
 
   async injectMockData() {
