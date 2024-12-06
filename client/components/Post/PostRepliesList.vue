@@ -59,7 +59,8 @@ onBeforeMount(async () => {
   <p v-else>Loading...</p>
   <form @submit.prevent="addReply(replyText)">
     <textarea v-model="replyText" placeholder="Write your reply here..." rows="3" required></textarea>
-    <button type="submit">Post Reply</button>
+    <button type="submit" class="btn btn-primary btn-submit">Post Reply</button>
+
   </form>
 </template>
 
@@ -92,7 +93,22 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
+
 button:hover {
   background-color: #0056b3;
+}
+
+.btn-submit:hover {
+  background-color: black;
+  color: white;
+}
+
+.btn-submit {
+  margin: auto;
+  width: 90%;
+  background-color: transparent;
+  border: none;
+  border: 2px solid black;
+  color: black;
 }
 </style>

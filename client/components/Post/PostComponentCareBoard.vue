@@ -103,6 +103,7 @@ const toggleShowReplies = async () => {
   border-radius: 0.5em;
   margin: 10px;
   width: fit-content;
+  font-size: medium;
 }
 
 .see-replies:hover {
@@ -117,6 +118,8 @@ const toggleShowReplies = async () => {
   border-radius: 0.5em;
   margin: 10px;
   width: fit-content;
+  height: 2.5em;
+  font-size: medium;
 }
 
 .delete:hover {

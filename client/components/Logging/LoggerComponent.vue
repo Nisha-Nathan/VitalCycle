@@ -131,11 +131,12 @@ onMounted(() => {
           <button type="button" class="btn btn-icon" @click="showDatePicker = !showDatePicker">
             <img class="springtime" src="/client/assets/images/Springtime.svg" alt="Springtime Icon" />
           </button>
-          <button @click="displayChecklist">Daily Checklist</button>
-
+          <!-- <button @click="displayChecklist">Daily Checklist</button> -->
           <div v-if="showDatePicker">
             <input type="date" v-model="dateOfLog" @change="handleDateChange" />
           </div>
+          <button type="button" class="btn btn-outline-light btn-checklist"  @click="displayChecklist">Daily Checklist </button>
+
         </div>
       </div>
 
@@ -193,6 +194,7 @@ form {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .date-info {
@@ -290,5 +292,18 @@ h2 {
   margin: 10px;
   background-color: black;
   border: none;
+}
+
+.btn-checklist {
+  max-width: fit-content;
+  border-radius: 1em !important;
+  justify-self: flex-end;
+}
+
+
+.btn-checklist:hover {
+  background-color: black;
+  color: white;
+
 }
 </style>
