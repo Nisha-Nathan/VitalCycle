@@ -17,6 +17,12 @@ const cycleStats = ref<{
   lastPeriodStart: string | null;
 } | null>(null);
 
+const exerciseStats = ref<{
+  averageActivityDuration: number | null;
+  mostCommonActivities: string | null;
+  // activity duration later?
+} | null>(null);
+
 const isLoading = ref(false);
 const errorMessage = ref("");
 
@@ -47,9 +53,37 @@ const fetchCycleStats = async () => {
   }
 };
 
+// Fetch Exercise Stats
+const fetchExerciseStats = async () => {
+  if (!isLoggedIn.value || !currentUsername.value) {
+    exerciseStats.value = null;
+    errorMessage.value = "Please log in to view your exercise statistics.";
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const response = await fetchy("/api/exercise", "GET");
+    console.log("API Response:", response); // Log the full response
+
+    if (response?.stats) {
+      exerciseStats.value = response.stats; // Assign the stats directly
+    } else {
+      exerciseStats.value = null;
+      errorMessage.value = "No cycle data found. Start logging your exercise to see statistics!";
+    }
+  } catch (error) {
+    exerciseStats.value = null;
+    errorMessage.value = "Failed to fetch exercise statistics. Please try again.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 // Fetch stats on component mount
 onMounted(() => {
   fetchCycleStats();
+  fetchExerciseStats();
 });
 </script>
 
@@ -71,11 +105,11 @@ onMounted(() => {
       <div v-else>
         <div class="stat-item">
           Average Cycle Length:
-          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "No data available" }}
+          {{ cycleStats?.averageCycleLength ? `${cycleStats.averageCycleLength} days` : "Not enough data yet! At least 2 cycles needed. " }}
         </div>
         <div class="stat-item">
           Average Period Length:
-          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "No data available" }}
+          {{ cycleStats?.averagePeriodLength ? `${cycleStats.averagePeriodLength} days` : "At least 1 full period needed." }}
         </div>
         <div class="stat-item">
           Last Menstrual Period Start:
@@ -84,10 +118,20 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="currentTab === 'Activity Trends'" class="stats-overview">
-      <div class="stat-item">Recent Activities</div>
-      <div class="stat-item">Activity Duration Trends</div>
-      <div class="stat-item">Most Common Activities</div>
+    <div v-if="currentTab === 'Exercise Trends'" class="stats-overview">
+      <div v-if="isLoading" class="stat-item">Loading...</div>
+      <div v-else-if="errorMessage" class="stat-item">{{ errorMessage }}</div>
+      <div v-else>
+        <!-- Example: Displaying Exercise Stats -->
+        <div class="stat-item">
+          Average Activity Duration:
+          {{ exerciseStats?.averageActivityDuration ? `${exerciseStats.averageActivityDuration} minutes` : "No data available" }}
+        </div>
+        <div class="stat-item">
+          Most Common Activities:
+          {{ exerciseStats?.mostCommonActivities?.join(", ") || "No data available" }}
+        </div>
+      </div>
     </div>
 
     <div v-if="currentTab === 'Weight Trends'" class="stats-overview">
