@@ -10,6 +10,7 @@ const emit = defineEmits(["update-flow"]);
 const definedMoods = ["Angry", "Happy", "Calm", "Sad", "Confused"];
 const definedFlowIntensities = ["None", "Light", "Medium", "Heavy"];
 const definedSymptoms = ["Abdominal Cramps", "Headache", "Acne", "Fatigue", "Constipation", "Diarrhea", "Nausea", "Bloating", "Chills", "Mood swings", "Dry skin"];
+const definedActivities = ["Walking", "Running", "Biking", "Weightlifting", "Yoga", "Meditation", "Dance", "HIIT", "Other"]
 
 const getCurrentDate = () => {
   const date = new Date();
@@ -19,6 +20,7 @@ const getCurrentDate = () => {
 const currentDate = ref(getCurrentDate());
 const dateOfLog = ref(currentDate.value);
 const selectedSymptoms = ref<string[]>([]);
+const selectedActivity = ref<string | null>(null);
 const selectedMood = ref<string | null>(null);
 const selectedFlow = ref<string | null>("None");
 const notes = ref("");
@@ -44,6 +46,7 @@ const submitLog = async () => {
         mood: selectedMood.value,
         flow: selectedFlow.value,
         notes: notes.value,
+        activity: selectedActivity.value,
       },
     });
     logId.value = response.log.id;
@@ -131,16 +134,17 @@ onMounted(() => {
           <button type="button" class="btn btn-icon" @click="showDatePicker = !showDatePicker">
             <img class="springtime" src="/client/assets/images/Springtime.svg" alt="Springtime Icon" />
           </button>
-          <button @click="displayChecklist">Daily Checklist</button>
-
+          <!-- <button @click="displayChecklist">Daily Checklist</button> -->
           <div v-if="showDatePicker">
             <input type="date" v-model="dateOfLog" @change="handleDateChange" />
           </div>
+          <button type="button" class="btn btn-outline-light btn-checklist"  @click="displayChecklist">Daily Checklist </button>
+
         </div>
       </div>
 
       <div class="content">
-        <DailyChecklist v-if="showDailyChecklist" @close-checklist="showDailyChecklist = false" />
+        <DailyChecklist v-if="showDailyChecklist" :current-date="dateOfLog" @close-checklist="showDailyChecklist = false" />
         <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..." :readonly="!isCurrentDate"></textarea>
 
         <div class="btn-group mood-section" role="group" aria-label="Mood Entries">
@@ -161,6 +165,22 @@ onMounted(() => {
           <div v-for="(symptom, index) in definedSymptoms" :key="index">
             <input type="checkbox" class="btn-check" name="btnradio-sym" :id="`btnradio-sym-${index}`" v-model="selectedSymptoms" :value="symptom" autocomplete="off" :disabled="!isCurrentDate" />
             <label class="btn btn-outline" :for="`btnradio-sym-${index}`">{{ symptom }}</label>
+          </div>
+        </div>
+
+        <div class="btn-group activity-section" role="group" aria-label="Activity Entries">
+          <div v-for="(activity, index) in definedActivities" :key="index">
+            <input
+              type="radio"
+              class="btn-check"
+              name="btnradio-activity"
+              :id="`btnradio-activity-${index}`"
+              v-model="selectedActivity"
+              :value="activity"
+              autocomplete="off"
+              :disabled="!isCurrentDate"
+            />
+            <label class="btn btn-outline" :for="`btnradio-activity-${index}`">{{ activity }}</label>
           </div>
         </div>
       </div>
@@ -193,6 +213,7 @@ form {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .date-info {
@@ -248,7 +269,8 @@ form {
 .header,
 .mood-section,
 .flow-section,
-.symptoms-section {
+.symptoms-section,
+.activity-section {
   background-color: #ea7575;
   border-radius: 10px;
   padding: 0.75rem;
@@ -290,5 +312,18 @@ h2 {
   margin: 10px;
   background-color: black;
   border: none;
+}
+
+.btn-checklist {
+  max-width: fit-content;
+  border-radius: 1em !important;
+  justify-self: flex-end;
+}
+
+
+.btn-checklist:hover {
+  background-color: black;
+  color: white;
+
 }
 </style>
