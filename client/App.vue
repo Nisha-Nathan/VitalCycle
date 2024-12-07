@@ -3,7 +3,7 @@ import { useToastStore } from "@/stores/toast";
 import { useUserStore } from "@/stores/user";
 import { useNotificationStore } from "./stores/notification";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount } from "vue";
+import { computed, onBeforeMount, onUnmounted } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 
 const currentRoute = useRoute();
@@ -13,6 +13,22 @@ const { isLoggedIn, sisterCircleOptIn, myCareBoardOptIn } = storeToRefs(userStor
 const { toast } = storeToRefs(useToastStore());
 const notificationStore = useNotificationStore();
 const { deliveredCount } = storeToRefs(notificationStore);
+let pollingInterval: ReturnType<typeof setInterval> | null = null;
+
+function startPolling() {
+  pollingInterval = setInterval(async () => {
+    await notificationStore.fetchDeliveredCount();
+    await notificationStore.fetchDeliveredNotifications();
+  }, 10000); // Poll every 10 seconds
+}
+
+function stopPolling() {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+}
+
 
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
@@ -20,10 +36,15 @@ onBeforeMount(async () => {
     await userStore.updateSession();
     if (isLoggedIn.value) {
       await notificationStore.fetchDeliveredCount();
+      startPolling();
     }
   } catch {
     // User is not logged in
   }
+});
+
+onUnmounted(() => {
+  stopPolling();
 });
 
 
@@ -32,6 +53,9 @@ onBeforeMount(async () => {
 <template>
   <header>
     <nav class="navbar">
+      <RouterLink :to="{ name: 'Today' }">
+        <img style="align-items: center;" src="@/assets/images/vitalcycle-logo.png" />
+      </RouterLink>
       <RouterLink to="/" class="nav-item">Today</RouterLink>
       <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Sister Circles
       </RouterLink>
@@ -46,7 +70,7 @@ onBeforeMount(async () => {
     </nav>
 
     <p v-if="toast" :class="toast.style" class="toast-message">{{ toast.message }}</p>
-   
+
   </header>
 
   <RouterView />
@@ -56,6 +80,14 @@ onBeforeMount(async () => {
 @import "./assets/toast.css";
 @import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
 
+img {
+  width: 50px;
+  height: 50px;
+}
+
+a:hover {
+  text-decoration: 2px underline;
+}
 
 .navbar {
   display: flex;
@@ -73,13 +105,14 @@ onBeforeMount(async () => {
 
 .nav-item.router-link-active {
   font-weight: bold;
+  text-decoration: none;
 }
 
-.toast-message{
-  font-size:1em;
-  margin:10px;
+.toast-message {
+  font-size: 1em;
+  margin: 10px;
   border-radius: 10px;
-  width:90%;
+  width: 90%;
   text-align: center;
   justify-self: center;
   font-family: "Quando", serif;

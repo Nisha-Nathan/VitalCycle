@@ -60,7 +60,7 @@ onBeforeMount(async () => {
       <PostComponent :post="post.post" @refreshPosts="getPosts" @editPost="updateEditing" />
     </article>
   </section>
-  <p v-else-if="loaded">No posts found</p>
+  <p v-else-if="loaded">No Care Board message posts found</p>
   <p v-else>Loading...</p>
 </template>
 

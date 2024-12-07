@@ -38,11 +38,6 @@ const emptyForm = () => {
 };
 
 
-const printTime = () => {
-    console.log(notificationTime.value);
-};
-
-
 </script>
 
 
@@ -51,10 +46,10 @@ const printTime = () => {
     <form @submit.prevent="createNotification()">
         <h3>Create Notification</h3>
         <div class="input-group mb-3">
-            <label for="notificationTime">Notify About:</label>
-            <input v-model="notifyAbout" id="notificationTime" type="text" class="form-control"
-                placeholder="What would you like to be notified about..." aria-label="Username"
-                aria-describedby="basic-addon1" @timeupdate="printTime">
+            <label for="notificationContent">Notify About:</label>
+            <input v-model="notifyAbout" id="notificationContent" type="text" class="form-control"
+                placeholder="What would you like to be notified about..." aria-label="Notification Content"
+                aria-describedby="basic-addon1">
         </div>
         <div class="input-group mb-3">
             <label for="notificationTime">Notification Time:</label>
@@ -64,8 +59,8 @@ const printTime = () => {
         </div>
 
         <div class="form-select-in">
-            <label for="notificationTime">Notification Frequency:</label>
-            <select class="form-select" aria-label="Frequency Select" v-model="frequency">
+            <label for="notificationFrequency">Notification Frequency:</label>
+            <select id="notificationFrequency" class="form-select" aria-label="Frequency Select" v-model="frequency">
                 <option selected disabled>How frequently would you like to be notified?</option>
                 <option value="Once">Once</option>
                 <option value="Daily">Daily</option>
@@ -82,10 +77,19 @@ const printTime = () => {
 <style scoped>
 .input-group {
     gap: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-#notificationTime {
+#notificationTime, #notificationContent, #notificationFrequency {
     width: 100%;
+}
+
+.form-select-in {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .btn-submit:hover {
@@ -97,5 +101,9 @@ const printTime = () => {
     width: 100%;
     background-color: black;
     border: none;
+}
+
+label {
+    text-align: left;
 }
 </style>

@@ -4,6 +4,7 @@ import { fetchy } from "@/utils/fetchy";
 export const useNotificationStore = defineStore("notification", {
   state: () => ({
     deliveredCount: 0, // Holds the count of delivered notifications
+    deliveredNotifications: <Array<Record<string, string>>>[],
   }),
   actions: {
     // Fetch the count of delivered notifications from the backend
@@ -17,13 +18,13 @@ export const useNotificationStore = defineStore("notification", {
     },
 
     async fetchDeliveredNotifications() {
-        try {
-            const response = await fetchy("/api/notifications/delivered", "GET");
-            return response.notifications;
-        } catch (error) {
-            console.error("Failed to fetch delivered notifications count:", error);
-        }
-
+      try {
+        const response = await fetchy("/api/notifications/delivered", "GET");
+        this.deliveredNotifications = response.notifications;
+        return response.notifications;
+      } catch (error) {
+        console.error("Failed to fetch delivered notifications count:", error);
+      }
     },
 
     // Decrement the count manually when notifications are marked as read
@@ -33,18 +34,20 @@ export const useNotificationStore = defineStore("notification", {
       }
     },
 
-    resetCount(){
-        this.deliveredCount = 0;
+    resetCount() {
+      this.deliveredCount = 0;
     },
 
     async deleteNotification(notificationId: string) {
-        await fetchy(`/api/notifications/${notificationId}`, "DELETE");
-        this.decrementCount();
+      await fetchy(`/api/notifications/${notificationId}`, "DELETE");
+      this.deliveredNotifications = this.deliveredNotifications.filter((notification) => notification._id !== notificationId);
+      this.decrementCount();
     },
 
     async deleteAllNotifications() {
-        await fetchy("/api/notifications", "DELETE");
-        this.resetCount();  
-    }
+      await fetchy("/api/notifications", "DELETE");
+      this.deliveredNotifications = [];
+      this.resetCount();
+    },
   },
 });

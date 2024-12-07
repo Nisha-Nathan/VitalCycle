@@ -4,15 +4,15 @@ import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
+import CreateNotificationComponent from "./CreateNotificationComponent.vue";
 
 const notificationStore = useNotificationStore();
+const { deliveredNotifications } = storeToRefs(notificationStore);
 const { currentUsername } = storeToRefs(useUserStore());
-const notifications = ref<Array<Record<string, string>>>([]);
 
 async function deleteNotification(id: string) {
     try {
         await notificationStore.deleteNotification(id);
-        getNotifications();
     } catch (error) {
         return;
     }
@@ -21,19 +21,14 @@ async function deleteNotification(id: string) {
 async function deleteAllNotifications() {
     try {
         await notificationStore.deleteAllNotifications();
-        getNotifications();
     } catch (error) {
         return;
     }
 }
 
-async function getNotifications() {
-    notifications.value = await notificationStore.fetchDeliveredNotifications();
-    console.log("notifications: ", notifications.value);
-}
 
 onMounted(() => {
-    getNotifications();
+    notificationStore.fetchDeliveredNotifications();
 });
 
 
@@ -45,19 +40,43 @@ onMounted(() => {
         <section class="header">
             <h2 class="section-title">{{ currentUsername }}'s Notifications</h2>
             <div class="header-content">
-                <div class="logout">
-                    <button type="button" class="btn btn-outline-light btn-clear-all"
-                        @click="deleteAllNotifications">Clear
-                        All Notifications </button>
+                <div class="create-notificationa">
+                    <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal"
+                        data-bs-target="#createNotificationModal">Create Notification</button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="createNotificationModal" tabindex="-1"
+                        aria-labelledby="createNotificationModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <CreateNotificationComponent />
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" ref="closeBtn" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <button type="button" class="btn btn-outline-light btn-clear-all" @click="deleteAllNotifications">Clear
+                    All Notifications
+                </button>
             </div>
 
         </section>
 
         <section class="notifications">
             <div>
-                <ol v-if="notifications.length > 0">
-                    <li v-for="notification in notifications" :key="notification._id">
+                <ol v-if="deliveredNotifications.length > 0">
+                    <li v-for="notification in deliveredNotifications" :key="notification._id">
                         <div>
                             <p class="notification-message">{{ notification.notificationContent }}</p>
                             <p class="notification-time">{{ formatDate(new Date(notification.notificationTime)) }}</p>
@@ -90,7 +109,7 @@ onMounted(() => {
 .header-content {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
 }
 
 section {
@@ -111,25 +130,26 @@ li {
     align-items: center;
 }
 
-.notification-message{
+.notification-message {
     margin-bottom: 5px;
 }
-.notification-time{
+
+.notification-time {
     font-size: 0.8em;
     color: grey;
-    margin-left:10px;
-    margin-top:0;
+    margin-left: 10px;
+    margin-top: 0;
 }
 
 .btn-delete {
     background-color: black;
     color: white;
     margin-bottom: 5px;
-    
+
 }
 
 .btn-delete:hover {
-    
+
     background-color: #ea7575;
     color: white;
 }
@@ -137,5 +157,10 @@ li {
 .btn-clear-all:hover {
     background-color: #ea7575;
     color: white;
+}
+
+.modal-body {
+    color: black;
+    align-items: flex-start;
 }
 </style>

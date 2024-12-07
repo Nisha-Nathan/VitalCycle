@@ -180,7 +180,7 @@ export default class NotificationConcept {
   }
 
   async getDeliveredNotifications(user: ObjectId) {
-    const notifications = await this.notifications.readMany({ user, status: "delivered" });
+    const notifications = await this.notifications.readMany({ user, status: "delivered" },{ sort: { dateUpdated: -1 } });
     return {notifications: notifications, count: notifications.length};
   }
 

@@ -151,11 +151,14 @@ const closeModal = () => {
       <PostComponent :post="post.post" @refreshPosts="getPosts" @editPost="updateEditing" />
     </article>
   </section>
-  <p v-else-if="loaded">No posts found</p>
+  <p v-else-if="loaded">No Care Board messages posted</p>
   <p v-else>Loading...</p>
 </template>
 
 <style scoped>
+p{
+  text-align: center;
+}
 .header {
   background-color: black;
   color: white;

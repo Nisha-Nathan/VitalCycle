@@ -176,6 +176,10 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
+p{
+  text-align: center;
+}
+
 .header {
   background-color: black;
   color: white;
