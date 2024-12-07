@@ -110,7 +110,10 @@ export default class NotificationConcept {
 
     // Set the notification time based on the provided hours and minutes
     const notificationTime = new Date(currentTime);
+    console.log("currentTime", currentTime);
+    console.log("timeFrame", timeFrame);
     notificationTime.setHours(timeFrame.hours, timeFrame.minutes, 0, 0);
+    console.log("notificationTime", notificationTime);
 
     // Adjust for frequency
     if (frequency === "weekly") {
