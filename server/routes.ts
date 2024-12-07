@@ -257,7 +257,7 @@ class Routes {
   async getCycleStats(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     const stats = await Logging.getInstance().calculateCycleStats(user);
-    return { msg: "Successfully retrieved cycle statistics!", stats };
+    return { stats };
   }
 
   @Router.post("/logs")
@@ -374,7 +374,6 @@ class Routes {
   @Router.post("/create/notification")
   async createNotification(session: SessionDoc, notifyAbout: string, frequency: string, timeFrame: { hours: number; minutes: number }) {
     const user = Sessioning.getUser(session);
-    console.log("create notification called", notifyAbout, frequency, timeFrame);
     if (!notifyAbout || !frequency || !timeFrame || timeFrame.hours == null || timeFrame.minutes == null) {
       throw new Error("Invalid input: 'notifyAbout', 'frequency', and 'timeFrame' are required.");
     }
@@ -384,7 +383,7 @@ class Routes {
       hours: timeFrame.hours,
       minutes: timeFrame.minutes,
     });
-    return {}
+    return {msg: "Notification created successfully!", notification: result};
 
   }
 

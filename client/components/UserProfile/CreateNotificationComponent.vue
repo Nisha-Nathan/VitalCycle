@@ -12,25 +12,14 @@ const createNotification = async () => {
     try {
         const [hours, minutes] = notificationTime.value.split(":").map(Number);
         const offsetHours = (nTime.value / 60) + hours;
-        // console.log("hours: ", hours);
-        // console.log("minutes: ", minutes);
-        // console.log("ntime before: ", nTime.value);
-        // console.log("ntime offset: ", nTime.value.getTimezoneOffset());
-        // nTime.value.setHours(hours);
-        // console.log("ntime after: ", nTime.value);
-        // nTime.value.setMinutes(minutes);
-        // console.log("ntime after minutes: ", nTime.value);
-        console.log("offsetHours: ", offsetHours);
-        console.log("minutes: ", minutes);
-        console.log("ntime: ", nTime.value);    
 
         await fetchy("/api/create/notification", "POST", {
             body: {
                 notifyAbout: notifyAbout.value,
                 frequency: frequency.value.toLowerCase(),
                 timeFrame: {
-                    hours:offsetHours,
-                    minutes:minutes,
+                    hours: offsetHours,
+                    minutes: minutes,
                 },
             },
         });
@@ -77,7 +66,7 @@ const printTime = () => {
         <div class="form-select-in">
             <label for="notificationTime">Notification Frequency:</label>
             <select class="form-select" aria-label="Frequency Select" v-model="frequency">
-                <option selected disabled >How frequently would you like to be notified?</option>
+                <option selected disabled>How frequently would you like to be notified?</option>
                 <option value="Once">Once</option>
                 <option value="Daily">Daily</option>
                 <option value="Weekly">Weekly</option>
@@ -100,14 +89,13 @@ const printTime = () => {
 }
 
 .btn-submit:hover {
-  background-color: #ff7f7f;
+    background-color: #ff7f7f;
 }
 
 .btn-submit {
-  margin: 10px;
-  width: 100%;
-  background-color: black;
-  border: none;
+    margin: 10px;
+    width: 100%;
+    background-color: black;
+    border: none;
 }
-
 </style>
