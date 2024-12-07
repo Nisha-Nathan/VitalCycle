@@ -6,26 +6,30 @@ import { ref } from 'vue';
 const notificationTime = ref<string>("");
 const notifyAbout = ref("");
 const frequency = ref("How frequently would you like to be notified?");
-const nTime = ref(new Date());
+const nTime = ref(new Date().getTimezoneOffset());
 
 const createNotification = async () => {
     try {
         const [hours, minutes] = notificationTime.value.split(":").map(Number);
-        console.log("hours: ", hours);
+        const offsetHours = (nTime.value / 60) + hours;
+        // console.log("hours: ", hours);
+        // console.log("minutes: ", minutes);
+        // console.log("ntime before: ", nTime.value);
+        // console.log("ntime offset: ", nTime.value.getTimezoneOffset());
+        // nTime.value.setHours(hours);
+        // console.log("ntime after: ", nTime.value);
+        // nTime.value.setMinutes(minutes);
+        // console.log("ntime after minutes: ", nTime.value);
+        console.log("offsetHours: ", offsetHours);
         console.log("minutes: ", minutes);
-        console.log("ntime before: ", nTime.value);
-        console.log("ntime offset: ", nTime.value.getTimezoneOffset());
-        nTime.value.setHours(hours);
-        console.log("ntime after: ", nTime.value);
-        nTime.value.setMinutes(minutes);
-        console.log("ntime after minutes: ", nTime.value);
+        console.log("ntime: ", nTime.value);    
 
         await fetchy("/api/create/notification", "POST", {
             body: {
                 notifyAbout: notifyAbout.value,
                 frequency: frequency.value.toLowerCase(),
                 timeFrame: {
-                    hours,
+                    offsetHours,
                     minutes,
                 },
             },
