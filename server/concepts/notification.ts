@@ -114,13 +114,13 @@ export default class NotificationConcept {
     // notificationTime.setHours(timeFrame.hours, timeFrame.minutes, 0, 0);
     console.log("currentTime", currentTime);
     console.log("timeFrame", timeFrame);
-    // const timezoneOffset = currentTime.getTimezoneOffset();
+
     // const timezoneHoursOffset = ((timezoneOffset) / 60);
     // console.log("timezoneOffset", timezoneOffset);
     // console.log("timezone hours offset", ((timezoneOffset) / 60));
     console.log("notiification time before", notificationTime);
-    // notificationTime.setHours(timeFrame.hours  , timeFrame.minutes, 0, 0);
-    notificationTime.setUTCHours(timeFrame.hours  , timeFrame.minutes, 0, 0);
+    notificationTime.setHours(timeFrame.hours  , timeFrame.minutes, 0, 0);
+    // notificationTime.setUTCHours(timeFrame.hours  , timeFrame.minutes, 0, 0);
 
     console.log("notificationTime", notificationTime);
 
