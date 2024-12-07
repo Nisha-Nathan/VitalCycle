@@ -256,7 +256,7 @@ class Routes {
   async getCycleStats(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     const stats = await Logging.getInstance().calculateCycleStats(user);
-    return { message: "Successfully retrieved cycle statistics!", stats };
+    return { stats };
   }
 
   @Router.get("/activity/stats")
@@ -409,8 +409,7 @@ class Routes {
       hours: timeFrame.hours,
       minutes: timeFrame.minutes,
     });
-    return {msg: "Notification created successfully!", notification: result};
-
+    return { msg: "Notification created successfully!", notification: result };
   }
 
   @Router.get("/notifications/deliver")
