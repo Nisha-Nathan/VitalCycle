@@ -29,8 +29,8 @@ const createNotification = async () => {
                 notifyAbout: notifyAbout.value,
                 frequency: frequency.value.toLowerCase(),
                 timeFrame: {
-                    offsetHours,
-                    minutes,
+                    hours:offsetHours,
+                    minutes:minutes,
                 },
             },
         });
