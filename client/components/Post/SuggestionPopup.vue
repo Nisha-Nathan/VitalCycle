@@ -4,60 +4,41 @@ import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
 
+const props = defineProps(["circleName"]);
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
-const emit = defineEmits(["closeSection", "goToCareboard", "refreshPosts"]);
-
-interface Invite {
-  sentFromID: string;
-  sentFromUsername: string;
-  sentToID: string;
-  sentToUsername: string;
-  id: string;
-}
-
-const invitedTo = ref<Invite[]>([]);
-const userStore = useUserStore();
-
+const emit = defineEmits(["closeSection"]);
+let myDescription = ref("");
 const closeSection = () => {
   emit("closeSection");
 };
 
-async function getInvites() {
-  let query: Record<string, string> = {};
+async function getSuggestionDescription(circleName: string) {
+  let query: Record<string, string> = { circleName };
   let requestResults;
   try {
-    requestResults = await fetchy("/api/invites", "GET", { query });
+    requestResults = await fetchy(`/api/suggestedCircles/description/${circleName}`, "GET");
   } catch (error) {
-    console.log(error);
     return;
   }
-  invitedTo.value = requestResults;
+  myDescription.value = requestResults.description;
 }
 
-const goToUserCareboard = (username: string) => {
-  closeSection();
-  userStore.goToCareboard(username);
-  emit("goToCareboard");
-  emit("closeSection");
-  emit("refreshPosts");
-};
+function getDescription() {
+  return myDescription.value;
+}
 
 onBeforeMount(async () => {
-  await getInvites();
+  await getSuggestionDescription(props.circleName);
 });
 </script>
 
 <template>
   <main>
-    <!-- <button class="close-btn" @click="closeSection">X</button> -->
-    <!-- <h3>Friend's Careboards</h3> -->
+    <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close" @click="closeSection"></button>
+    <button class="close-btn" @click="closeSection">X</button>
     <div class="invites-parts">
-      <ul v-if="invitedTo.length > 0">
-        <li v-for="invite in invitedTo" :key="invite.id">
-          <button @click="goToUserCareboard(invite.sentFromUsername)" class="visitFriendButton">{{ invite.sentFromUsername }}</button>
-        </li>
-      </ul>
-      <p v-else>You haven't been invited to any careboards yet.</p>
+      <h4>Suggestion: {{ props.circleName }}</h4>
+      <p>Description: {{ getDescription() }}</p>
     </div>
   </main>
 </template>
@@ -66,9 +47,34 @@ onBeforeMount(async () => {
 /* General Layout */
 @import url("https://fonts.googleapis.com/css2?family=Quando&display=swap");
 main {
-  border-radius: 1em;
-  padding: 10px;
+  background-color: white;
+  color: black;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 80px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  border: 1px solid black;
+  border-radius: 1rem;
+  z-index: 100;
+  width: 30vw;
 }
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+p {
+  margin-top: 1rem;
+}
+
 h3 {
   text-align: center;
 }

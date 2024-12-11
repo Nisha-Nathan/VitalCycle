@@ -25,8 +25,6 @@ export const useUserStore = defineStore(
       });
     };
 
-   
-
     const loginUser = async (username: string, password: string) => {
       await fetchy("/api/login", "POST", {
         body: { username, password },
@@ -42,7 +40,7 @@ export const useUserStore = defineStore(
       }
     };
 
-    const initializeUserOpting = async (username:string) => {
+    const initializeUserOpting = async (username: string) => {
       try {
         await fetchy(`/api/opting/${username}`, "POST", {
           body: { username },
@@ -119,7 +117,7 @@ export const useUserStore = defineStore(
       myCareBoardOptIn,
       fetchOptingStatus,
       updateOptingStatus,
-      initializeUserOpting
+      initializeUserOpting,
     };
   },
   { persist: true },

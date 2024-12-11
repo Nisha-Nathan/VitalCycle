@@ -26,6 +26,13 @@ export interface CircleDoc extends BaseDoc {
   description?: string;
 }
 
+export interface CircleSuggestionDoc extends BaseDoc {
+  author: ObjectId;
+  username: string;
+  name: string;
+  description?: string;
+}
+
 const predefinedCircles = ["Fertility", "Menopause", "Menstrual Hygiene"];
 
 /**
@@ -35,11 +42,13 @@ export default class PostingConcept {
   public readonly sisterCirclePosts: DocCollection<SisterCirclePostDoc>;
   public readonly myCareBoardPosts: DocCollection<MyCareBoardPostDoc>;
   public readonly circles: DocCollection<CircleDoc>;
+  public readonly suggestedCircles: DocCollection<CircleSuggestionDoc>;
 
-  constructor(sisterCircleCollection: string, careBoardCollection: string, circlesCollection: string) {
+  constructor(sisterCircleCollection: string, careBoardCollection: string, circlesCollection: string, suggestedCircleCollection: string) {
     this.sisterCirclePosts = new DocCollection<SisterCirclePostDoc>(sisterCircleCollection);
     this.myCareBoardPosts = new DocCollection<MyCareBoardPostDoc>(careBoardCollection);
     this.circles = new DocCollection<CircleDoc>(circlesCollection);
+    this.suggestedCircles = new DocCollection<CircleSuggestionDoc>(suggestedCircleCollection);
 
     // Initialize default circles
     void this.initializeDefaultCircles();
@@ -120,6 +129,46 @@ export default class PostingConcept {
     return { msg: "MyCareBoard post created!", post: await this.myCareBoardPosts.readOne({ _id }) };
   }
 
+  // Create Suggested Circle
+  async createSuggestedCircle(author: ObjectId, username: string, circleName: string, description?: string) {
+    //this.ensureCircleDoesntExist(author, circleName);
+    const circleToSuggest = {
+      author,
+      username,
+      name: circleName,
+      description,
+    };
+
+    const _id = await this.suggestedCircles.createOne(circleToSuggest);
+    return { msg: "Circle Suggestion Created!", circle: await this.suggestedCircles.readOne({ _id }) };
+  }
+
+  // Delete suggested circle
+  async deleteSuggestedCircle(author: ObjectId, circleName: string) {
+    await this.suggestedCircles.deleteOne({ author, name: circleName });
+    return { msg: "Suggested circle deleted!" };
+  }
+
+  // Get all circles suggested by username
+  async getAllSuggestedCircles(username: string) {
+    const result = await this.suggestedCircles.readMany({ username });
+    return result;
+  }
+
+  // Get all circles suggested by username
+  async getSuggestionDescription(username: string, circleName: string) {
+    const result = await this.suggestedCircles.readOne({ username, name: circleName });
+    return result;
+  }
+
+  async ensureCircleDoesntExist(author: ObjectId, circleName: string) {
+    const result = await this.circles.readMany({ name: circleName });
+    if (result.length > 0) throw new Error("You cannot suggest this circle because it already exists in Sister Circles!");
+    const result2 = await this.suggestedCircles.readMany({ author, name: circleName });
+    console.log("here is result 2: ", result2);
+    if (result2.length > 0) throw new Error("You cannot suggest this circle because you have already suggested it!");
+  }
+
   // Fetch all circles
   async getAllCircles() {
     return await this.circles.readMany({}, { sort: { name: 1 } }); // Sort alphabetically
@@ -135,13 +184,13 @@ export default class PostingConcept {
     if (!circle) {
       throw new Error(`Circle with name ${circleName} not found`);
     }
-    const posts = await this.sisterCirclePosts.readMany({ circles: { $in: [circle.name] } },{ sort: { dateUpdated: -1 } });
+    const posts = await this.sisterCirclePosts.readMany({ circles: { $in: [circle.name] } }, { sort: { dateUpdated: -1 } });
     return posts;
   }
 
   // Fetch SisterCircle Posts by Author
   async getSisterCirclePostsByAuthor(author: ObjectId) {
-    return await this.sisterCirclePosts.readMany({ author },{ sort: { dateUpdated: -1 } });
+    return await this.sisterCirclePosts.readMany({ author }, { sort: { dateUpdated: -1 } });
   }
 
   private titleContains(title: string, search: string): boolean {
@@ -156,7 +205,7 @@ export default class PostingConcept {
 
     try {
       // Fetch all posts
-      const posts = await this.sisterCirclePosts.readMany({},{ sort: { dateUpdated: -1 } });
+      const posts = await this.sisterCirclePosts.readMany({}, { sort: { dateUpdated: -1 } });
 
       // Filter posts where the title contains the search string (case-insensitive)
       const filteredPosts = posts.filter((post) => this.titleContains(post.title, title));
@@ -171,12 +220,12 @@ export default class PostingConcept {
 
   // Fetch MyCareboard Posts by Board Posted To
   async getMyCareBoardPostsByDestinationUsername(postedOnUsername: string) {
-    return await this.myCareBoardPosts.readMany({ postedOnUsername },{ sort: { dateUpdated: -1 } });
+    return await this.myCareBoardPosts.readMany({ postedOnUsername }, { sort: { dateUpdated: -1 } });
   }
 
   // Fetch MyCareBoard Posts by Author
   async getMyCareBoardPostsByAuthor(author: ObjectId) {
-    return await this.myCareBoardPosts.readMany({ author },{ sort: { dateUpdated: -1 } });
+    return await this.myCareBoardPosts.readMany({ author }, { sort: { dateUpdated: -1 } });
   }
 
   // Delete SisterCircle Post

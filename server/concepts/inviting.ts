@@ -37,7 +37,6 @@ export default class ReactingConcept {
 
   // Get All invites that a user sent out
   async getAllInvitesSent(userID: ObjectId) {
-    console.log("getting sent invites...");
     return await this.invites.readMany({ sentFromID: userID });
   }
 

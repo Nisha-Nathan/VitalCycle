@@ -20,7 +20,6 @@ const selectedCircle = ref("All Circles");
 const closeBtnAddCircle = ref<HTMLButtonElement | null>(null);
 const closeBtnAddPost = ref<HTMLButtonElement | null>(null);
 
-
 async function getUserCircles() {
   let query: Record<string, string> = {};
   if (currentUsername.value) {
@@ -38,7 +37,6 @@ async function getUserCircles() {
   } else {
     circles.value = ["All Circles"];
   }
-
 }
 
 onMounted(() => {
@@ -85,7 +83,7 @@ function updateEditing(id: string) {
 const closeModal = () => {
   closeBtnAddCircle.value?.click();
   closeBtnAddPost.value?.click();
-}
+};
 
 onBeforeMount(async () => {
   await getPosts();
@@ -94,30 +92,34 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-
   <section class="header">
-    <h2 class="section-title">Sister Circles</h2>
+    <h2 class="section-title">Circles</h2>
     <div class="header-content">
       <div class="btn-group section" role="group">
         <div v-if="circles.length !== 0" v-for="(circle, index) in circles" :key="index">
-          <input type="radio" class="btn-check" :name="`btnradio-sistercircles`" :id="`btnradio-sistercircles-${index}`"
-            v-model="selectedCircle" :value="circle" autocomplete="off" @change="getPosts(undefined, selectedCircle)" />
+          <input
+            type="radio"
+            class="btn-check"
+            :name="`btnradio-sistercircles`"
+            :id="`btnradio-sistercircles-${index}`"
+            v-model="selectedCircle"
+            :value="circle"
+            autocomplete="off"
+            @change="getPosts(undefined, selectedCircle)"
+          />
           <label class="btn btn-circle" :for="`btnradio-sistercircles-${index}`">{{ circle }}</label>
         </div>
       </div>
 
       <div class="add-circle">
-        <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal"
-          data-bs-target="#addCircleModal">Add a
-          Circle <i class="bi bi-plus"></i> </button>
+        <button type="button" class="btn btn-outline-light btn-add-circle" data-bs-toggle="modal" data-bs-target="#addCircleModal">Add a Circle <i class="bi bi-plus"></i></button>
 
         <!-- Modal -->
-        <div class="modal fade" id="addCircleModal" tabindex="-1" aria-labelledby="addCircleModalLabel"
-          aria-hidden="true">
+        <div class="modal fade" id="addCircleModal" tabindex="-1" aria-labelledby="addCircleModalLabel" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h1 class="modal-title fs-5" id="createPostModalLabel">Join a new Sister Cycle</h1>
+                <h1 class="modal-title fs-5" id="createPostModalLabel">Join a new Circle</h1>
 
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
@@ -125,8 +127,7 @@ onBeforeMount(async () => {
                 <AddCirclesForm @refreshCircles="getUserCircles" @closeForm="closeModal" />
               </div>
               <div class="modal-footer">
-                <button ref="closeBtnAddCircle" type="button" class="btn btn-secondary"
-                  data-bs-dismiss="modal">Close</button>
+                <button ref="closeBtnAddCircle" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -142,12 +143,11 @@ onBeforeMount(async () => {
     </button>
 
     <!-- Modal -->
-    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
-      aria-hidden="true">
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="createPostModalLabel">Create A Sister Circles Post</h1>
+            <h1 class="modal-title fs-5" id="createPostModalLabel">Create A Circles Post</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -160,7 +160,6 @@ onBeforeMount(async () => {
       </div>
     </div>
   </section>
-
 
   <div class="row">
     <SearchPostForm :headerText="'Search by Title:'" :placeholder="'Post title'" @getPostsByAuthor="getPostsByTitle" />
@@ -176,7 +175,7 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-p{
+p {
   text-align: center;
 }
 
@@ -190,7 +189,6 @@ p{
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-top: 0;
   max-width: unset;
-
 }
 
 .header-content {
@@ -261,16 +259,14 @@ article {
   color: #ea7575;
 }
 
-
-
-.btn-check:checked+.btn,
-.btn-check:active+.btn {
+.btn-check:checked + .btn,
+.btn-check:active + .btn {
   border-color: #000000;
   background-color: #ea7575;
   color: #000000;
 }
 
-.btn-check:not(:checked)+.btn {
+.btn-check:not(:checked) + .btn {
   border-color: #ea7575;
   color: #ea7575;
   /* Reset background to default */
@@ -296,7 +292,6 @@ article {
 
 .bi-plus-lg {
   font-size: 2em;
-
 }
 
 .btn-add-circle {
@@ -309,14 +304,13 @@ article {
 .btn-add-post:hover {
   background-color: #ea7575;
   color: white;
-
 }
 
 .btn-add-post:hover {
   border-color: black !important;
 }
 
-.btn-check:hover + .btn{
+.btn-check:hover + .btn {
   background-color: #ea7575;
   color: white;
 }

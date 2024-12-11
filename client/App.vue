@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useToastStore } from "@/stores/toast";
 import { useUserStore } from "@/stores/user";
-import { useNotificationStore } from "./stores/notification";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onUnmounted } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
+import { useNotificationStore } from "./stores/notification";
 
 const currentRoute = useRoute();
 const currentRouteName = computed(() => currentRoute.name);
@@ -29,7 +29,6 @@ function stopPolling() {
   }
 }
 
-
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
@@ -46,19 +45,16 @@ onBeforeMount(async () => {
 onUnmounted(() => {
   stopPolling();
 });
-
-
 </script>
 
 <template>
   <header>
     <nav class="navbar">
       <RouterLink :to="{ name: 'Today' }">
-        <img style="align-items: center;" src="@/assets/images/vitalcycle-logo.png" />
+        <img style="align-items: center" src="@/assets/images/vitalcycle-logo.png" />
       </RouterLink>
       <RouterLink to="/" class="nav-item">Today</RouterLink>
-      <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Sister Circles
-      </RouterLink>
+      <RouterLink to="/sister-circle" class="nav-item" v-if="isLoggedIn && sisterCircleOptIn">Circles </RouterLink>
       <RouterLink to="/care-board" class="nav-item" v-if="isLoggedIn && myCareBoardOptIn">Care Board</RouterLink>
       <RouterLink to="/login" class="nav-item" v-if="!isLoggedIn">Login</RouterLink>
       <RouterLink to="/user-profile" class="nav-item" v-if="isLoggedIn">User Profile</RouterLink>
@@ -70,7 +66,6 @@ onUnmounted(() => {
     </nav>
 
     <p v-if="toast" :class="toast.style" class="toast-message">{{ toast.message }}</p>
-
   </header>
 
   <RouterView />
@@ -124,7 +119,7 @@ a:hover {
 }
 
 .btn-notifications:hover {
-  background-color: #EA7575;
+  background-color: #ea7575;
   border: none;
 }
 </style>

@@ -2,8 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Checklist, Friending, Inviting, Logging, Opting, Posting, Reacting, Replying, Sessioning, Notification } from "./app";
-import { BadValuesError, NotFoundError } from "./concepts/errors";
+import { Authing, Checklist, Friending, Inviting, Logging, Notification, Opting, Posting, Reacting, Replying, Sessioning } from "./app";
 import { Activity, FlowIntensity, Mood, Symptom } from "./concepts/logging";
 import { ReactEmoji } from "./concepts/reacting";
 import { SessionDoc } from "./concepts/sessioning";
@@ -203,6 +202,39 @@ class Routes {
   async removeUserCircle(session: SessionDoc, circle: string) {
     const user = Sessioning.getUser(session);
     return await Authing.removeUserFromCircle(user, circle);
+  }
+
+  @Router.post("/suggestedCircles")
+  async addCircleSuggestion(session: SessionDoc, circleName: string, description?: string) {
+    const user = Sessioning.getUser(session);
+    const username = (await Authing.getUserById(user)).username;
+    return await Posting.createSuggestedCircle(user, username, circleName, description);
+  }
+
+  @Router.post("/remove/suggestedCircles")
+  async removeSuggestedCircle(session: SessionDoc, circleName: string) {
+    const user = Sessioning.getUser(session);
+    return await Posting.deleteSuggestedCircle(user, circleName);
+  }
+
+  @Router.get("/suggestedCircles/:username")
+  async getSuggestedCircles(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const username = (await Authing.getUserById(user)).username;
+    const directResult = await Posting.getAllSuggestedCircles(username);
+    let result = [];
+    for (const suggestedCircle of directResult) {
+      result.push(suggestedCircle.name);
+    }
+    return { circles: result };
+  }
+
+  @Router.get("/suggestedCircles/description/:circleName")
+  async getSuggestedCircleDescription(session: SessionDoc, circleName: string) {
+    const user = Sessioning.getUser(session);
+    const username = (await Authing.getUserById(user)).username;
+    const result = await Posting.getSuggestionDescription(username, circleName);
+    return { description: result?.description };
   }
 
   @Router.get("/friends")

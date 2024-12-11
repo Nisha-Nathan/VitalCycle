@@ -22,7 +22,7 @@ const closeBtnPost = ref<HTMLButtonElement | null>(null);
 
 async function getPosts(author?: string) {
   let toGet;
-  if (!userStore.currentlyViewingCareboard) {
+  if (userStore.currentlyViewingCareboard == "") {
     toGet = currentUsername.value;
   } else {
     toGet = userStore.currentlyViewingCareboard;
@@ -57,13 +57,19 @@ const remountCareBoardList = () => {
 
 const goToMyCareboard = () => {
   userStore.goToCareboard("");
+  getPosts();
+  remountCareBoardList();
+};
+
+const goToFriendCareboard = () => {
+  getPosts();
   remountCareBoardList();
 };
 
 const closeModal = () => {
- closeBtn.value?.click();
- closeBtnPost.value?.click();
-}
+  closeBtn.value?.click();
+  closeBtnPost.value?.click();
+};
 </script>
 
 <template>
@@ -80,10 +86,10 @@ const closeModal = () => {
             <div class="modal-content">
               <div class="modal-header">
                 <h1 class="modal-title fs-5" id="staticBackdropLabel">Friends' Careboards</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                <VisitFriendsCareboardPopup class="invites-section" @goToCareboard="remountCareBoardList" @closeSection="closeModal" />
+                <VisitFriendsCareboardPopup class="invites-section" @goToCareboard="goToFriendCareboard" @closeSection="closeModal" />
               </div>
               <div class="modal-footer">
                 <button type="button" ref="closeBtn" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -129,8 +135,8 @@ const closeModal = () => {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="createPostModalLabel">Create A Sister Circles Post</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"  aria-label="Close"></button>
+            <h1 class="modal-title fs-5" id="createPostModalLabel">Create A Care Board Post</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <CreatePostFormCareBoard @refreshPosts="getPosts" @closeSection="closeModal" />
@@ -145,8 +151,7 @@ const closeModal = () => {
 
   <button v-if="userStore.currentlyViewingCareboard" class="btn btn-primary btn-go-back" type="button" @click="goToMyCareboard">Return to My Careboard</button>
 
-
-  <section class="posts" v-if="loaded && posts.length !== 0">
+  <section :key="careBoardListKey" class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">
       <PostComponent :post="post.post" @refreshPosts="getPosts" @editPost="updateEditing" />
     </article>
@@ -156,7 +161,7 @@ const closeModal = () => {
 </template>
 
 <style scoped>
-p{
+p {
   text-align: center;
 }
 .header {
@@ -202,7 +207,6 @@ article {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  
 }
 
 .posts {
@@ -247,12 +251,11 @@ article {
   /* Reset background to default */
 }
 
-.btn-go-back{
+.btn-go-back {
   background-color: black;
   color: white;
   border: none;
 }
-
 
 .btn-add-post {
   background-color: black;
