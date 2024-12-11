@@ -70,7 +70,6 @@ type TimeFrame = {
   minutes: number;
 };
 
-
 /**
  * concept: Notification [User]
  */
@@ -81,7 +80,7 @@ export default class NotificationConcept {
     this.notifications = new DocCollection<NotificationDoc>(collectionName);
   }
 
-  async createNotification(user: ObjectId, notifyAbout: string,    frequency: "once" | "daily" | "weekly", timeFrame: TimeFrame) {
+  async createNotification(user: ObjectId, notifyAbout: string, frequency: "once" | "daily" | "weekly", timeFrame: TimeFrame) {
     const notificationContent = await this.generateNotificationContent(notifyAbout);
     const notificationTime = this.getNotificationTime(timeFrame, frequency);
     const currentTime = new Date();
@@ -102,15 +101,12 @@ export default class NotificationConcept {
     return await this.notifications.readOne({ _id });
   }
 
-  private getNotificationTime(
-    timeFrame: { hours: number; minutes: number },
-    frequency: "once" | "daily" | "weekly"
-  ): Date {
+  private getNotificationTime(timeFrame: { hours: number; minutes: number }, frequency: "once" | "daily" | "weekly"): Date {
     const currentTime = new Date();
 
     // Set the notification time based on the provided hours and minutes
     const notificationTime = new Date(currentTime);
-    notificationTime.setHours(timeFrame.hours  , timeFrame.minutes, 0, 0);
+    notificationTime.setHours(timeFrame.hours, timeFrame.minutes, 0, 0);
 
     // Adjust for frequency
     if (frequency === "weekly") {
@@ -122,32 +118,28 @@ export default class NotificationConcept {
     return notificationTime;
   }
 
-
   async deliverPendingNotifications() {
     const currentTime = new Date();
     const pendingNotifications = await this.notifications.readMany({ status: "pending" });
-
+    console.log("Pending notifications", pendingNotifications);
     for (const notification of pendingNotifications) {
       if (notification.notificationTime <= currentTime) {
         // Update status to 'delivered'
+        console.log("Delivering notification", notification);
         await this.notifications.partialUpdateOne({ _id: notification._id }, { status: "delivered" });
 
         if (notification.frequency !== "once") {
-          const nextNotificationTime = this.getNextNotificationTime(
-            notification.notificationTime,
-            notification.frequency
-          );
+          const nextNotificationTime = this.getNextNotificationTime(notification.notificationTime, notification.frequency);
 
           await this.notifications.partialUpdateOne(
             { _id: notification._id },
             {
               status: "pending",
               notificationTime: nextNotificationTime,
-              notificationContent: this.generateNotificationContent(
-                notification.notifyAbout
-              ),
-            });
-          }
+              notificationContent: this.generateNotificationContent(notification.notifyAbout),
+            },
+          );
+        }
 
         // If frequency is daily or weekly, schedule the next notification
         // if (notification.frequency) {
@@ -180,8 +172,8 @@ export default class NotificationConcept {
   }
 
   async getDeliveredNotifications(user: ObjectId) {
-    const notifications = await this.notifications.readMany({ user, status: "delivered" },{ sort: { dateUpdated: -1 } });
-    return {notifications: notifications, count: notifications.length};
+    const notifications = await this.notifications.readMany({ user, status: "delivered" }, { sort: { dateUpdated: -1 } });
+    return { notifications: notifications, count: notifications.length };
   }
 
   async getPendingNotifications(user: ObjectId) {
