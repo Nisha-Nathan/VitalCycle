@@ -3,6 +3,7 @@ import AuthenticatingConcept from "./concepts/authenticating";
 import ChecklistConcept from "./concepts/checklisting";
 import FriendingConcept from "./concepts/friending";
 import InvitingConcept from "./concepts/inviting";
+import LoggingConcept from "./concepts/logging";
 import NotificationConcept from "./concepts/notification";
 import OptingConcept from "./concepts/opting";
 import PostingConcept from "./concepts/posting";
@@ -22,5 +23,6 @@ export const Checklist = new ChecklistConcept("checklists");
 export const Inviting = new InvitingConcept("invites");
 export const Opting = new OptingConcept("opting");
 export const Notification = new NotificationConcept("notifications");
+export const Logging = new LoggingConcept("logs");
 
-export { default as Logging } from "./concepts/logging";
+// export { default as Logging } from "./concepts/logging";

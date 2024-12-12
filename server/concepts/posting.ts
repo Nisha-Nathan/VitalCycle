@@ -165,7 +165,6 @@ export default class PostingConcept {
     const result = await this.circles.readMany({ name: circleName });
     if (result.length > 0) throw new Error("You cannot suggest this circle because it already exists in Sister Circles!");
     const result2 = await this.suggestedCircles.readMany({ author, name: circleName });
-    console.log("here is result 2: ", result2);
     if (result2.length > 0) throw new Error("You cannot suggest this circle because you have already suggested it!");
   }
 

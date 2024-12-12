@@ -287,55 +287,56 @@ class Routes {
   @Router.get("/cycles/stats")
   async getCycleStats(session: SessionDoc) {
     const user = Sessioning.getUser(session);
-    const stats = await Logging.getInstance().calculateCycleStats(user);
+    const stats = await Logging.calculateCycleStats(user);
     return { stats };
   }
 
   @Router.get("/activity/stats")
   async getActivityStats(session: SessionDoc) {
     const user = Sessioning.getUser(session);
-    const stats = await Logging.getInstance().calculateActivityStats(user);
+    const stats = await Logging.calculateActivityStats(user);
     return { stats };
   }
 
   @Router.post("/logs")
   async createLog(session: SessionDoc, dateOfLog: Date, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
     const user = Sessioning.getUser(session);
-    return await Logging.getInstance().create(user, dateOfLog, symptoms, mood, flow, notes);
+    return await Logging.create(user, dateOfLog, symptoms, mood, flow, notes);
   }
 
   @Router.post("/activity/logs")
   async createActivityLog(session: SessionDoc, dateOfLog: Date, activities: Activity[]) {
     const user = Sessioning.getUser(session);
-    return await Logging.getInstance().createActivityLog(user, dateOfLog, activities);
+    return await Logging.createActivityLog(user, dateOfLog, activities);
   }
 
   @Router.put("/logs/:id")
   async updateLog(session: SessionDoc, id: string, symptoms: Symptom[], mood: Mood | null, flow: FlowIntensity | null, notes: string) {
+    console.log("in routes, updating for id: ", id);
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
-    await Logging.getInstance().assertAuthorIsUser(oid, user);
-    return await Logging.getInstance().update(oid, symptoms, mood, flow, notes);
+    await Logging.assertAuthorIsUser(oid, user);
+    return await Logging.update(oid, symptoms, mood, flow, notes);
   }
 
   @Router.put("/activity/logs/:id")
   async updateActivityLog(session: SessionDoc, id: string, activities: Activity[]) {
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
-    await Logging.getInstance().assertAuthorIsUser(oid, user);
-    return await Logging.getInstance().updateActivityLog(oid, activities);
+    await Logging.assertAuthorIsUser(oid, user);
+    return await Logging.updateActivityLog(oid, activities);
   }
 
   @Router.get("/log")
   async getLog(session: SessionDoc, date: Date) {
     const user = Sessioning.getUser(session);
-    return await Logging.getInstance().getLogByDate(user, date);
+    return await Logging.getLogByDate(user, date);
   }
 
   @Router.get("/activity/log")
   async getActivityLog(session: SessionDoc, date: Date) {
     const user = Sessioning.getUser(session);
-    return await Logging.getInstance().getActivityLogByDate(user, date);
+    return await Logging.getActivityLogByDate(user, date);
   }
 
   @Router.get("/circles")

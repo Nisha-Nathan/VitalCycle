@@ -10,11 +10,13 @@ const emit = defineEmits(["update-flow"]);
 const definedMoods = ["Angry", "Happy", "Calm", "Sad", "Confused"];
 const definedFlowIntensities = ["None", "Light", "Medium", "Heavy"];
 const definedSymptoms = ["Abdominal Cramps", "Headache", "Acne", "Fatigue", "Constipation", "Diarrhea", "Nausea", "Bloating", "Chills", "Mood swings", "Dry skin"];
-const definedActivities = ["Walking", "Running", "Biking", "Weightlifting", "Yoga", "Meditation", "Dance", "HIIT", "Other"]
+const definedActivities = ["Walking", "Running", "Biking", "Weightlifting", "Yoga", "Meditation", "Dance", "HIIT", "Other"];
 
 const getCurrentDate = () => {
-  const date = new Date();
-  return date.toISOString().split("T")[0];
+  const now = new Date();
+  const timezoneOffset = now.getTimezoneOffset();
+  const estDate = new Date(now.getTime() - (timezoneOffset + 300) * 60 * 1000);
+  return estDate.toISOString().split("T")[0];
 };
 
 const currentDate = ref(getCurrentDate());
@@ -96,7 +98,15 @@ const fetchLogByDate = async (date: string) => {
       logId.value = null;
       isEditMode.value = false;
     }
-  } catch (_) {
+  } catch (error) {
+    // couldn't get response, reset form
+    dateOfLog.value = date;
+    selectedSymptoms.value = [];
+    selectedMood.value = null;
+    selectedFlow.value = "None";
+    notes.value = "";
+    logId.value = null;
+    isEditMode.value = false;
     return;
   }
 };
@@ -138,54 +148,44 @@ onMounted(() => {
           <div v-if="showDatePicker">
             <input type="date" v-model="dateOfLog" @change="handleDateChange" />
           </div>
-          <button type="button" class="btn btn-outline-light btn-checklist"  @click="displayChecklist">Daily Checklist </button>
-
+          <button type="button" class="btn btn-outline-light btn-checklist" @click="displayChecklist">Daily Checklist</button>
         </div>
       </div>
 
       <div class="content">
         <DailyChecklist v-if="showDailyChecklist" :current-date="dateOfLog" @close-checklist="showDailyChecklist = false" />
-        <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..." :readonly="!isCurrentDate"></textarea>
+        <textarea class="journal" id="notes" v-model="notes" placeholder="How did your day go..."></textarea>
 
         <div class="btn-group mood-section" role="group" aria-label="Mood Entries">
           <div v-for="(mood, index) in definedMoods" :key="index">
-            <input type="radio" class="btn-check" name="btnradio-mood" :id="`btnradio-mood-${index}`" v-model="selectedMood" :value="mood" autocomplete="off" :disabled="!isCurrentDate" />
+            <input type="radio" class="btn-check" name="btnradio-mood" :id="`btnradio-mood-${index}`" v-model="selectedMood" :value="mood" autocomplete="off" />
             <label class="btn btn-outline" :for="`btnradio-mood-${index}`">{{ mood }}</label>
           </div>
         </div>
 
         <div class="btn-group flow-section" role="group" aria-label="Flow Entries">
           <div v-for="(flow, index) in definedFlowIntensities" :key="index">
-            <input type="radio" class="btn-check" name="btnradio-flow" :id="`btnradio-flow-${index}`" v-model="selectedFlow" :value="flow" autocomplete="off" :disabled="!isCurrentDate" />
+            <input type="radio" class="btn-check" name="btnradio-flow" :id="`btnradio-flow-${index}`" v-model="selectedFlow" :value="flow" autocomplete="off" />
             <label class="btn btn-outline" :for="`btnradio-flow-${index}`">{{ flow }}</label>
           </div>
         </div>
 
         <div class="btn-group symptoms-section" role="group" aria-label="Symptoms Entries">
           <div v-for="(symptom, index) in definedSymptoms" :key="index">
-            <input type="checkbox" class="btn-check" name="btnradio-sym" :id="`btnradio-sym-${index}`" v-model="selectedSymptoms" :value="symptom" autocomplete="off" :disabled="!isCurrentDate" />
+            <input type="checkbox" class="btn-check" name="btnradio-sym" :id="`btnradio-sym-${index}`" v-model="selectedSymptoms" :value="symptom" autocomplete="off" />
             <label class="btn btn-outline" :for="`btnradio-sym-${index}`">{{ symptom }}</label>
           </div>
         </div>
 
         <div class="btn-group activity-section" role="group" aria-label="Activity Entries">
           <div v-for="(activity, index) in definedActivities" :key="index">
-            <input
-              type="radio"
-              class="btn-check"
-              name="btnradio-activity"
-              :id="`btnradio-activity-${index}`"
-              v-model="selectedActivity"
-              :value="activity"
-              autocomplete="off"
-              :disabled="!isCurrentDate"
-            />
+            <input type="radio" class="btn-check" name="btnradio-activity" :id="`btnradio-activity-${index}`" v-model="selectedActivity" :value="activity" autocomplete="off" />
             <label class="btn btn-outline" :for="`btnradio-activity-${index}`">{{ activity }}</label>
           </div>
         </div>
       </div>
     </div>
-    <button v-if="isCurrentDate" type="submit" class="btn btn-primary btn-submit">{{ isEditMode ? "Update" : "Submit" }}</button>
+    <button type="submit" class="btn btn-primary btn-submit">{{ isEditMode ? "Update" : "Submit" }}</button>
   </form>
 </template>
 
@@ -320,10 +320,8 @@ h2 {
   justify-self: flex-end;
 }
 
-
 .btn-checklist:hover {
   background-color: black;
   color: white;
-
 }
 </style>
